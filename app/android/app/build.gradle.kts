@@ -52,6 +52,7 @@ android {
 
     buildTypes {
         release {
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             // Sem chave configurada, assina com a de debug (só para testar no aparelho).
             signingConfig = if (segredo("ANDROID_KEYSTORE_PATH") != null) {
                 signingConfigs.getByName("release")
