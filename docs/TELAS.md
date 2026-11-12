@@ -18,5 +18,8 @@ flutter test test/artes_test.dart --dart-define=CAPTURAS=true
 # ícones do app (precisa do ImageMagick)
 for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
   convert ../docs/artes/icone-512.png -resize ${d#*:}x${d#*:} android/app/src/main/res/mipmap-${d%:*}/ic_launcher.png
+  convert ../docs/artes/icone-adaptativo-frente.png -resize $((${d#*:} * 9 / 4))x$((${d#*:} * 9 / 4)) \
+    android/app/src/main/res/mipmap-${d%:*}/ic_launcher_foreground.png
 done
 ```
+O ícone adaptativo (Android 8+) usa essa frente sobre o degradê de `res/drawable/ic_launcher_background.xml`.

@@ -15,7 +15,7 @@ void main() {
       ..devicePixelRatio = 1
       ..physicalSize = tamanho;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(appDeTeste(await servicosDeTeste(), tela: Material(child: arte)));
+    await tester.pumpWidget(appDeTeste(await servicosDeTeste(), tela: Material(type: MaterialType.transparency, child: arte)));
     await tester.pump();
     await capturar(tester, nome, pasta: '../docs/artes');
   }
@@ -29,6 +29,16 @@ void main() {
         child: CustomPaint(painter: _Icone(), size: Size.infinite),
       ),
       'icone-512',
+    );
+  });
+
+  // Frente do ícone adaptativo (fundo transparente; a área segura é o círculo de 66% do centro).
+  testWidgets('ícone adaptativo (frente) 432', (tester) async {
+    await desenhar(
+      tester,
+      const Size(432, 432),
+      const Padding(padding: EdgeInsets.all(56), child: CustomPaint(painter: _Icone(), size: Size.infinite)),
+      'icone-adaptativo-frente',
     );
   });
 
