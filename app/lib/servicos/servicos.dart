@@ -33,7 +33,7 @@ class Servicos {
 }
 
 /// Link da loja usado no compartilhamento.
-const linkDaLoja = 'https://play.google.com/store/apps/details?id=com.agsterr.encaixa';
+const linkDaLoja = 'https://play.google.com/store/apps/details?id=com.agsterr.encaixa2';
 
 /// Número do desafio (o primeiro foi em 1º/11/2026).
 int numeroDoDesafio(DateTime dia) =>

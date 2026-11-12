@@ -3,7 +3,7 @@
 # Uso (no CI, com o emulador ligado): ferramentas/testar_no_emulador.sh caminho/app-release.apk
 set -u
 APK="$1"
-PACOTE=com.agsterr.encaixa
+PACOTE=com.agsterr.encaixa2
 
 adb install -r "$APK" || exit 1
 adb logcat -c

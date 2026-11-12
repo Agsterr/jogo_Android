@@ -1,4 +1,4 @@
-package com.agsterr.encaixa
+package com.agsterr.encaixa2
 
 import io.flutter.embedding.android.FlutterActivity
 

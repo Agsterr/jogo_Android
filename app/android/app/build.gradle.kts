@@ -15,7 +15,7 @@ val chave = Properties().apply {
 fun segredo(nome: String): String? = (chave.getProperty(nome) ?: System.getenv(nome))?.takeIf { it.isNotBlank() }
 
 android {
-    namespace = "com.agsterr.encaixa"
+    namespace = "com.agsterr.encaixa2"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.agsterr.encaixa"
+        applicationId = "com.agsterr.encaixa2"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
