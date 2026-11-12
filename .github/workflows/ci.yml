@@ -27,6 +27,13 @@ jobs:
       - run: flutter analyze
       - run: flutter test
       # Assina com a chave de produção só se os segredos existirem (veja docs/PUBLICAR.md).
+      # Sem a chave de produção, o APK é assinado com a chave de debug. Guardá-la no cache faz todos os
+      # APKs de teste terem a mesma assinatura, e o celular aceita atualizar sem desinstalar.
+      - name: Mesma chave de debug em todos os builds
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: chave-debug-encaixa-v1
       - name: Chave de assinatura
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
