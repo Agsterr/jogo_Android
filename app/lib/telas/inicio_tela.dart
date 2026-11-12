@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
+import '../jogo/arena.dart';
 import '../jogo/eventos.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
@@ -15,6 +16,7 @@ import '../widgets/dicas.dart';
 import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
 import 'ajuda_tela.dart';
+import 'arena_tela.dart';
 import 'jogo_tela.dart';
 import 'loja_tela.dart';
 import 'mapa_tela.dart';
@@ -153,6 +155,17 @@ class _InicioTelaState extends State<InicioTela> {
                             ),
                           ],
                         ),
+                      ),
+                      const SizedBox(height: 14),
+                      _CartaoArena(
+                        melhor: p.arenaMelhor(Arena.semana(hoje)),
+                        premioDisponivel: Arena.trofeus.any(
+                          (t) =>
+                              p.arenaMelhor(Arena.semana(hoje)) >= t.pontos &&
+                              !p.premioArenaPego(Arena.semana(hoje), t.nome),
+                        ),
+                        termina: tempoRestante(hoje, Arena.fim(hoje)),
+                        aoTocar: () => _abrir(ArenaTela(servicos: servicos)),
                       ),
                       const SizedBox(height: 14),
                       if (p.sequenciaPerdida(dia) > 0) ...[
@@ -708,6 +721,96 @@ class _RecuperarSequencia extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Atalho da Arena da semana na tela inicial.
+class _CartaoArena extends StatelessWidget {
+  const _CartaoArena({
+    required this.melhor,
+    required this.premioDisponivel,
+    required this.termina,
+    required this.aoTocar,
+  });
+
+  final int melhor;
+  final bool premioDisponivel;
+  final String termina;
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) {
+    final trofeu = Arena.trofeuPara(melhor);
+    final indice = trofeu == null ? -1 : Arena.trofeus.indexOf(trofeu);
+    const cores = [Color(0xFFFFB800), Color(0xFFFF6A00)];
+    return Semantics(
+      button: true,
+      label: 'Arena da semana',
+      child: GestureDetector(
+        onTap: aoTocar,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            gradient: const LinearGradient(colors: cores),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 1.5),
+            boxShadow: [
+              BoxShadow(color: Color.lerp(cores.last, Colors.black, 0.45)!, offset: const Offset(0, 5)),
+              BoxShadow(color: cores.first.withValues(alpha: 0.4), blurRadius: 18),
+            ],
+          ),
+          child: Row(
+            children: [
+              Badge(
+                isLabelVisible: premioDisponivel,
+                backgroundColor: Cores.destaque,
+                child: Icon(
+                  Icons.emoji_events_rounded,
+                  size: 44,
+                  color: indice < 0 ? Colors.white : coresDosTrofeus[indice],
+                  shadows: const [Shadow(color: Color(0xFF6B2A00), offset: Offset(0, 3))],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: TextoContornado(
+                        'Arena da semana',
+                        tamanho: 21,
+                        alinhamento: TextAlign.start,
+                        contorno: Color(0xFF7A3000),
+                      ),
+                    ),
+                    Text(
+                      premioDisponivel
+                          ? 'Prêmio esperando por você!'
+                          : (melhor == 0
+                                ? 'Ganhe troféus e gemas'
+                                : 'Melhor: $melhor · ${trofeu?.nome ?? 'sem troféu'}'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('termina em', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                  Text(termina, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

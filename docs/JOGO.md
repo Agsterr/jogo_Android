@@ -56,6 +56,11 @@ versão do app. Número do desafio = dias desde 1º/11/2026. Pode repetir; vale 
 - `test/fases_test.dart` tem um **jogador automático** que joga as 60 fases: se ele não vencer alguma, o teste falha.
   Mudou a fórmula? Rode o teste.
 
+## Arena da semana (`app/lib/jogo/arena.dart`)
+- Torneio de segunda a domingo com as mesmas peças para todos (semente da semana). Vale a melhor partida.
+- Troféus por pontos: Bronze 500 (+10 gemas), Prata 1.500 (+25), Ouro 3.000 (+50), Diamante 6.000 (+100).
+- Prêmios pegos na tela da Arena, uma vez por semana. Ranking mundial por posição: issue do Play Games.
+
 ## Missões do dia e sequência (`app/lib/jogo/missoes.dart`)
 - 3 missões por dia, de tipos diferentes, sorteadas pela data (iguais para todos): limpar linhas, linhas de uma cor,
   combo, pontos numa partida, partidas, tabuleiro vazio, jogar o Desafio do dia. Cada uma vale de 3 a 5 gemas.

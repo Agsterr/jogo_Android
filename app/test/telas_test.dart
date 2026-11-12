@@ -1,6 +1,7 @@
 import 'package:encaixa/jogo/partida.dart';
 import 'package:encaixa/jogo/peca.dart';
 import 'package:encaixa/jogo/temas.dart';
+import 'package:encaixa/telas/arena_tela.dart';
 import 'package:encaixa/telas/jogo_tela.dart';
 import 'package:encaixa/telas/loja_tela.dart';
 import 'package:encaixa/widgets/tabuleiro_widget.dart';
@@ -224,6 +225,25 @@ void main() {
     await tester.pumpAndSettle();
     expect(s.progresso.gemas, 15);
     expect(find.text('Volte amanhã!'), findsOneWidget);
+  });
+
+  testWidgets('Arena: troféus e prêmio', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(
+      valores: {
+        'gemas': 42,
+        'arenaSemana': 20261109,
+        'arenaMelhor': 1720,
+        'arenaPremios': <String>['Bronze'],
+      },
+    );
+    await tester.pumpWidget(appDeTeste(s, tela: ArenaTela(servicos: s)));
+    await tester.pump();
+    expect(find.text('Prata'), findsWidgets);
+    await capturar(tester, '19-arena');
+    await tester.tap(find.text('+25'));
+    await tester.pump();
+    expect(s.progresso.gemas, 67);
   });
 
   testWidgets('tela pequena com fonte grande não estoura', (tester) async {

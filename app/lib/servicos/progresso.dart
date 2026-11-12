@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../jogo/arena.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
 import '../jogo/temas.dart';
@@ -126,6 +127,32 @@ class Progresso extends ChangeNotifier {
     await ganharGemas(gemasGanhas);
     notifyListeners();
     return gemasGanhas;
+  }
+
+  // ---------- arena da semana ----------
+
+  /// Melhor pontuação na Arena desta [semana] (zera quando a semana muda).
+  int arenaMelhor(int semana) => _prefs.getInt('arenaSemana') == semana ? (_prefs.getInt('arenaMelhor') ?? 0) : 0;
+
+  Future<void> registrarArena(int semana, int pontos) async {
+    if (_prefs.getInt('arenaSemana') != semana) {
+      await _prefs.setInt('arenaSemana', semana);
+      await _prefs.setInt('arenaMelhor', 0);
+      await _prefs.remove('arenaPremios');
+    }
+    if (pontos > arenaMelhor(semana)) await _prefs.setInt('arenaMelhor', pontos);
+    notifyListeners();
+  }
+
+  bool premioArenaPego(int semana, String trofeu) =>
+      _prefs.getInt('arenaSemana') == semana && (_prefs.getStringList('arenaPremios') ?? const []).contains(trofeu);
+
+  /// Recolhe as gemas de um troféu alcançado nesta semana (uma vez).
+  Future<int> pegarPremioArena(int semana, Trofeu t) async {
+    if (arenaMelhor(semana) < t.pontos || premioArenaPego(semana, t.nome)) return 0;
+    await _prefs.setStringList('arenaPremios', [...?_prefs.getStringList('arenaPremios'), t.nome]);
+    await ganharGemas(t.gemas);
+    return t.gemas;
   }
 
   // ---------- temas ----------

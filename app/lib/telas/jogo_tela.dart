@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../app.dart';
+import '../jogo/arena.dart';
 import '../jogo/eventos.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
@@ -31,12 +32,15 @@ abstract final class Custos {
 enum _Fim { segundaChance, resultado, faseVencida, faseFalhou }
 
 class JogoTela extends StatefulWidget {
-  const JogoTela({super.key, required this.servicos, this.diario = false, this.fase, this.partida});
+  const JogoTela({super.key, required this.servicos, this.diario = false, this.arena = false, this.fase, this.partida});
 
   final Servicos servicos;
 
   /// Desafio do dia: semente fixa para todos.
   final bool diario;
+
+  /// Arena da semana: semente fixa da semana, vale a melhor partida.
+  final bool arena;
 
   /// Modo Fases: objetivo e limite de peças.
   final Fase? fase;
@@ -94,7 +98,7 @@ class _JogoTelaState extends State<JogoTela> {
       Objetivo.pedras => Dicas.pedras,
       Objetivo.pontos => Dicas.pontos,
       Objetivo.linhas => null,
-      null => widget.diario ? Dicas.desafio : Dicas.infinito,
+      null => widget.arena ? Dicas.arena : (widget.diario ? Dicas.desafio : Dicas.infinito),
     };
     if (dica != null) mostrarDicaUmaVez(context, _s, dica);
   }
@@ -123,12 +127,15 @@ class _JogoTelaState extends State<JogoTela> {
   }
 
   /// Clássico e Desafio têm partidas salvas separadas.
-  String get _chave => widget.diario ? 'desafio' : 'classico';
+  String get _chave => widget.arena ? 'arena' : (widget.diario ? 'desafio' : 'classico');
+
+  int get _semana => Arena.semana(_s.hoje());
 
   Partida? _partidaSalva() {
     if (widget.fase != null) return null;
     final json = _s.progresso.partidaSalva(_chave);
     if (json == null || (widget.diario && json['dia'] != _dia)) return null;
+    if (widget.arena && json['semana'] != _semana) return null;
     try {
       return Partida.deJson(json);
     } on Object {
@@ -136,11 +143,17 @@ class _JogoTelaState extends State<JogoTela> {
     }
   }
 
-  void _salvar() =>
-      widget.fase != null ? null : _s.progresso.salvarPartida(_chave, {..._partida.paraJson(), 'dia': _dia});
+  void _salvar() => widget.fase != null
+      ? null
+      : _s.progresso.salvarPartida(_chave, {..._partida.paraJson(), 'dia': _dia, 'semana': _semana});
 
   Partida _novaPartida() =>
-      widget.fase?.novaPartida() ?? Partida(semente: widget.diario ? _dia : DateTime.now().microsecondsSinceEpoch);
+      widget.fase?.novaPartida() ??
+      Partida(
+        semente: widget.arena
+            ? Arena.semente(_s.hoje())
+            : (widget.diario ? _dia : DateTime.now().microsecondsSinceEpoch),
+      );
 
   // ---------- arrastar e soltar ----------
 
@@ -337,6 +350,7 @@ class _JogoTelaState extends State<JogoTela> {
     final recorde = await _s.progresso.fimDePartida(pontos);
     await _s.progresso.contarMissoes(_dia, {TipoMissao.partidas: 1, TipoMissao.pontos: pontos});
     final gemasDesafio = widget.diario ? await _s.progresso.concluirDesafio(_dia, pontos) : 0;
+    if (widget.arena) await _s.progresso.registrarArena(_semana, pontos);
     if (!mounted) return;
     setState(() {
       _novoRecorde = recorde;
@@ -372,7 +386,11 @@ class _JogoTelaState extends State<JogoTela> {
   }
 
   void _compartilhar() {
-    final texto = widget.diario
+    final texto = widget.arena
+        ? 'Encaixa 🏆 Arena da semana\n⭐ ${_partida.pontos} pontos'
+              '${Arena.trofeuPara(_partida.pontos) == null ? '' : ' · ${Arena.trofeuPara(_partida.pontos)!.nome}'}\n'
+              'Mesmas peças para todo mundo até domingo. Consegue me passar?\n$linkDaLoja'
+        : widget.diario
         ? 'Encaixa 🧩 Desafio #${numeroDoDesafio(_s.hoje())}\n⭐ ${_partida.pontos} pontos\n'
               'Mesmas peças para todo mundo. Consegue me passar?\n$linkDaLoja'
         : 'Fiz ${_partida.pontos} pontos no Encaixa 🧩 Consegue me passar?\n$linkDaLoja';
@@ -443,6 +461,11 @@ class _JogoTelaState extends State<JogoTela> {
             Text(
               'FASE ${fase.numero}',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
+            ),
+          if (widget.arena)
+            const Text(
+              'ARENA DA SEMANA',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
             ),
           if (widget.diario)
             Text(
@@ -811,8 +834,21 @@ class _JogoTelaState extends State<JogoTela> {
           style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
         ),
       ),
+    if (widget.arena)
+      Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Text(
+          [
+            'Melhor da semana: ${_s.progresso.arenaMelhor(_semana)}',
+            if (Arena.trofeuPara(_s.progresso.arenaMelhor(_semana)) case final t?)
+              'Troféu ${t.nome}! Pegue o prêmio na Arena.',
+          ].join('\n'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Cores.ouro, fontWeight: FontWeight.w700),
+        ),
+      ),
     const SizedBox(height: 20),
-    _botao(widget.diario ? 'Tentar de novo' : 'Jogar de novo', Icons.replay_rounded, _jogarDeNovo),
+    _botao(widget.diario || widget.arena ? 'Tentar de novo' : 'Jogar de novo', Icons.replay_rounded, _jogarDeNovo),
     const SizedBox(height: 10),
     OutlinedButton.icon(
       style: OutlinedButton.styleFrom(minimumSize: const Size(64, 48)),

@@ -84,7 +84,14 @@ abstract final class Dicas {
     'Gemas vêm de linhas de uma cor, missões, fases, presentes, eventos e da loja.',
   ]);
 
-  static const todas = [comoJogar, fases, pedras, pontos, infinito, desafio, missoes, presente, eventos, gemas];
+  static const arena = Dica('arena', 'Arena da semana', Icons.emoji_events_rounded, Color(0xFFFFCC33), [
+    'Um torneio por semana, de segunda a domingo, com as MESMAS peças para todo mundo.',
+    'Jogue quantas vezes quiser: vale a sua melhor partida da semana.',
+    'Bata as metas para ganhar troféus: Bronze (500), Prata (1.500), Ouro (3.000) e Diamante (6.000).',
+    'Cada troféu dá gemas. Pegue na tela da Arena antes de a semana acabar!',
+  ]);
+
+  static const todas = [comoJogar, fases, pedras, pontos, infinito, desafio, arena, missoes, presente, eventos, gemas];
 }
 
 /// Mostra a dica só na primeira vez (o jogador pode rever tudo em "Como jogar").
