@@ -60,6 +60,48 @@ class Progresso extends ChangeNotifier {
     return _prefs.getInt('sequencia') ?? 0;
   }
 
+  /// Sequência que acabou ontem (pulou só um dia) e ainda pode ser recuperada: 1 vez por semana.
+  int sequenciaPerdida(int hoje) {
+    final ontem = diaAnterior(hoje);
+    if (desafioFeito != diaAnterior(ontem)) return 0;
+    final ultimaVez = _prefs.getInt('sequenciaSalva') ?? 0;
+    if (ultimaVez != 0 && diasEntre(ultimaVez, hoje) < 7) return 0;
+    return _prefs.getInt('sequencia') ?? 0;
+  }
+
+  /// Recupera a sequência como se o desafio de ontem tivesse sido feito.
+  Future<bool> recuperarSequencia(int hoje) async {
+    if (sequenciaPerdida(hoje) == 0) return false;
+    await _prefs.setInt('desafioFeito', diaAnterior(hoje));
+    await _prefs.setInt('sequenciaSalva', hoje);
+    notifyListeners();
+    return true;
+  }
+
+  // ---------- presente de entrada (7 dias) ----------
+
+  /// Dia do ciclo (1 a 7) que o jogador pega hoje, ou 0 se já pegou.
+  int presenteDeHoje(int hoje) {
+    final ultimo = _prefs.getInt('presenteDia') ?? 0;
+    if (ultimo == hoje) return 0;
+    final seguido = ultimo == diaAnterior(hoje);
+    final anterior = _prefs.getInt('presenteSeq') ?? 0;
+    return seguido ? anterior % 7 + 1 : 1;
+  }
+
+  /// Dia do ciclo já pego hoje (para mostrar o calendário depois de pegar).
+  int presentePego(int hoje) => (_prefs.getInt('presenteDia') ?? 0) == hoje ? (_prefs.getInt('presenteSeq') ?? 0) : 0;
+
+  Future<int> pegarPresente(int hoje) async {
+    final diaDoCiclo = presenteDeHoje(hoje);
+    if (diaDoCiclo == 0) return 0;
+    final gemas = gemasDoPresente(diaDoCiclo) * (diaDoCiclo == 7 && assinante ? 2 : 1);
+    await _prefs.setInt('presenteDia', hoje);
+    await _prefs.setInt('presenteSeq', diaDoCiclo);
+    await ganharGemas(gemas);
+    return gemas;
+  }
+
   /// Conclui o desafio. Devolve as gemas ganhas (desafio + prêmio da sequência).
   Future<int> concluirDesafio(int dia, int pontos) async {
     if (desafioFeito == dia && pontos <= desafioPontos) return 0;

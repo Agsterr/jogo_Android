@@ -203,6 +203,27 @@ void main() {
     await capturar(tester, '14-loja-temas');
   });
 
+  testWidgets('presente do dia e recuperar sequência', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(
+      valores: {'gemas': 20, 'desafioFeito': 20261110, 'sequencia': 6, 'presenteDia': 20261111, 'presenteSeq': 2},
+    );
+    await tester.pumpWidget(appDeTeste(s));
+    await tester.pumpAndSettle();
+    expect(find.text('Sua sequência de 6 dias acabou!'), findsOneWidget);
+    await tester.tap(find.text('15'));
+    await tester.pumpAndSettle();
+    expect(s.progresso.sequencia(20261112), 6);
+    expect(s.progresso.gemas, 5);
+    await tester.tap(find.byTooltip('Presente do dia'));
+    await tester.pumpAndSettle();
+    await capturar(tester, '15-presente');
+    await tester.tap(find.text('Pegar +10'));
+    await tester.pumpAndSettle();
+    expect(s.progresso.gemas, 15);
+    expect(find.text('Volte amanhã!'), findsOneWidget);
+  });
+
   testWidgets('tela pequena com fonte grande não estoura', (tester) async {
     telaDeCelular(tester, tamanho: const Size(320, 600), fonte: 1.3);
     final s = await servicosDeTeste();

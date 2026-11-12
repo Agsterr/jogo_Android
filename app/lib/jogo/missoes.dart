@@ -75,3 +75,12 @@ int diaAnterior(int dia) {
   final d = DateTime.utc(dia ~/ 10000, dia ~/ 100 % 100, dia % 100).subtract(const Duration(days: 1));
   return Sorteio.sementeDoDia(d);
 }
+
+/// Dias entre duas datas aaaammdd.
+int diasEntre(int de, int ate) {
+  DateTime d(int x) => DateTime.utc(x ~/ 10000, x ~/ 100 % 100, x % 100);
+  return d(ate).difference(d(de)).inDays;
+}
+
+/// Gemas do presente de entrada em cada dia do ciclo de 7 (o 7º vale o dobro para assinantes).
+int gemasDoPresente(int diaDoCiclo) => const [5, 5, 10, 10, 15, 15, 30][diaDoCiclo - 1];

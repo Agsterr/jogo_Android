@@ -52,6 +52,13 @@ class InicioTela extends StatelessWidget {
                                   if (p.assinante) const _Selo('Encaixa+'),
                                   if (p.sequencia(dia) > 0) ...[const SizedBox(width: 8), _Sequencia(p.sequencia(dia))],
                                   const Spacer(),
+                                  _BotaoPresente(
+                                    disponivel: p.presenteDeHoje(dia) > 0,
+                                    aoTocar: () => showDialog<void>(
+                                      context: context,
+                                      builder: (_) => _DialogoPresente(progresso: p, dia: dia),
+                                    ),
+                                  ),
                                   IconButton(
                                     tooltip: p.somLigado ? 'Desligar som' : 'Ligar som',
                                     onPressed: p.alternarSom,
@@ -129,6 +136,10 @@ class InicioTela extends StatelessWidget {
                                     aoTocar: () => _abrir(context, JogoTela(servicos: servicos, diario: true)),
                                   ),
                                   const SizedBox(height: 14),
+                                  if (p.sequenciaPerdida(dia) > 0) ...[
+                                    _RecuperarSequencia(servicos: servicos, dia: dia),
+                                    const SizedBox(height: 14),
+                                  ],
                                   if (_BannerEvento.temAlgo(hoje)) ...[
                                     _BannerEvento(progresso: p, agora: hoje),
                                     const SizedBox(height: 14),
@@ -516,6 +527,154 @@ class _BannerEvento extends StatelessWidget {
             )
           else
             const Text('x2', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+        ],
+      ),
+    );
+  }
+}
+
+class _BotaoPresente extends StatelessWidget {
+  const _BotaoPresente({required this.disponivel, required this.aoTocar});
+
+  final bool disponivel;
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    tooltip: 'Presente do dia',
+    onPressed: aoTocar,
+    icon: Badge(
+      isLabelVisible: disponivel,
+      backgroundColor: Cores.destaque,
+      child: Icon(Icons.card_giftcard_rounded, color: disponivel ? Cores.ouro : null),
+    ),
+  );
+}
+
+/// Calendário de 7 dias de presentes por entrar no jogo.
+class _DialogoPresente extends StatelessWidget {
+  const _DialogoPresente({required this.progresso, required this.dia});
+
+  final Progresso progresso;
+  final int dia;
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: progresso,
+    builder: (context, _) {
+      final hoje = progresso.presenteDeHoje(dia);
+      final pego = progresso.presentePego(dia);
+      final atual = hoje > 0 ? hoje : pego;
+      return AlertDialog(
+        backgroundColor: Cores.painel,
+        title: const Text('Presente do dia', textAlign: TextAlign.center),
+        content: Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (var d = 1; d <= 7; d++)
+              Container(
+                width: d == 7 ? 152 : 72,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: d < atual || (d == atual && pego > 0)
+                      ? Cores.blocos[3].withValues(alpha: 0.35)
+                      : (d == atual ? Cores.blocos[5] : Cores.casa),
+                  borderRadius: BorderRadius.circular(14),
+                  border: d == atual ? Border.all(color: Cores.ouro, width: 2) : null,
+                ),
+                child: Column(
+                  children: [
+                    Text('Dia $d', style: TextStyle(fontSize: 13, color: d == atual ? Colors.white : Cores.textoFraco)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const IconeGema(tamanho: 16),
+                        Text(
+                          ' ${gemasDoPresente(d)}',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          if (hoje > 0)
+            FilledButton(onPressed: () => progresso.pegarPresente(dia), child: Text('Pegar +${gemasDoPresente(hoje)}'))
+          else
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Volte amanhã!')),
+        ],
+      );
+    },
+  );
+}
+
+/// Pulou um dia do Desafio: oferece recuperar a sequência (anúncio ou gemas).
+class _RecuperarSequencia extends StatelessWidget {
+  const _RecuperarSequencia({required this.servicos, required this.dia});
+
+  static const custo = 15;
+
+  final Servicos servicos;
+  final int dia;
+
+  Future<void> _comAnuncio(BuildContext context) async {
+    if (await servicos.anuncios.mostrarPremiado()) {
+      await servicos.progresso.recuperarSequencia(dia);
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Anúncio indisponível agora. Tente de novo.')));
+    }
+  }
+
+  Future<void> _comGemas() async {
+    if (await servicos.progresso.gastarGemas(custo)) await servicos.progresso.recuperarSequencia(dia);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = servicos.progresso;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Cores.blocos[1].withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Sua sequência de ${p.sequenciaPerdida(dia)} dias acabou!',
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+          ),
+          const Text('Recupere agora (1 vez por semana).', style: TextStyle(color: Cores.textoFraco)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(minimumSize: const Size(64, 44)),
+                  onPressed: () => _comAnuncio(context),
+                  icon: const Icon(Icons.smart_display_rounded),
+                  label: const Text('Anúncio'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(minimumSize: const Size(64, 44)),
+                  onPressed: p.gemas >= custo ? _comGemas : null,
+                  icon: const IconeGema(),
+                  label: const Text('$custo'),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
