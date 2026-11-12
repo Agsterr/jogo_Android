@@ -1,0 +1,32 @@
+name: encaixa
+description: "Encaixa: quebra-cabeça de blocos e cores"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: ^1.1.0
+  shared_preferences: ^2.5.6
+  google_mobile_ads: ^9.2.0
+  in_app_purchase: ^3.3.1
+  in_app_purchase_android: ^0.5.5
+  share_plus: ^13.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Fredoka
+      fonts:
+        - asset: assets/fontes/Fredoka-Medium.ttf
+          weight: 500
+        - asset: assets/fontes/Fredoka-Bold.ttf
+          weight: 700

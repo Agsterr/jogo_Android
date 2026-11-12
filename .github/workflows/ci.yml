@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.50.0
+          cache: true
+      - run: flutter pub get
+      - run: dart format --set-exit-if-changed -l 120 lib test
+      - run: flutter analyze
+      - run: flutter test
+      # Assina com a chave de produção só se os segredos existirem (veja docs/PUBLICAR.md).
+      - name: Chave de assinatura
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        if: env.KEYSTORE_BASE64 != ''
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/encaixa.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/encaixa.jks" >> "$GITHUB_ENV"
+      - name: Gerar APK e AAB
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
+        run: |
+          DEFINES="--dart-define=ADMOB_PREMIADO=${{ secrets.ADMOB_PREMIADO }} --dart-define=ADMOB_INTERSTICIAL=${{ secrets.ADMOB_INTERSTICIAL }}"
+          # Sem os segredos, os IDs ficam vazios e o app usa os de teste.
+          [ -z "${{ secrets.ADMOB_PREMIADO }}" ] && DEFINES=""
+          flutter build apk --release $DEFINES
+          flutter build appbundle --release $DEFINES
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encaixa-android
+          path: |
+            app/build/app/outputs/flutter-apk/app-release.apk
+            app/build/app/outputs/bundle/release/app-release.aab
