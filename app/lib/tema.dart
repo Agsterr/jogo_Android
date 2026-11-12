@@ -4,25 +4,27 @@ import 'jogo/temas.dart';
 
 /// Cores e desenho dos blocos. A arte do jogo é toda vetorial, feita aqui.
 abstract final class Cores {
-  static const fundoTopo = Color(0xFF2B1B72);
-  static const fundoBase = Color(0xFF140B3A);
-  static const painel = Color(0xFF0F0830);
-  static const casa = Color(0xFF231858);
+  static const fundoTopo = Color(0xFF4A1BC2);
+  static const fundoBase = Color(0xFF16074A);
+  static const painel = Color(0xFF14063F);
+  static const casa = Color(0xFF2A1670);
+  static const brilhoRosa = Color(0xFFFF2E97);
+  static const brilhoCiano = Color(0xFF00D9FF);
   static const texto = Color(0xFFF5F1FF);
   static const textoFraco = Color(0xFFB4A8E0);
   static const gema = Color(0xFF3FE0D0);
-  static const ouro = Color(0xFFFFC94A);
-  static const destaque = Color(0xFFFF5A8A);
+  static const ouro = Color(0xFFFFCC33);
+  static const destaque = Color(0xFFFF2E7E);
   static const pedra = Color(0xFF8E8AA6);
 
   /// Uma cor por tipo de bloco (o índice vem de `Peca.cor`).
   static const blocos = [
-    Color(0xFFFF5A6E), // coral
-    Color(0xFFFF9F1C), // laranja
-    Color(0xFFFFD23F), // amarelo
-    Color(0xFF3DDC84), // verde
-    Color(0xFF2EC4F1), // azul
-    Color(0xFFA96BFF), // roxo
+    Color(0xFFFF3D6E), // coral
+    Color(0xFFFF8A00), // laranja
+    Color(0xFFFFD000), // amarelo
+    Color(0xFF00E08A), // verde
+    Color(0xFF00B4FF), // azul
+    Color(0xFFA64DFF), // roxo
   ];
 
   /// Cores das peças: mudam com o tema escolhido na loja (`Progresso.usarTema`).
@@ -56,28 +58,46 @@ ThemeData temaDoJogo() {
   );
 }
 
-/// Desenha um bloco "bala de goma": degradê, borda clara em cima e sombra embaixo.
+/// Desenha um bloco "bala de goma": base 3D, degradê vivo, borda de luz e brilho.
 void pintarBloco(Canvas canvas, Rect r, Color cor, {double opacidade = 1}) {
-  final raio = Radius.circular(r.width * 0.2);
-  final escura = Color.lerp(cor, Colors.black, 0.35)!;
-  final clara = Color.lerp(cor, Colors.white, 0.35)!;
-  Color o(Color c) => c.withValues(alpha: c.a * opacidade);
+  final raio = Radius.circular(r.width * 0.22);
+  final escura = Color.lerp(cor, Colors.black, 0.4)!;
+  final clara = Color.lerp(cor, Colors.white, 0.45)!;
+  Color o(Color c, [double a = 1]) => c.withValues(alpha: c.a * a * opacidade);
 
+  // Lateral escura embaixo (dá volume).
   canvas.drawRRect(RRect.fromRectAndRadius(r, raio), Paint()..color = o(escura));
-  final corpo = Rect.fromLTRB(r.left, r.top, r.right, r.bottom - r.height * 0.1);
+  // Corpo com degradê.
+  final corpo = Rect.fromLTRB(r.left, r.top, r.right, r.bottom - r.height * 0.13);
+  final rr = RRect.fromRectAndRadius(corpo, raio);
   canvas.drawRRect(
-    RRect.fromRectAndRadius(corpo, raio),
+    rr,
     Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [o(clara), o(cor)],
+        colors: [o(clara), o(cor), o(Color.lerp(cor, escura, 0.25)!)],
+        stops: const [0, 0.55, 1],
       ).createShader(corpo),
   );
-  final brilho = Rect.fromLTWH(r.left + r.width * 0.16, r.top + r.height * 0.12, r.width * 0.36, r.height * 0.14);
+  // Borda de luz por dentro.
+  canvas.drawRRect(
+    rr.deflate(r.width * 0.03),
+    Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = r.width * 0.04
+      ..color = o(Colors.white, 0.28),
+  );
+  // Brilho no alto e pontinho de reflexo.
+  final brilho = Rect.fromLTWH(r.left + r.width * 0.14, r.top + r.height * 0.1, r.width * 0.48, r.height * 0.16);
   canvas.drawRRect(
     RRect.fromRectAndRadius(brilho, Radius.circular(brilho.height)),
-    Paint()..color = Colors.white.withValues(alpha: 0.45 * opacidade),
+    Paint()..color = o(Colors.white, 0.6),
+  );
+  canvas.drawCircle(
+    Offset(r.left + r.width * 0.75, r.top + r.height * 0.18),
+    r.width * 0.06,
+    Paint()..color = o(Colors.white, 0.7),
   );
 }
 

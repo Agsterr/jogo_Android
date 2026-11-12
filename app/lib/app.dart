@@ -20,7 +20,7 @@ class EncaixaApp extends StatelessWidget {
   );
 }
 
-/// Fundo com degradê usado em todas as telas.
+/// Fundo de todas as telas: degradê violeta com manchas de luz rosa e ciano.
 class FundoJogo extends StatelessWidget {
   const FundoJogo({super.key, required this.child});
 
@@ -29,6 +29,24 @@ class FundoJogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: const BoxDecoration(gradient: Cores.fundo),
-    child: child,
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: const Alignment(0.9, -0.85),
+          radius: 0.9,
+          colors: [Cores.brilhoRosa.withValues(alpha: 0.45), Cores.brilhoRosa.withValues(alpha: 0)],
+        ),
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(-1, 0.75),
+            radius: 0.9,
+            colors: [Cores.brilhoCiano.withValues(alpha: 0.32), Cores.brilhoCiano.withValues(alpha: 0)],
+          ),
+        ),
+        child: child,
+      ),
+    ),
   );
 }

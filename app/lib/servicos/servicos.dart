@@ -11,6 +11,7 @@ class Servicos {
     required this.compras,
     this.sons = const SemSons(),
     this.hoje = _agora,
+    this.mostrarPresenteAoAbrir = true,
   });
 
   final Progresso progresso;
@@ -20,6 +21,9 @@ class Servicos {
 
   /// Relógio injetável: os testes fixam o dia do desafio.
   final DateTime Function() hoje;
+
+  /// Abre o presente do dia sozinho na tela inicial (desligado nos testes).
+  final bool mostrarPresenteAoAbrir;
 
   static DateTime _agora() => DateTime.now();
 }

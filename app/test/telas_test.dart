@@ -78,9 +78,10 @@ void main() {
     );
     await tester.pumpWidget(appDeTeste(s));
     await tester.pumpAndSettle();
-    expect(find.text('JOGAR'), findsOneWidget);
-    expect(find.text('Missões de hoje'), findsOneWidget);
-    expect(find.text('Desafio do dia #12'), findsOneWidget);
+    expect(find.text('JOGAR'), findsWidgets);
+    expect(find.text('Fase 1'), findsOneWidget);
+    expect(find.text('Missões de hoje'), findsWidgets);
+    expect(find.text('Desafio #12'), findsWidgets);
     await capturar(tester, '1-inicio');
   });
 
@@ -165,7 +166,8 @@ void main() {
     await s.progresso.salvarPartida('classico', partidaDeExemplo().paraJson());
     await tester.pumpWidget(appDeTeste(s));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('CONTINUAR'));
+    expect(find.text('Continuar partida'), findsOneWidget);
+    await tester.tap(find.text('Infinito').first);
     await tester.pumpAndSettle();
     expect(find.text('1240'), findsWidgets);
   });
@@ -192,8 +194,8 @@ void main() {
     addTearDown(() => s.progresso.usarTema(TemaDeBlocos.classico));
     await tester.pumpWidget(appDeTeste(s));
     await tester.pumpAndSettle();
-    expect(find.text('Evento de Natal'), findsOneWidget);
-    await tester.tap(find.text('Tema grátis'));
+    expect(find.text('Natal'), findsWidgets);
+    await tester.tap(find.text('Tema\ngrátis'));
     await tester.pumpAndSettle();
     expect(s.progresso.temaAtivo.id, 'natal');
     await capturar(tester, '13-evento-natal');

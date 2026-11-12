@@ -1,6 +1,16 @@
+import 'dart:ui' show Color;
+
 /// Eventos com prazo. A lista fica no app; quando houver Remote Config, ela pode vir de lá (#15).
 class Evento {
-  const Evento(this.id, this.nome, this.inicio, this.fim, {this.tema, this.gemasEmDobro = true});
+  const Evento(
+    this.id,
+    this.nome,
+    this.inicio,
+    this.fim, {
+    this.tema,
+    this.gemasEmDobro = true,
+    this.cores = const [Color(0xFFFF2E7E), Color(0xFFFF8A00)],
+  });
 
   final String id;
   final String nome;
@@ -13,11 +23,22 @@ class Evento {
   final String? tema;
   final bool gemasEmDobro;
 
+  /// Degradê do banner.
+  final List<Color> cores;
+
   bool ativo(DateTime agora) => !agora.isBefore(inicio) && agora.isBefore(fim);
 }
 
 final eventos = [
-  Evento('natal-2026', 'Natal', DateTime(2026, 12, 18), DateTime(2026, 12, 27), tema: 'natal'),
+  Evento('festival-2026', 'Festival de Lançamento', DateTime(2026, 11, 10), DateTime(2026, 12, 1), tema: 'festival'),
+  Evento(
+    'natal-2026',
+    'Natal',
+    DateTime(2026, 12, 18),
+    DateTime(2026, 12, 27),
+    tema: 'natal',
+    cores: [Color(0xFFE53935), Color(0xFF2E7D32)],
+  ),
   Evento('carnaval-2027', 'Carnaval', DateTime(2027, 2, 5), DateTime(2027, 2, 11)),
 ];
 

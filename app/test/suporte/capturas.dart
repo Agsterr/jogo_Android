@@ -39,6 +39,7 @@ Future<Servicos> servicosDeTeste({Map<String, Object> valores = const {}, DateTi
     anuncios: SemAnuncios(),
     compras: ComprasFicticias(progresso),
     hoje: () => hoje ?? DateTime(2026, 11, 12, 9),
+    mostrarPresenteAoAbrir: false,
   );
 }
 

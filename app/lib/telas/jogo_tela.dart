@@ -14,6 +14,7 @@ import '../jogo/sorteio.dart';
 import '../servicos/servicos.dart';
 import '../servicos/sons.dart';
 import '../tema.dart';
+import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
 import '../widgets/tabuleiro_widget.dart';
 import 'loja_tela.dart';
@@ -70,6 +71,9 @@ class _JogoTelaState extends State<JogoTela> {
   int _gemasFase = 0;
 
   Servicos get _s => widget.servicos;
+
+  @visibleForTesting
+  Partida get partidaParaTeste => _partida;
 
   @override
   void initState() {
@@ -443,7 +447,7 @@ class _JogoTelaState extends State<JogoTela> {
 
   Widget _placarDePontos() => Column(
     children: [
-      Text('${_partida.pontos}', style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w700, height: 1.1)),
+      TextoContornado('${_partida.pontos}', tamanho: 50),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -470,20 +474,31 @@ class _JogoTelaState extends State<JogoTela> {
     alignment: Alignment.center,
     children: [
       Container(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: Cores.painel,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 18, offset: Offset(0, 8))],
+          borderRadius: BorderRadius.circular(22),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Cores.brilhoRosa, Color(0xFF8B5CFF), Cores.brilhoCiano],
+          ),
+          boxShadow: [
+            BoxShadow(color: Cores.brilhoRosa.withValues(alpha: 0.35), blurRadius: 28, offset: const Offset(-6, -4)),
+            BoxShadow(color: Cores.brilhoCiano.withValues(alpha: 0.3), blurRadius: 28, offset: const Offset(6, 8)),
+          ],
         ),
-        child: SizedBox.square(
-          dimension: lado,
-          child: TabuleiroWidget(
-            key: _chaveTabuleiro,
-            tabuleiro: _partida.tabuleiro,
-            previa: _previa,
-            removidos: _removidos,
-            geracao: _geracao,
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(color: Cores.painel, borderRadius: BorderRadius.circular(19)),
+          child: SizedBox.square(
+            dimension: lado,
+            child: TabuleiroWidget(
+              key: _chaveTabuleiro,
+              tabuleiro: _partida.tabuleiro,
+              previa: _previa,
+              removidos: _removidos,
+              geracao: _geracao,
+            ),
           ),
         ),
       ),
@@ -577,29 +592,32 @@ class _JogoTelaState extends State<JogoTela> {
       child: Center(
         child: Container(
           margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
           constraints: const BoxConstraints(maxWidth: 380),
-          decoration: BoxDecoration(
-            color: Cores.painel,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Cores.blocos[5].withValues(alpha: 0.6), width: 2),
-          ),
-          child: ListenableBuilder(
-            listenable: _s.progresso,
-            builder: (context, _) => Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: switch (_fim) {
-                _Fim.segundaChance => _segundaChance(),
-                _Fim.faseVencida => _faseVencida(widget.fase!),
-                _Fim.faseFalhou => _faseFalhou(widget.fase!),
-                _ => _resultado(),
-              },
+          child: CartaoVidro(
+            padding: const EdgeInsets.fromLTRB(22, 22, 22, 12),
+            child: ListenableBuilder(
+              listenable: _s.progresso,
+              builder: (context, _) => Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: switch (_fim) {
+                  _Fim.segundaChance => _segundaChance(),
+                  _Fim.faseVencida => _faseVencida(widget.fase!),
+                  _Fim.faseFalhou => _faseFalhou(widget.fase!),
+                  _ => _resultado(),
+                },
+              ),
             ),
           ),
         ),
       ),
     ),
+  );
+
+  /// Botão principal dos painéis (estilo bala).
+  Widget _botao(String texto, IconData icone, VoidCallback? acao) => Padding(
+    padding: const EdgeInsets.only(top: 4),
+    child: BotaoDoce(texto: texto, icone: icone, cor: Cores.blocos[3], altura: 52, tamanhoTexto: 20, aoTocar: acao),
   );
 
   List<Widget> _faseVencida(Fase fase) {
@@ -626,11 +644,7 @@ class _JogoTelaState extends State<JogoTela> {
         ),
       const SizedBox(height: 20),
       if (fase.numero < Fase.total)
-        FilledButton.icon(
-          onPressed: () => _irParaFase(fase.numero + 1),
-          icon: const Icon(Icons.arrow_forward_rounded),
-          label: const Text('Próxima fase'),
-        ),
+        _botao('Próxima fase', Icons.arrow_forward_rounded, () => _irParaFase(fase.numero + 1)),
       TextButton(onPressed: _sair, child: const Text('Mapa')),
     ];
   }
@@ -651,10 +665,10 @@ class _JogoTelaState extends State<JogoTela> {
       ),
       const SizedBox(height: 20),
       if (!_ajudou) ...[
-        FilledButton.icon(
-          onPressed: _s.progresso.assinante ? _ajudarNaFase : _ajudaComAnuncio,
-          icon: Icon(_s.progresso.assinante ? Icons.workspace_premium_rounded : Icons.smart_display_rounded),
-          label: Text(semEspaco ? 'Abrir espaço' : '+5 peças'),
+        _botao(
+          semEspaco ? 'Abrir espaço' : '+5 peças',
+          _s.progresso.assinante ? Icons.workspace_premium_rounded : Icons.smart_display_rounded,
+          _s.progresso.assinante ? _ajudarNaFase : _ajudaComAnuncio,
         ),
         const SizedBox(height: 10),
         OutlinedButton.icon(
@@ -664,11 +678,7 @@ class _JogoTelaState extends State<JogoTela> {
           label: const Text('Usar ${Custos.continuar} gemas'),
         ),
       ] else
-        FilledButton.icon(
-          onPressed: () => _irParaFase(fase.numero),
-          icon: const Icon(Icons.replay_rounded),
-          label: const Text('Tentar de novo'),
-        ),
+        _botao('Tentar de novo', Icons.replay_rounded, () => _irParaFase(fase.numero)),
       const SizedBox(height: 4),
       if (!_ajudou) TextButton(onPressed: () => _irParaFase(fase.numero), child: const Text('Tentar de novo')),
       TextButton(onPressed: _sair, child: const Text('Mapa')),
@@ -693,17 +703,9 @@ class _JogoTelaState extends State<JogoTela> {
       ),
       const SizedBox(height: 20),
       if (p.assinante)
-        FilledButton.icon(
-          onPressed: _continuar,
-          icon: const Icon(Icons.workspace_premium_rounded),
-          label: const Text('Continuar grátis'),
-        )
+        _botao('Continuar grátis', Icons.workspace_premium_rounded, _continuar)
       else
-        FilledButton.icon(
-          onPressed: _continuarComAnuncio,
-          icon: const Icon(Icons.smart_display_rounded),
-          label: const Text('Assistir e continuar'),
-        ),
+        _botao('Assistir e continuar', Icons.smart_display_rounded, _continuarComAnuncio),
       const SizedBox(height: 10),
       OutlinedButton.icon(
         style: OutlinedButton.styleFrom(minimumSize: const Size(64, 48)),
@@ -751,11 +753,7 @@ class _JogoTelaState extends State<JogoTela> {
         ),
       ),
     const SizedBox(height: 20),
-    FilledButton.icon(
-      onPressed: _jogarDeNovo,
-      icon: const Icon(Icons.replay_rounded),
-      label: Text(widget.diario ? 'Tentar de novo' : 'Jogar de novo'),
-    ),
+    _botao(widget.diario ? 'Tentar de novo' : 'Jogar de novo', Icons.replay_rounded, _jogarDeNovo),
     const SizedBox(height: 10),
     OutlinedButton.icon(
       style: OutlinedButton.styleFrom(minimumSize: const Size(64, 48)),
@@ -827,16 +825,6 @@ class _Aviso extends StatelessWidget {
         ),
       );
     },
-    child: Text(
-      texto,
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontSize: 34,
-        fontWeight: FontWeight.w700,
-        height: 1.1,
-        color: Colors.white,
-        shadows: [Shadow(color: Color(0xFFB0306A), offset: Offset(0, 3), blurRadius: 0)],
-      ),
-    ),
+    child: TextoContornado(texto, tamanho: 36, cor: const Color(0xFFFFF27A), contorno: const Color(0xFFB0186A)),
   );
 }

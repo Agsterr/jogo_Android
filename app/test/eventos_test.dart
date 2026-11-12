@@ -17,7 +17,8 @@ void main() {
     expect(eventoAtivo(DateTime(2026, 12, 18))?.id, 'natal-2026');
     expect(eventoAtivo(DateTime(2026, 12, 27)), isNull);
     expect(multiplicadorDeGemas(DateTime(2026, 12, 22, 10)), 2); // terça, mas no evento
-    expect(multiplicadorDeGemas(DateTime(2026, 11, 17, 10)), 1);
+    expect(eventoAtivo(DateTime(2026, 11, 17))?.id, 'festival-2026');
+    expect(multiplicadorDeGemas(DateTime(2027, 1, 12, 10)), 1); // terça sem evento
     expect(tempoRestante(DateTime(2026, 12, 23, 20), DateTime(2026, 12, 27)), '3d 4h');
   });
 

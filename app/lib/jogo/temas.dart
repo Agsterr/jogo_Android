@@ -18,12 +18,12 @@ class TemaDeBlocos {
   final String? evento;
 
   static const classico = TemaDeBlocos('classico', 'Clássico', [
-    Color(0xFFFF5A6E),
-    Color(0xFFFF9F1C),
-    Color(0xFFFFD23F),
-    Color(0xFF3DDC84),
-    Color(0xFF2EC4F1),
-    Color(0xFFA96BFF),
+    Color(0xFFFF3D6E),
+    Color(0xFFFF8A00),
+    Color(0xFFFFD000),
+    Color(0xFF00E08A),
+    Color(0xFF00B4FF),
+    Color(0xFFA64DFF),
   ]);
 
   static const todos = [
@@ -60,6 +60,14 @@ class TemaDeBlocos {
       Color(0xFF4834D4),
       Color(0xFFFFFFFF),
     ], assinante: true),
+    TemaDeBlocos('festival', 'Festival', [
+      Color(0xFFFF1F8F),
+      Color(0xFFFF6A00),
+      Color(0xFFFFEA00),
+      Color(0xFF39FF14),
+      Color(0xFF00F0FF),
+      Color(0xFF8B5CFF),
+    ], evento: 'festival-2026'),
     TemaDeBlocos('natal', 'Natal', [
       Color(0xFFE53935),
       Color(0xFF2E7D32),

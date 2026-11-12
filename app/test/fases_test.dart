@@ -20,6 +20,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Faz a melhor jogada pela nota gulosa. Devolve `false` se nada coube.
 bool jogada(Partida p) {
+  final melhor = melhorJogada(p);
+  if (melhor == null) return false;
+  p.colocar(melhor.$1, melhor.$2, melhor.$3);
+  return true;
+}
+
+/// Melhor (peça, linha, coluna) pela nota gulosa, ou `null` se nada cabe.
+(int, int, int)? melhorJogada(Partida p) {
   {
     (int, int, int)? melhor;
     var melhorNota = -1 << 30;
@@ -58,9 +66,7 @@ bool jogada(Partida p) {
         }
       }
     }
-    if (melhor == null) return false;
-    p.colocar(melhor.$1, melhor.$2, melhor.$3);
-    return true;
+    return melhor;
   }
 }
 

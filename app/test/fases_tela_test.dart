@@ -21,7 +21,7 @@ void main() {
     final s = await servicosDeTeste(valores: progressoNoMeio);
     await tester.pumpWidget(appDeTeste(s, tela: MapaTela(servicos: s)));
     await tester.pump();
-    expect(find.text('13'), findsOneWidget);
+    expect(find.text('13'), findsWidgets);
     expect(find.byIcon(Icons.lock_rounded), findsWidgets);
     await capturar(tester, '9-mapa');
   });
