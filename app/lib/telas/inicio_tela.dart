@@ -11,8 +11,10 @@ import '../jogo/temas.dart';
 import '../servicos/progresso.dart';
 import '../servicos/servicos.dart';
 import '../tema.dart';
+import '../widgets/dicas.dart';
 import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
+import 'ajuda_tela.dart';
 import 'jogo_tela.dart';
 import 'loja_tela.dart';
 import 'mapa_tela.dart';
@@ -71,6 +73,11 @@ class _InicioTelaState extends State<InicioTela> {
                           if (p.assinante) const _Selo('Encaixa+'),
                           if (p.sequencia(dia) > 0) ...[const SizedBox(width: 8), _Sequencia(p.sequencia(dia))],
                           const Spacer(),
+                          IconButton(
+                            tooltip: 'Como jogar',
+                            onPressed: () => _abrir(const AjudaTela()),
+                            icon: const Icon(Icons.help_rounded),
+                          ),
                           _BotaoPresente(disponivel: p.presenteDeHoje(dia) > 0, aoTocar: () => _abrirPresente(dia)),
                           IconButton(
                             tooltip: p.somLigado ? 'Desligar som' : 'Ligar som',
@@ -87,7 +94,10 @@ class _InicioTelaState extends State<InicioTela> {
                       const Logo(tamanho: 50),
                       const SizedBox(height: 14),
                       if (_BannerEvento.temAlgo(hoje)) ...[
-                        _BannerEvento(progresso: p, agora: hoje),
+                        GestureDetector(
+                          onTap: () => mostrarDica(context, Dicas.eventos),
+                          child: _BannerEvento(progresso: p, agora: hoje),
+                        ),
                         const SizedBox(height: 14),
                       ],
                       Row(
@@ -370,6 +380,12 @@ class _CartaoMissoes extends StatelessWidget {
           Row(
             children: [
               const Expanded(child: TextoContornado('Missões de hoje', tamanho: 19, alinhamento: TextAlign.start)),
+              IconButton(
+                tooltip: 'Como funcionam as missões',
+                visualDensity: VisualDensity.compact,
+                onPressed: () => mostrarDica(context, Dicas.missoes),
+                icon: const Icon(Icons.info_outline_rounded, size: 22),
+              ),
               _Bau(aberto: aberto, pronto: todasPegas && !aberto, aoTocar: () => progresso.abrirBau(dia)),
             ],
           ),
@@ -520,7 +536,10 @@ class _BannerEvento extends StatelessWidget {
                     contorno: Color.lerp(cores.last, Colors.black, 0.5)!,
                   ),
                 ),
-                const Text('Gemas em dobro', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const Text(
+                  'Gemas em dobro · toque e saiba mais',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                ),
               ],
             ),
           ),

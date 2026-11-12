@@ -27,6 +27,14 @@ class Progresso extends ChangeNotifier {
   bool get semAnuncios => _prefs.getBool('semAnuncios') ?? false;
   bool get assinante => _prefs.getBool('assinante') ?? false;
 
+  /// Dicas e tutorial já vistos.
+  bool dicaVista(String id) => (_prefs.getStringList('dicas') ?? const []).contains(id);
+
+  Future<void> marcarDica(String id) async {
+    if (dicaVista(id)) return;
+    await _prefs.setStringList('dicas', [...?_prefs.getStringList('dicas'), id]);
+  }
+
   bool get somLigado => _prefs.getBool('som') ?? true;
 
   Future<void> alternarSom() async {

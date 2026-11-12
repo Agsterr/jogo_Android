@@ -13,10 +13,17 @@ Future<void> jogarPelaTela(WidgetTester tester) async {
   for (var i = 0; i < 60; i++) {
     if (find.textContaining('concluída').evaluate().isNotEmpty) return;
     if (find.text('Tentar de novo').evaluate().isNotEmpty) return;
+    if (!await jogarUmaVez(tester)) return;
+  }
+}
+
+/// Uma jogada arrastando pela tela. Devolve `false` se nada coube.
+Future<bool> jogarUmaVez(WidgetTester tester) async {
+  {
     final estado = tester.state<State<JogoTela>>(find.byType(JogoTela));
     final partida = (estado as dynamic).partidaParaTeste;
     final escolha = f.melhorJogada(partida);
-    if (escolha == null) return;
+    if (escolha == null) return false;
     final (indice, linha, coluna) = escolha;
     final peca = partida.mao[indice]!;
     final caixa = tester.renderObject<RenderBox>(find.byType(TabuleiroWidget));
@@ -29,6 +36,7 @@ Future<void> jogarPelaTela(WidgetTester tester) async {
     await tester.pump();
     await gesto.up();
     await tester.pumpAndSettle();
+    return true;
   }
 }
 

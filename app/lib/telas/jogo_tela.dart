@@ -14,6 +14,7 @@ import '../jogo/sorteio.dart';
 import '../servicos/servicos.dart';
 import '../servicos/sons.dart';
 import '../tema.dart';
+import '../widgets/dicas.dart';
 import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
 import '../widgets/tabuleiro_widget.dart';
@@ -82,6 +83,43 @@ class _JogoTelaState extends State<JogoTela> {
     _dia = Sorteio.sementeDoDia(_s.hoje());
     _partida = widget.partida ?? _partidaSalva() ?? _novaPartida();
     if (_partida.fimDeJogo) _fim = _partida.continuou ? _Fim.resultado : _Fim.segundaChance;
+    if (widget.fase?.numero == 1 && _s.mostrarDicas && !_s.progresso.dicaVista('tutorial')) _tutorial = 0;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _dicaDeEntrada());
+  }
+
+  /// Explica o modo na primeira vez que o jogador entra nele.
+  void _dicaDeEntrada() {
+    if (!mounted || _tutorial != null) return;
+    final dica = switch (widget.fase?.objetivo) {
+      Objetivo.pedras => Dicas.pedras,
+      Objetivo.pontos => Dicas.pontos,
+      Objetivo.linhas => null,
+      null => widget.diario ? Dicas.desafio : Dicas.infinito,
+    };
+    if (dica != null) mostrarDicaUmaVez(context, _s, dica);
+  }
+
+  // ---------- tutorial da fase 1 ----------
+
+  /// Passo do tutorial (0: arrastar, 1: encher linha, 2: objetivo) ou `null` se não há tutorial.
+  int? _tutorial;
+
+  static const _textosTutorial = [
+    'Segure uma peça aqui embaixo e arraste até o tabuleiro.',
+    'Isso! Agora encha uma linha ou coluna INTEIRA: ela some e dá pontos.',
+    'Muito bem! O objetivo da fase fica lá em cima. Cumpra antes de acabar as peças: '
+        'quanto mais peças sobrarem, mais estrelas!',
+  ];
+
+  void _avancarTutorial(Jogada jogada) {
+    final passo = _tutorial;
+    if (passo == 0) _tutorial = 1;
+    if (passo == 1 && jogada.linhasLimpas > 0) _tutorial = 2;
+  }
+
+  void _terminarTutorial() {
+    _s.progresso.marcarDica('tutorial');
+    setState(() => _tutorial = null);
   }
 
   /// Clássico e Desafio têm partidas salvas separadas.
@@ -166,6 +204,7 @@ class _JogoTelaState extends State<JogoTela> {
     }
     _s.progresso.ganharGemas(jogada.gemas * multiplicadorDeGemas(_s.hoje()));
     _s.progresso.contarMissoes(_dia, contagemDaJogada(jogada));
+    _avancarTutorial(jogada);
     _salvar();
     setState(() {});
     if (widget.fase case final fase?) {
@@ -206,6 +245,7 @@ class _JogoTelaState extends State<JogoTela> {
 
   Future<void> _conferirFase(Fase fase) async {
     if (fase.concluida(_partida)) {
+      if (_tutorial != null) _terminarTutorial();
       _s.sons.tocar(Som.combo);
       // Quem precisou de ajuda leva no máximo 1 estrela.
       final estrelas = _ajudou ? 1 : fase.estrelas(_partida);
@@ -365,6 +405,19 @@ class _JogoTelaState extends State<JogoTela> {
                     const SizedBox(height: 8),
                   ],
                 ),
+                if (_tutorial case final passo? when _fim == null)
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    // Passo 0: logo acima da mão. Passo 1: sobre o placar. Passo 2: abaixo do objetivo.
+                    bottom: passo == 0 ? _casa * 2.5 + 16 + 70 : null,
+                    top: passo == 0 ? null : (passo == 1 ? 44 : 150),
+                    child: BalaoTutorial(
+                      texto: _textosTutorial[passo],
+                      mostrarMao: passo == 0,
+                      aoEntender: passo == 2 ? _terminarTutorial : null,
+                    ),
+                  ),
                 if (_arrastando != null && _dedo != null) _pecaNoDedo(),
                 if (_fim != null) _painelDoFim(),
               ],
@@ -832,5 +885,106 @@ class _Aviso extends StatelessWidget {
       );
     },
     child: TextoContornado(texto, tamanho: 36, cor: const Color(0xFFFFF27A), contorno: const Color(0xFFB0186A)),
+  );
+}
+
+/// Balão do tutorial. Não bloqueia o arraste (só o botão ENTENDI recebe toque).
+class BalaoTutorial extends StatefulWidget {
+  const BalaoTutorial({super.key, required this.texto, this.mostrarMao = false, this.aoEntender});
+
+  final String texto;
+  final bool mostrarMao;
+  final VoidCallback? aoEntender;
+
+  @override
+  State<BalaoTutorial> createState() => _BalaoTutorialState();
+}
+
+class _BalaoTutorialState extends State<BalaoTutorial> with SingleTickerProviderStateMixin {
+  late final _mao = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+
+  @override
+  void initState() {
+    super.initState();
+    _animarMao();
+  }
+
+  @override
+  void didUpdateWidget(BalaoTutorial antigo) {
+    super.didUpdateWidget(antigo);
+    _animarMao();
+  }
+
+  /// A mão só se mexe enquanto aparece (animação parada não gasta bateria).
+  void _animarMao() => widget.mostrarMao ? _mao.repeat(reverse: true) : _mao.stop();
+
+  @override
+  void dispose() {
+    _mao.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      IgnorePointer(
+        ignoring: widget.aoEntender == null,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              const BoxShadow(color: Color(0x66000000), offset: Offset(0, 5)),
+              BoxShadow(color: Cores.brilhoRosa.withValues(alpha: 0.5), blurRadius: 20),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.texto,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2A0B5E),
+                  height: 1.25,
+                ),
+              ),
+              if (widget.aoEntender != null) ...[
+                const SizedBox(height: 10),
+                BotaoDoce(
+                  texto: 'ENTENDI',
+                  cor: Cores.blocos[3],
+                  altura: 44,
+                  tamanhoTexto: 18,
+                  aoTocar: widget.aoEntender,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+      if (widget.mostrarMao)
+        IgnorePointer(
+          child: Align(
+            // Aponta para a primeira peça da mão.
+            alignment: const Alignment(-0.68, 0),
+            child: AnimatedBuilder(
+              animation: _mao,
+              builder: (context, child) => Transform.translate(offset: Offset(0, 58 + _mao.value * 22), child: child),
+              child: const Icon(
+                Icons.touch_app_rounded,
+                size: 54,
+                color: Colors.white,
+                shadows: [Shadow(color: Color(0xFF2A0B5E), offset: Offset(0, 3), blurRadius: 4)],
+              ),
+            ),
+          ),
+        ),
+    ],
   );
 }

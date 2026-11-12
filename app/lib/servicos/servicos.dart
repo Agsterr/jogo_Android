@@ -12,6 +12,7 @@ class Servicos {
     this.sons = const SemSons(),
     this.hoje = _agora,
     this.mostrarPresenteAoAbrir = true,
+    this.mostrarDicas = true,
   });
 
   final Progresso progresso;
@@ -24,6 +25,9 @@ class Servicos {
 
   /// Abre o presente do dia sozinho na tela inicial (desligado nos testes).
   final bool mostrarPresenteAoAbrir;
+
+  /// Dicas de primeira vez e tutorial (desligados nos testes de tela, ligados nos do tutorial).
+  final bool mostrarDicas;
 
   static DateTime _agora() => DateTime.now();
 }

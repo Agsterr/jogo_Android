@@ -19,6 +19,12 @@ bônus** e **Desafio do dia compartilhável** (mesmas peças para todo mundo, co
 - Linha ou coluna cheia some. Acaba quando nenhuma peça da mão cabe.
 - Peça que não cabe em lugar nenhum aparece cinza na mão.
 
+## Ajuda e tutorial (`app/lib/widgets/dicas.dart`)
+- **Fase 1:** tutorial em 3 passos que acompanha as jogadas (arrastar → encher uma linha → objetivo e estrelas).
+- **Primeira vez** no Infinito, no Desafio do dia, numa fase de pedras e numa de pontos: uma janela explica o modo.
+- Tocar no banner do evento explica os eventos; o "i" das missões explica missões e baú.
+- Botão **?** na tela inicial abre "Como jogar" com todos os textos.
+
 ## Pontuação (`app/lib/jogo/partida.dart`)
 | Evento | Pontos |
 |---|---|
