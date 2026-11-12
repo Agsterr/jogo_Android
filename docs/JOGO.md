@@ -47,14 +47,17 @@ Semente = data (`aaaammdd`) num sorteador próprio (mulberry32), para todo mundo
 versão do app. Número do desafio = dias desde 1º/11/2026. Pode repetir; vale a melhor pontuação.
 
 ## Modo Fases (`app/lib/jogo/fases.dart`)
-- 60 fases em 3 mundos (Doce, Oceano, Vulcão), geradas por fórmula: sem arquivo de dados, iguais para todos.
-- Objetivos que se alternam: **limpar N linhas**, **fazer N pontos** e **quebrar as pedras** (blocos cinza já no
-  tabuleiro, que somem quando a linha ou coluna deles é limpa). Cada fase tem limite de peças.
+- **140 fases em 7 mundos** (Doce, Oceano, Vulcão, Floresta, Gelo, Deserto, Galáxia), iguais para todos.
+- Objetivos: **limpar N linhas**, **fazer N pontos**, **quebrar as pedras**, **linhas de uma cor só** (fase com 3 cores)
+  e **combo xN**. As 10 primeiras ensinam um objetivo por vez; a última de cada mundo é um "chefe" de pedras.
+- A dificuldade sobe sozinha: alvos maiores, mais pedras, **blocos soltos** no tabuleiro a partir do 2º mundo e menos
+  folga de peças.
+- **Calibrada por um robô** (`app/lib/jogo/robo.dart`): o jogo deixa o robô jogar a fase e define o limite de peças pelo
+  que ele precisou, mais uma folga que cai de 80% (fase 1) para 12% (fase 140), mínimo de 10 peças. Se o robô não
+  vence, troca a variação ou alivia o alvo. Assim **toda fase tem solução**.
 - Estrelas: 3 sobrando ≥ 30% das peças, 2 com ≥ 15%, senão 1. Quem usou ajuda leva 1 estrela.
 - Ajuda (uma por tentativa): **+5 peças** ou **abrir espaço**, por anúncio premiado ou 10 gemas (grátis no Encaixa+).
 - Gemas: +2 na primeira vez que passa a fase e +15 ao fechar um mundo.
-- `test/fases_test.dart` tem um **jogador automático** que joga as 60 fases: se ele não vencer alguma, o teste falha.
-  Mudou a fórmula? Rode o teste.
 
 ## Arena da semana (`app/lib/jogo/arena.dart`)
 - Torneio de segunda a domingo com as mesmas peças para todos (semente da semana). Vale a melhor partida.

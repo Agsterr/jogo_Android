@@ -44,6 +44,18 @@ abstract final class Dicas {
     'Combos e várias linhas de uma vez multiplicam os pontos!',
   ]);
 
+  static const umaCor = Dica('uma-cor', 'Linhas de uma cor', Icons.palette_rounded, Color(0xFFA64DFF), [
+    'Nesta fase as peças vêm em só 3 cores.',
+    'Encha uma linha ou coluna inteira com blocos da MESMA cor.',
+    'Dica: guarde uma linha para cada cor e não misture.',
+  ]);
+
+  static const combo = Dica('combo', 'Combo', Icons.bolt_rounded, Color(0xFFFF2E7E), [
+    'Cada jogada que limpa linha aumenta o combo: x2, x3, x4...',
+    'O combo só zera depois de 3 jogadas seguidas sem limpar nada.',
+    'Dica: deixe várias linhas quase cheias e vá fechando uma por jogada.',
+  ]);
+
   static const infinito = Dica('infinito', 'Modo Infinito', Icons.all_inclusive_rounded, Color(0xFFFF8A00), [
     'Jogue até não caber mais nenhuma peça.',
     'Tente bater o seu recorde.',
@@ -91,7 +103,21 @@ abstract final class Dicas {
     'Cada troféu dá gemas. Pegue na tela da Arena antes de a semana acabar!',
   ]);
 
-  static const todas = [comoJogar, fases, pedras, pontos, infinito, desafio, arena, missoes, presente, eventos, gemas];
+  static const todas = [
+    comoJogar,
+    fases,
+    pedras,
+    pontos,
+    umaCor,
+    combo,
+    infinito,
+    desafio,
+    arena,
+    missoes,
+    presente,
+    eventos,
+    gemas,
+  ];
 }
 
 /// Mostra a dica só na primeira vez (o jogador pode rever tudo em "Como jogar").

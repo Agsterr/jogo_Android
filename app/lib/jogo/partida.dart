@@ -31,13 +31,16 @@ class Jogada {
 /// Regras de uma partida. Sem Flutter: dá para testar tudo em Dart puro.
 class Partida {
   /// [inicial] é o tabuleiro de partida das fases (com pedras).
-  Partida({required int semente, Tabuleiro? inicial})
+  Partida({required int semente, Tabuleiro? inicial, this.cores = totalCores})
     : _sorteio = Sorteio(semente),
       tabuleiro = inicial ?? Tabuleiro() {
     _novaMao();
   }
 
-  Partida._salva(this._sorteio) : tabuleiro = Tabuleiro();
+  Partida._salva(this._sorteio, {this.cores = totalCores}) : tabuleiro = Tabuleiro();
+
+  /// Quantas cores as peças podem ter.
+  final int cores;
 
   /// Para salvar no aparelho (o "Desfazer" não é salvo).
   Map<String, Object?> paraJson() => {
@@ -63,10 +66,13 @@ class Partida {
     'continuou': continuou,
     'jogadas': jogadas,
     'linhas': linhas,
+    'cores': cores,
+    'linhasDeUmaCor': linhasDeUmaCor,
+    'maiorCombo': maiorCombo,
   };
 
   factory Partida.deJson(Map<String, Object?> j) {
-    final p = Partida._salva(Sorteio.doEstado(j['sorteio']! as int));
+    final p = Partida._salva(Sorteio.doEstado(j['sorteio']! as int), cores: (j['cores'] as int?) ?? totalCores);
     final casas = (j['casas']! as List).cast<int?>();
     for (var i = 0; i < casas.length; i++) {
       p.tabuleiro.definir(i ~/ Tabuleiro.tamanho, i % Tabuleiro.tamanho, casas[i]);
@@ -84,7 +90,9 @@ class Partida {
       .._semLimpar = j['semLimpar']! as int
       ..continuou = j['continuou']! as bool
       ..jogadas = (j['jogadas'] as int?) ?? 0
-      ..linhas = (j['linhas'] as int?) ?? 0;
+      ..linhas = (j['linhas'] as int?) ?? 0
+      ..linhasDeUmaCor = (j['linhasDeUmaCor'] as int?) ?? 0
+      ..maiorCombo = (j['maiorCombo'] as int?) ?? 0;
     return p;
   }
 
@@ -101,6 +109,10 @@ class Partida {
 
   /// Linhas e colunas limpas na partida toda.
   int linhas = 0;
+
+  /// Linhas de uma cor só limpas e maior combo da partida (objetivos das fases).
+  int linhasDeUmaCor = 0;
+  int maiorCombo = 0;
   List<Peca?> mao = const [];
   int pontos = 0;
   int combo = 0;
@@ -155,6 +167,8 @@ class Partida {
     pontos += ganho;
     jogadas++;
     this.linhas += linhas;
+    linhasDeUmaCor += deUmaCor;
+    if (combo > maiorCombo) maiorCombo = combo;
 
     mao = [...mao]..[indice] = null;
     if (mao.every((p) => p == null)) _novaMao();
@@ -202,7 +216,7 @@ class Partida {
   /// Sorteia 3 peças; tenta algumas vezes para que pelo menos uma caiba.
   void _novaMao() {
     for (var tentativa = 0; tentativa < 30; tentativa++) {
-      final nova = List<Peca?>.generate(tamanhoMao, (_) => Peca.sortear(_sorteio));
+      final nova = List<Peca?>.generate(tamanhoMao, (_) => Peca.sortear(_sorteio, cores));
       mao = nova;
       if (nova.any((p) => tabuleiro.cabeEmAlgumLugar(p!.formato))) return;
     }
@@ -216,13 +230,15 @@ class _Estado {
       pontos = p.pontos,
       jogadas = p.jogadas,
       linhas = p.linhas,
+      umaCor = p.linhasDeUmaCor,
+      maiorCombo = p.maiorCombo,
       combo = p.combo,
       semLimpar = p._semLimpar,
       sorteio = p._sorteio.copia();
 
   final Tabuleiro tabuleiro;
   final List<Peca?> mao;
-  final int pontos, jogadas, linhas, combo, semLimpar;
+  final int pontos, jogadas, linhas, umaCor, maiorCombo, combo, semLimpar;
   final Sorteio sorteio;
 
   void restaurar(Partida p) {
@@ -232,6 +248,8 @@ class _Estado {
       ..pontos = pontos
       ..jogadas = jogadas
       ..linhas = linhas
+      ..linhasDeUmaCor = umaCor
+      ..maiorCombo = maiorCombo
       ..combo = combo
       .._semLimpar = semLimpar;
     p._sorteio.restaurarDe(sorteio);

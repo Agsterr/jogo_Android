@@ -29,7 +29,7 @@ void main() {
   testWidgets('fase de pedras: objetivo, peças e vitória', (tester) async {
     telaDeCelular(tester);
     final s = await servicosDeTeste(valores: progressoNoMeio);
-    final fase = Fase.numero(5);
+    final fase = Fase.numero(4);
     expect(fase.objetivo, Objetivo.pedras);
     final partida = fase.novaPartida();
     await tester.pumpWidget(
@@ -75,7 +75,7 @@ void main() {
   testWidgets('sem peças oferece +5 peças', (tester) async {
     telaDeCelular(tester);
     final s = await servicosDeTeste(valores: {'gemas': 20});
-    final fase = Fase.numero(6); // linhas
+    final fase = Fase.numero(7); // linhas
     final partida = fase.novaPartida()
       ..jogadas = fase.pecas - 1
       ..mao = [
@@ -100,5 +100,22 @@ void main() {
     await tester.pump();
     expect(find.text('Peças: 5'), findsOneWidget);
     expect(s.progresso.gemas, 10);
+  });
+
+  testWidgets('fases novas: uma cor (3 cores) e avançada com pedras e blocos soltos', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(valores: {'gemas': 42});
+    for (final (n, nome) in [(14, '20-fase-uma-cor'), (121, '21-fase-galaxia')]) {
+      final fase = Fase.numero(n);
+      await tester.pumpWidget(
+        appDeTeste(
+          s,
+          tela: JogoTela(key: ValueKey(n), servicos: s, fase: fase),
+        ),
+      );
+      await tester.pump();
+      expect(find.text(fase.texto), findsOneWidget);
+      await capturar(tester, nome);
+    }
   });
 }

@@ -97,6 +97,8 @@ class _JogoTelaState extends State<JogoTela> {
     final dica = switch (widget.fase?.objetivo) {
       Objetivo.pedras => Dicas.pedras,
       Objetivo.pontos => Dicas.pontos,
+      Objetivo.umaCor => Dicas.umaCor,
+      Objetivo.combo => Dicas.combo,
       Objetivo.linhas => null,
       null => widget.arena ? Dicas.arena : (widget.diario ? Dicas.desafio : Dicas.infinito),
     };

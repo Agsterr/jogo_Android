@@ -64,11 +64,12 @@ class Peca {
   final Formato formato;
   final int cor;
 
-  static Peca sortear(Sorteio sorteio) {
+  /// Sorteia uma peça usando só as [cores] primeiras cores (fases de "uma cor" usam menos).
+  static Peca sortear(Sorteio sorteio, [int cores = totalCores]) {
     final pesoTotal = Formato.todos.fold(0, (s, f) => s + f.peso);
     var alvo = sorteio.proximo(pesoTotal);
     for (final f in Formato.todos) {
-      if (alvo < f.peso) return Peca(f, sorteio.proximo(totalCores));
+      if (alvo < f.peso) return Peca(f, sorteio.proximo(cores));
       alvo -= f.peso;
     }
     throw StateError('inalcançável');

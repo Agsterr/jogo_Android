@@ -168,7 +168,15 @@ class _MapaTelaState extends State<MapaTela> with SingleTickerProviderStateMixin
   }
 }
 
-Color corDoMundo(int mundo) => [Cores.destaque, Cores.blocos[4], Cores.blocos[1]][mundo % 3];
+Color corDoMundo(int mundo) => const [
+  Color(0xFFFF2E7E), // Doce
+  Color(0xFF00B4FF), // Oceano
+  Color(0xFFFF6A00), // Vulcão
+  Color(0xFF00C46A), // Floresta
+  Color(0xFF7FD8FF), // Gelo
+  Color(0xFFE0A030), // Deserto
+  Color(0xFF8B5CFF), // Galáxia
+][mundo % 7];
 
 /// Caminho pontilhado ligando as fases (aceso até a fase atual).
 class _Trilha extends CustomPainter {
