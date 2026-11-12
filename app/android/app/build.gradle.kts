@@ -11,7 +11,8 @@ val chave = Properties().apply {
     val arquivo = rootProject.file("key.properties")
     if (arquivo.exists()) arquivo.inputStream().use { load(it) }
 }
-fun segredo(nome: String): String? = chave.getProperty(nome) ?: System.getenv(nome)
+// Vazio conta como ausente: no CI, segredo não cadastrado chega como "" (e ID vazio do AdMob fecha o app).
+fun segredo(nome: String): String? = (chave.getProperty(nome) ?: System.getenv(nome))?.takeIf { it.isNotBlank() }
 
 android {
     namespace = "com.agsterr.encaixa"

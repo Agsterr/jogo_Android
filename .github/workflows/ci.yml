@@ -46,6 +46,12 @@ jobs:
           [ -z "${{ secrets.ADMOB_PREMIADO }}" ] && DEFINES=""
           flutter build apk --release $DEFINES
           flutter build appbundle --release $DEFINES
+      # O SDK de anúncios fecha o app na abertura se o ID do AdMob estiver vazio no manifesto.
+      - name: Conferir ID do AdMob no APK
+        run: |
+          AAPT2=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | tail -1)
+          "$AAPT2" dump xmltree --file AndroidManifest.xml build/app/outputs/flutter-apk/app-release.apk \
+            | grep -A2 'com.google.android.gms.ads.APPLICATION_ID' | tee /dev/stderr | grep -q 'ca-app-pub-'
       - uses: actions/upload-artifact@v4
         with:
           name: encaixa-android
