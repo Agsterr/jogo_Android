@@ -60,10 +60,25 @@ void main() {
 
   testWidgets('tela inicial', (tester) async {
     telaDeCelular(tester);
-    final s = await servicosDeTeste(valores: {'recorde': 3120, 'gemas': 42});
+    final s = await servicosDeTeste(
+      valores: {
+        'recorde': 3120,
+        'gemas': 42,
+        'sequencia': 5,
+        'desafioFeito': 20261111,
+        'missoesDia': 20261112,
+        'missao_linhas': 9,
+        'missao_umaCor': 2,
+        'missao_combo': 4,
+        'missao_pontos': 900,
+        'missao_partidas': 1,
+        'missao_limpo': 1,
+      },
+    );
     await tester.pumpWidget(appDeTeste(s));
     await tester.pumpAndSettle();
     expect(find.text('JOGAR'), findsOneWidget);
+    expect(find.text('Missões de hoje'), findsOneWidget);
     expect(find.text('Desafio do dia #12'), findsOneWidget);
     await capturar(tester, '1-inicio');
   });

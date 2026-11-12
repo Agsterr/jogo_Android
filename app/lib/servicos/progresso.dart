@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../jogo/missoes.dart';
+
 /// Tudo que o jogador guarda no aparelho: recorde, gemas e o que comprou.
 class Progresso extends ChangeNotifier {
   Progresso(this._prefs);
@@ -39,13 +41,81 @@ class Progresso extends ChangeNotifier {
     return novo;
   }
 
-  Future<void> concluirDesafio(int dia, int pontos) async {
-    if (desafioFeito == dia && pontos <= desafioPontos) return;
+  /// Dias seguidos jogando o Desafio do dia (zera se pular um dia).
+  int sequencia(int hoje) {
+    final ultimo = desafioFeito;
+    if (ultimo != hoje && ultimo != diaAnterior(hoje)) return 0;
+    return _prefs.getInt('sequencia') ?? 0;
+  }
+
+  /// Conclui o desafio. Devolve as gemas ganhas (desafio + prêmio da sequência).
+  Future<int> concluirDesafio(int dia, int pontos) async {
+    if (desafioFeito == dia && pontos <= desafioPontos) return 0;
     final primeiraVez = desafioFeito != dia;
+    var gemasGanhas = 0;
+    if (primeiraVez) {
+      final dias = sequencia(dia) + 1;
+      await _prefs.setInt('sequencia', dias);
+      gemasGanhas = 5 + premioDaSequencia(dias);
+      await contarMissao(dia, TipoMissao.desafio, 1);
+    }
     await _prefs.setInt('desafioFeito', dia);
     await _prefs.setInt('desafioPontos', pontos);
-    if (primeiraVez) await ganharGemas(5);
+    await ganharGemas(gemasGanhas);
     notifyListeners();
+    return gemasGanhas;
+  }
+
+  // ---------- missões do dia ----------
+
+  /// Progresso da missão no [dia]; zera sozinho quando o dia vira.
+  int progressoMissao(int dia, TipoMissao tipo) =>
+      _prefs.getInt('missoesDia') == dia ? (_prefs.getInt('missao_${tipo.name}') ?? 0) : 0;
+
+  Future<void> _virarDia(int dia) async {
+    if (_prefs.getInt('missoesDia') == dia) return;
+    for (final t in TipoMissao.values) {
+      await _prefs.remove('missao_${t.name}');
+    }
+    await _prefs.remove('missoesPegas');
+    await _prefs.remove('bauAberto');
+    await _prefs.setInt('missoesDia', dia);
+  }
+
+  Future<void> contarMissao(int dia, TipoMissao tipo, int valor) async {
+    if (valor <= 0) return;
+    await _virarDia(dia);
+    final atual = progressoMissao(dia, tipo);
+    await _prefs.setInt('missao_${tipo.name}', tipo.maximo ? (valor > atual ? valor : atual) : atual + valor);
+    notifyListeners();
+  }
+
+  Future<void> contarMissoes(int dia, Map<TipoMissao, int> valores) async {
+    for (final MapEntry(key: tipo, value: valor) in valores.entries) {
+      await contarMissao(dia, tipo, valor);
+    }
+  }
+
+  bool missaoPega(int dia, int indice) =>
+      _prefs.getInt('missoesDia') == dia && (_prefs.getStringList('missoesPegas') ?? []).contains('$indice');
+
+  bool bauAberto(int dia) => _prefs.getInt('missoesDia') == dia && (_prefs.getBool('bauAberto') ?? false);
+
+  /// Recolhe o prêmio de uma missão concluída.
+  Future<bool> pegarMissao(int dia, int indice) async {
+    final m = missoesDoDia(dia)[indice];
+    if (missaoPega(dia, indice) || progressoMissao(dia, m.tipo) < m.alvo) return false;
+    await _virarDia(dia);
+    await _prefs.setStringList('missoesPegas', [...?_prefs.getStringList('missoesPegas'), '$indice']);
+    await ganharGemas(m.gemas);
+    return true;
+  }
+
+  Future<bool> abrirBau(int dia) async {
+    if (bauAberto(dia) || !List.generate(3, (i) => missaoPega(dia, i)).every((p) => p)) return false;
+    await _prefs.setBool('bauAberto', true);
+    await ganharGemas(gemasDoBau);
+    return true;
   }
 
   Future<void> ganharGemas(int quantidade) async {

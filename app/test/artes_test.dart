@@ -15,7 +15,12 @@ void main() {
       ..devicePixelRatio = 1
       ..physicalSize = tamanho;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(appDeTeste(await servicosDeTeste(), tela: Material(type: MaterialType.transparency, child: arte)));
+    await tester.pumpWidget(
+      appDeTeste(
+        await servicosDeTeste(),
+        tela: Material(type: MaterialType.transparency, child: arte),
+      ),
+    );
     await tester.pump();
     await capturar(tester, nome, pasta: '../docs/artes');
   }
@@ -37,7 +42,10 @@ void main() {
     await desenhar(
       tester,
       const Size(432, 432),
-      const Padding(padding: EdgeInsets.all(56), child: CustomPaint(painter: _Icone(), size: Size.infinite)),
+      const Padding(
+        padding: EdgeInsets.all(56),
+        child: CustomPaint(painter: _Icone(), size: Size.infinite),
+      ),
       'icone-adaptativo-frente',
     );
   });

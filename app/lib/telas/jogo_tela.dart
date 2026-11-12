@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../app.dart';
+import '../jogo/missoes.dart';
 import '../jogo/partida.dart';
 import '../jogo/peca.dart';
 import '../jogo/sorteio.dart';
@@ -55,6 +56,7 @@ class _JogoTelaState extends State<JogoTela> {
 
   _Fim? _fim;
   bool _novoRecorde = false;
+  int _gemasDesafio = 0;
 
   Servicos get _s => widget.servicos;
 
@@ -142,6 +144,7 @@ class _JogoTelaState extends State<JogoTela> {
       HapticFeedback.lightImpact();
     }
     _s.progresso.ganharGemas(jogada.gemas);
+    _s.progresso.contarMissoes(_dia, contagemDaJogada(jogada));
     _salvar();
     setState(() {});
     if (_partida.fimDeJogo) {
@@ -207,10 +210,12 @@ class _JogoTelaState extends State<JogoTela> {
     await _s.progresso.apagarPartida(_chave);
     final pontos = _partida.pontos;
     final recorde = await _s.progresso.fimDePartida(pontos);
-    if (widget.diario) await _s.progresso.concluirDesafio(_dia, pontos);
+    await _s.progresso.contarMissoes(_dia, {TipoMissao.partidas: 1, TipoMissao.pontos: pontos});
+    final gemasDesafio = widget.diario ? await _s.progresso.concluirDesafio(_dia, pontos) : 0;
     if (!mounted) return;
     setState(() {
       _novoRecorde = recorde;
+      _gemasDesafio = gemasDesafio;
       _fim = _Fim.resultado;
     });
   }
@@ -522,12 +527,16 @@ class _JogoTelaState extends State<JogoTela> {
       style: const TextStyle(color: Cores.textoFraco),
     ),
     if (widget.diario)
-      const Padding(
-        padding: EdgeInsets.only(top: 8),
+      Padding(
+        padding: const EdgeInsets.only(top: 8),
         child: Text(
-          'Desafio do dia concluído!',
+          [
+            'Desafio do dia concluído!',
+            if (_gemasDesafio > 0) '+$_gemasDesafio gemas',
+            '🔥 ${_s.progresso.sequencia(_dia)} ${_s.progresso.sequencia(_dia) == 1 ? 'dia' : 'dias seguidos'}',
+          ].join('\n'),
           textAlign: TextAlign.center,
-          style: TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
+          style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
         ),
       ),
     const SizedBox(height: 20),

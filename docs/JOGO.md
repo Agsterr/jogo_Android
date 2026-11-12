@@ -40,5 +40,11 @@ bônus** e **Desafio do dia compartilhável** (mesmas peças para todo mundo, co
 Semente = data (`aaaammdd`) num sorteador próprio (mulberry32), para todo mundo receber a mesma sequência em qualquer
 versão do app. Número do desafio = dias desde 1º/11/2026. Pode repetir; vale a melhor pontuação.
 
+## Missões do dia e sequência (`app/lib/jogo/missoes.dart`)
+- 3 missões por dia, de tipos diferentes, sorteadas pela data (iguais para todos): limpar linhas, linhas de uma cor,
+  combo, pontos numa partida, partidas, tabuleiro vazio, jogar o Desafio do dia. Cada uma vale de 3 a 5 gemas.
+- Pegando as 3, o **baú** dá +10 gemas. Tudo zera à meia-noite.
+- **Sequência 🔥:** dias seguidos jogando o Desafio do dia. Prêmio extra no 3º (+5), 7º (+15), 14º (+30) e 30º (+60) dia.
+
 ## Ideias para depois (não fazer antes de medir)
 Veja as issues com a etiqueta `ideia`. Prioridade é o que os números (retenção D1/D7, tempo de sessão) pedirem.

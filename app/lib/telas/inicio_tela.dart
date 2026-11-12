@@ -1,7 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
+import '../jogo/missoes.dart';
 import '../jogo/sorteio.dart';
+import '../servicos/progresso.dart';
 import '../servicos/servicos.dart';
 import '../tema.dart';
 import '../widgets/peca_widget.dart';
@@ -42,6 +44,7 @@ class InicioTela extends StatelessWidget {
                               child: Row(
                                 children: [
                                   if (p.assinante) const _Selo('Encaixa+'),
+                                  if (p.sequencia(dia) > 0) ...[const SizedBox(width: 8), _Sequencia(p.sequencia(dia))],
                                   const Spacer(),
                                   GemasChip(
                                     gemas: p.gemas,
@@ -99,6 +102,8 @@ class InicioTela extends StatelessWidget {
                                     aoTocar: () => _abrir(context, JogoTela(servicos: servicos, diario: true)),
                                   ),
                                   const SizedBox(height: 14),
+                                  _CartaoMissoes(progresso: p, dia: dia),
+                                  const SizedBox(height: 14),
                                   OutlinedButton.icon(
                                     style: OutlinedButton.styleFrom(minimumSize: const Size(64, 50)),
                                     onPressed: () => _abrir(context, LojaTela(servicos: servicos)),
@@ -152,7 +157,7 @@ class _CartaoDesafio extends StatelessWidget {
                   children: [
                     Text('Desafio do dia #$numero', style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
                     Text(
-                      feito ? 'Feito: $pontos pontos. Dá para melhorar!' : 'Mesmas peças para todo mundo',
+                      feito ? 'Feito: $pontos pontos. Dá para melhorar!' : 'Mesmas peças para todos',
                       style: const TextStyle(fontSize: 14),
                     ),
                   ],
@@ -271,4 +276,150 @@ class _BlocosDeFundo extends CustomPainter {
 
   @override
   bool shouldRepaint(_BlocosDeFundo antigo) => false;
+}
+
+class _Sequencia extends StatelessWidget {
+  const _Sequencia(this.dias);
+
+  final int dias;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: 'Dias seguidos no Desafio do dia',
+    child: Container(
+      padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
+      decoration: BoxDecoration(color: Cores.painel.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(20)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.local_fire_department_rounded, color: Cores.blocos[1], size: 20),
+          const SizedBox(width: 2),
+          Text('$dias', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        ],
+      ),
+    ),
+  );
+}
+
+/// As 3 missões do dia e o baú.
+class _CartaoMissoes extends StatelessWidget {
+  const _CartaoMissoes({required this.progresso, required this.dia});
+
+  final Progresso progresso;
+  final int dia;
+
+  @override
+  Widget build(BuildContext context) {
+    final missoes = missoesDoDia(dia);
+    final todasPegas = List.generate(3, (i) => progresso.missaoPega(dia, i)).every((p) => p);
+    final aberto = progresso.bauAberto(dia);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+      decoration: BoxDecoration(color: Cores.painel.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(18)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text('Missões de hoje', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+              ),
+              _Bau(aberto: aberto, pronto: todasPegas && !aberto, aoTocar: () => progresso.abrirBau(dia)),
+            ],
+          ),
+          for (var i = 0; i < missoes.length; i++)
+            _LinhaMissao(
+              missao: missoes[i],
+              feito: progresso.progressoMissao(dia, missoes[i].tipo),
+              pega: progresso.missaoPega(dia, i),
+              aoPegar: () => progresso.pegarMissao(dia, i),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LinhaMissao extends StatelessWidget {
+  const _LinhaMissao({required this.missao, required this.feito, required this.pega, required this.aoPegar});
+
+  final Missao missao;
+  final int feito;
+  final bool pega;
+  final VoidCallback aoPegar;
+
+  @override
+  Widget build(BuildContext context) {
+    final completa = feito >= missao.alvo;
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(missao.texto, style: TextStyle(fontSize: 14, color: pega ? Cores.textoFraco : Cores.texto)),
+                const SizedBox(height: 3),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: (feito / missao.alvo).clamp(0, 1),
+                    minHeight: 6,
+                    backgroundColor: Cores.casa,
+                    color: completa ? Cores.blocos[3] : Cores.blocos[4],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 74,
+            child: pega
+                ? Icon(Icons.check_circle_rounded, color: Cores.blocos[3])
+                : completa
+                ? FilledButton(
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(64, 34),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      backgroundColor: Cores.blocos[3],
+                      foregroundColor: const Color(0xFF07361C),
+                    ),
+                    onPressed: aoPegar,
+                    child: Text('+${missao.gemas}', style: const TextStyle(fontSize: 16)),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        missao.tipo.maximo ? '' : '${feito.clamp(0, missao.alvo)}/${missao.alvo}  ',
+                        style: const TextStyle(color: Cores.textoFraco, fontSize: 13),
+                      ),
+                      Text(
+                        '${missao.gemas}',
+                        style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
+                      ),
+                      const IconeGema(tamanho: 14),
+                    ],
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Bau extends StatelessWidget {
+  const _Bau({required this.aberto, required this.pronto, required this.aoTocar});
+
+  final bool aberto, pronto;
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) => TextButton.icon(
+    onPressed: pronto ? aoTocar : null,
+    icon: Icon(aberto ? Icons.inventory_2_outlined : Icons.redeem_rounded, color: pronto ? Cores.ouro : null),
+    label: Text(aberto ? 'Aberto' : '+$gemasDoBau'),
+  );
 }
