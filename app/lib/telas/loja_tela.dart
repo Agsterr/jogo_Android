@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
+import '../jogo/sorteio.dart';
 import '../servicos/compras.dart';
 import '../servicos/servicos.dart';
 import '../tema.dart';
@@ -13,9 +14,15 @@ class LojaTela extends StatelessWidget {
 
   static const gemasPorAnuncio = 5;
 
+  /// Para não desvalorizar os pacotes nem cansar o inventário do AdMob.
+  static const premiadosPorDia = 5;
+
+  int get _dia => Sorteio.sementeDoDia(servicos.hoje());
+
   Future<void> _gemasComAnuncio(BuildContext context) async {
     final ganhou = await servicos.anuncios.mostrarPremiado();
     if (ganhou) {
+      await servicos.progresso.registrarPremiado(_dia);
       await servicos.progresso.ganharGemas(gemasPorAnuncio);
     } else if (context.mounted) {
       ScaffoldMessenger.of(context)
@@ -71,9 +78,9 @@ class LojaTela extends StatelessWidget {
                 _Item(
                   icone: const Icon(Icons.smart_display_rounded, color: Cores.gema, size: 32),
                   titulo: '+$gemasPorAnuncio gemas grátis',
-                  descricao: 'Assista a um anúncio curto.',
+                  descricao: 'Anúncio curto · ${p.premiadosNoDia(_dia)} de $premiadosPorDia hoje',
                   botao: 'Assistir',
-                  aoTocar: () => _gemasComAnuncio(context),
+                  aoTocar: p.premiadosNoDia(_dia) < premiadosPorDia ? () => _gemasComAnuncio(context) : null,
                 ),
                 for (final MapEntry(key: id, value: qtd) in Produtos.gemas.entries) ...[
                   const SizedBox(height: 8),

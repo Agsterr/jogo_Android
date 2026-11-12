@@ -70,6 +70,16 @@ class Progresso extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Anúncios premiados de gemas vistos no [dia] (aaaammdd).
+  int premiadosNoDia(int dia) => _prefs.getInt('premiadosDia') == dia ? (_prefs.getInt('premiadosQtd') ?? 0) : 0;
+
+  Future<void> registrarPremiado(int dia) async {
+    final qtd = premiadosNoDia(dia) + 1;
+    await _prefs.setInt('premiadosDia', dia);
+    await _prefs.setInt('premiadosQtd', qtd);
+    notifyListeners();
+  }
+
   /// Assinante ganha 10 gemas por dia ao abrir o jogo.
   Future<bool> darBonusDoAssinante(int dia) async {
     if (!assinante || bonusAssinante == dia) return false;

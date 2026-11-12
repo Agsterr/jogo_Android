@@ -143,6 +143,22 @@ void main() {
     expect(find.text('Ativo'), findsOneWidget);
   });
 
+  testWidgets('loja: gemas por anúncio param depois de 5 no dia', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(valores: {'gemas': 0, 'premiadosDia': 20261112, 'premiadosQtd': 4});
+    await tester.pumpWidget(appDeTeste(s, tela: LojaTela(servicos: s)));
+    await tester.pump();
+    expect(find.textContaining('4 de 5 hoje'), findsOneWidget);
+    await tester.tap(find.text('Assistir'));
+    await tester.pump();
+    expect(s.progresso.gemas, 5);
+    expect(find.textContaining('5 de 5 hoje'), findsOneWidget);
+    await tester.tap(find.text('Assistir'));
+    await tester.pump();
+    expect(s.progresso.gemas, 5, reason: 'botão desativado');
+    expect(s.progresso.premiadosNoDia(20261113), 0, reason: 'zera no dia seguinte');
+  });
+
   testWidgets('tela pequena com fonte grande não estoura', (tester) async {
     telaDeCelular(tester, tamanho: const Size(320, 600), fonte: 1.3);
     final s = await servicosDeTeste();
