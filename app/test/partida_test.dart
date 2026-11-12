@@ -126,4 +126,14 @@ void main() {
     expect(r.linhas, [4]);
     expect(r.colunas, isEmpty);
   });
+
+  test('salvar e carregar devolve a mesma partida (e o mesmo sorteio)', () {
+    final p = Partida(semente: 9)..mao = [Peca(_bloco, 3), Peca(_linha8, 1), null];
+    p.colocar(0, 2, 2);
+    final copia = Partida.deJson(p.paraJson());
+    expect(copia.paraJson(), p.paraJson());
+    copia.colocar(1, 5, 0);
+    p.colocar(1, 5, 0);
+    expect(copia.paraJson(), p.paraJson(), reason: 'próximas peças iguais');
+  });
 }

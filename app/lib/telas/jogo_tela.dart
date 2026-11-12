@@ -62,9 +62,24 @@ class _JogoTelaState extends State<JogoTela> {
   void initState() {
     super.initState();
     _dia = Sorteio.sementeDoDia(_s.hoje());
-    _partida = widget.partida ?? _novaPartida();
+    _partida = widget.partida ?? _partidaSalva() ?? _novaPartida();
     if (_partida.fimDeJogo) _fim = _partida.continuou ? _Fim.resultado : _Fim.segundaChance;
   }
+
+  /// Clássico e Desafio têm partidas salvas separadas.
+  String get _chave => widget.diario ? 'desafio' : 'classico';
+
+  Partida? _partidaSalva() {
+    final json = _s.progresso.partidaSalva(_chave);
+    if (json == null || (widget.diario && json['dia'] != _dia)) return null;
+    try {
+      return Partida.deJson(json);
+    } on Object {
+      return null; // formato antigo ou corrompido: começa de novo
+    }
+  }
+
+  void _salvar() => _s.progresso.salvarPartida(_chave, {..._partida.paraJson(), 'dia': _dia});
 
   Partida _novaPartida() => Partida(semente: widget.diario ? _dia : DateTime.now().microsecondsSinceEpoch);
 
@@ -127,6 +142,7 @@ class _JogoTelaState extends State<JogoTela> {
       HapticFeedback.lightImpact();
     }
     _s.progresso.ganharGemas(jogada.gemas);
+    _salvar();
     setState(() {});
     if (_partida.fimDeJogo) {
       if (_partida.continuou) {
@@ -161,6 +177,7 @@ class _JogoTelaState extends State<JogoTela> {
       return;
     }
     setState(() => acao());
+    _salvar();
   }
 
   void _abrirLoja() => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => LojaTela(servicos: _s)));
@@ -168,6 +185,7 @@ class _JogoTelaState extends State<JogoTela> {
   void _continuar() {
     setState(() {
       _partida.continuar();
+      _salvar();
       _fim = null;
     });
   }
@@ -186,6 +204,7 @@ class _JogoTelaState extends State<JogoTela> {
   }
 
   Future<void> _encerrar() async {
+    await _s.progresso.apagarPartida(_chave);
     final pontos = _partida.pontos;
     final recorde = await _s.progresso.fimDePartida(pontos);
     if (widget.diario) await _s.progresso.concluirDesafio(_dia, pontos);

@@ -143,6 +143,17 @@ void main() {
     expect(find.text('Ativo'), findsOneWidget);
   });
 
+  testWidgets('partida salva continua de onde parou', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste();
+    await s.progresso.salvarPartida('classico', partidaDeExemplo().paraJson());
+    await tester.pumpWidget(appDeTeste(s));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('CONTINUAR'));
+    await tester.pumpAndSettle();
+    expect(find.text('1240'), findsWidgets);
+  });
+
   testWidgets('loja: gemas por anúncio param depois de 5 no dia', (tester) async {
     telaDeCelular(tester);
     final s = await servicosDeTeste(valores: {'gemas': 0, 'premiadosDia': 20261112, 'premiadosQtd': 4});

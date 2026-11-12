@@ -32,6 +32,53 @@ class Partida {
     _novaMao();
   }
 
+  Partida._salva(this._sorteio);
+
+  /// Para salvar no aparelho (o "Desfazer" não é salvo).
+  Map<String, Object?> paraJson() => {
+    'sorteio': _sorteio.estado,
+    'casas': [
+      for (var l = 0; l < Tabuleiro.tamanho; l++)
+        for (var k = 0; k < Tabuleiro.tamanho; k++) tabuleiro.cor(l, k),
+    ],
+    'mao': [
+      for (final p in mao)
+        p == null
+            ? null
+            : {
+                'cor': p.cor,
+                'celulas': [
+                  for (final c in p.formato.celulas) ...[c.linha, c.coluna],
+                ],
+              },
+    ],
+    'pontos': pontos,
+    'combo': combo,
+    'semLimpar': _semLimpar,
+    'continuou': continuou,
+  };
+
+  factory Partida.deJson(Map<String, Object?> j) {
+    final p = Partida._salva(Sorteio.doEstado(j['sorteio']! as int));
+    final casas = (j['casas']! as List).cast<int?>();
+    for (var i = 0; i < casas.length; i++) {
+      p.tabuleiro.definir(i ~/ Tabuleiro.tamanho, i % Tabuleiro.tamanho, casas[i]);
+    }
+    p
+      ..mao = [
+        for (final m in j['mao']! as List)
+          if (m case {'cor': final int cor, 'celulas': final List c})
+            Peca(Formato([for (var i = 0; i < c.length; i += 2) (linha: c[i] as int, coluna: c[i + 1] as int)]), cor)
+          else
+            null,
+      ]
+      ..pontos = j['pontos']! as int
+      ..combo = j['combo']! as int
+      .._semLimpar = j['semLimpar']! as int
+      ..continuou = j['continuou']! as bool;
+    return p;
+  }
+
   static const int tamanhoMao = 3;
 
   /// Jogadas seguidas sem limpar linha que ainda mantêm o combo.

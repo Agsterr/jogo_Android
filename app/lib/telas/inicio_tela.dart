@@ -89,7 +89,7 @@ class InicioTela extends StatelessWidget {
                                     ),
                                     onPressed: () => _abrir(context, JogoTela(servicos: servicos)),
                                     icon: const Icon(Icons.play_arrow_rounded, size: 34),
-                                    label: const Text('JOGAR'),
+                                    label: Text(p.temPartidaSalva('classico') ? 'CONTINUAR' : 'JOGAR'),
                                   ),
                                   const SizedBox(height: 14),
                                   _CartaoDesafio(

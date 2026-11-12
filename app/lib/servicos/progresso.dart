@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -77,6 +79,27 @@ class Progresso extends ChangeNotifier {
     final qtd = premiadosNoDia(dia) + 1;
     await _prefs.setInt('premiadosDia', dia);
     await _prefs.setInt('premiadosQtd', qtd);
+    notifyListeners();
+  }
+
+  /// Partida em andamento. A chave separa o Clássico do Desafio de cada dia.
+  Map<String, Object?>? partidaSalva(String chave) {
+    final texto = _prefs.getString('partida_$chave');
+    if (texto == null) return null;
+    try {
+      return (jsonDecode(texto) as Map).cast<String, Object?>();
+    } on FormatException {
+      return null;
+    }
+  }
+
+  bool temPartidaSalva(String chave) => _prefs.containsKey('partida_$chave');
+
+  Future<void> salvarPartida(String chave, Map<String, Object?> json) =>
+      _prefs.setString('partida_$chave', jsonEncode(json));
+
+  Future<void> apagarPartida(String chave) async {
+    await _prefs.remove('partida_$chave');
     notifyListeners();
   }
 

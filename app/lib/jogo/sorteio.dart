@@ -9,6 +9,10 @@ class Sorteio {
 
   int _estado;
 
+  /// Estado interno, para salvar e retomar a partida.
+  int get estado => _estado;
+  factory Sorteio.doEstado(int estado) => Sorteio._copia(estado);
+
   Sorteio copia() => Sorteio._copia(_estado);
 
   /// Volta ao estado de uma cópia (usado pelo "Desfazer").
