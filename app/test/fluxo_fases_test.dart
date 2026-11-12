@@ -55,4 +55,27 @@ void main() {
     expect(find.text('FASE 2'), findsOneWidget);
     expect(find.text(Fase.numero(2).texto), findsOneWidget);
   });
+
+  testWidgets('botão JOGAR da tela inicial leva à fase atual e avança depois de vencer', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste();
+    await tester.pumpWidget(appDeTeste(s));
+    await tester.pumpAndSettle();
+    expect(find.text('Fase 1'), findsOneWidget);
+    await tester.tap(find.text('JOGAR').first);
+    await tester.pumpAndSettle();
+    expect(find.text('FASE 1'), findsOneWidget);
+    await jogarPelaTela(tester);
+    expect(find.text('Fase 1 concluída!'), findsOneWidget);
+    await tester.tap(find.text('Mapa'));
+    await tester.pump(const Duration(seconds: 1)); // o mapa tem animação contínua
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Fases'), findsWidgets, reason: '"Mapa" abre o mapa');
+    await tester.tap(find.byTooltip('Voltar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Fase 2'), findsOneWidget, reason: 'o botão JOGAR já mostra a próxima fase');
+    await tester.tap(find.text('JOGAR').first);
+    await tester.pumpAndSettle();
+    expect(find.text('FASE 2'), findsOneWidget);
+  });
 }

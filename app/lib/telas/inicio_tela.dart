@@ -112,7 +112,7 @@ class _InicioTelaState extends State<InicioTela> {
                               cor: Cores.blocos[4],
                               altura: 66,
                               tamanhoTexto: 24,
-                              aoTocar: () => _abrir(MapaTela(servicos: servicos)),
+                              aoTocar: () => MapaTela.abrir(context, servicos),
                             ),
                           ),
                         ],

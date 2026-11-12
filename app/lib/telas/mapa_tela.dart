@@ -13,6 +13,26 @@ import 'jogo_tela.dart';
 class MapaTela extends StatefulWidget {
   const MapaTela({super.key, required this.servicos});
 
+  static const nomeDaRota = 'mapa';
+
+  /// Mostra o mapa: volta para ele se já estiver aberto embaixo, senão abre (nunca empilha dois).
+  static void abrir(BuildContext context, Servicos servicos) {
+    final nav = Navigator.of(context);
+    var achou = false;
+    nav.popUntil((rota) {
+      achou = rota.settings.name == nomeDaRota;
+      return achou || rota.isFirst;
+    });
+    if (!achou) {
+      nav.push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(name: nomeDaRota),
+          builder: (_) => MapaTela(servicos: servicos),
+        ),
+      );
+    }
+  }
+
   final Servicos servicos;
 
   @override

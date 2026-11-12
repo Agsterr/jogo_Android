@@ -18,6 +18,7 @@ import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
 import '../widgets/tabuleiro_widget.dart';
 import 'loja_tela.dart';
+import 'mapa_tela.dart';
 
 /// Preço dos reforços e da segunda chance, em gemas.
 abstract final class Custos {
@@ -318,6 +319,11 @@ class _JogoTelaState extends State<JogoTela> {
       _removidos = const [];
       _aviso = null;
     });
+  }
+
+  Future<void> _irParaMapa() async {
+    await _intersticial();
+    if (mounted) MapaTela.abrir(context, _s);
   }
 
   Future<void> _sair() async {
@@ -645,7 +651,7 @@ class _JogoTelaState extends State<JogoTela> {
       const SizedBox(height: 20),
       if (fase.numero < Fase.total)
         _botao('Próxima fase', Icons.arrow_forward_rounded, () => _irParaFase(fase.numero + 1)),
-      TextButton(onPressed: _sair, child: const Text('Mapa')),
+      TextButton(onPressed: _irParaMapa, child: const Text('Mapa')),
     ];
   }
 
@@ -681,7 +687,7 @@ class _JogoTelaState extends State<JogoTela> {
         _botao('Tentar de novo', Icons.replay_rounded, () => _irParaFase(fase.numero)),
       const SizedBox(height: 4),
       if (!_ajudou) TextButton(onPressed: () => _irParaFase(fase.numero), child: const Text('Tentar de novo')),
-      TextButton(onPressed: _sair, child: const Text('Mapa')),
+      TextButton(onPressed: _irParaMapa, child: const Text('Mapa')),
     ];
   }
 
