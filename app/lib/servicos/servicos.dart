@@ -1,14 +1,22 @@
 import 'anuncios.dart';
 import 'compras.dart';
 import 'progresso.dart';
+import 'sons.dart';
 
 /// O que as telas precisam do "mundo lá fora". Passado pelo construtor.
 class Servicos {
-  const Servicos({required this.progresso, required this.anuncios, required this.compras, this.hoje = _agora});
+  const Servicos({
+    required this.progresso,
+    required this.anuncios,
+    required this.compras,
+    this.sons = const SemSons(),
+    this.hoje = _agora,
+  });
 
   final Progresso progresso;
   final Anuncios anuncios;
   final Compras compras;
+  final Sons sons;
 
   /// Relógio injetável: os testes fixam o dia do desafio.
   final DateTime Function() hoje;

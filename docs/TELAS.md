@@ -23,3 +23,6 @@ for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
 done
 ```
 O ícone adaptativo (Android 8+) usa essa frente sobre o degradê de `res/drawable/ic_launcher_background.xml`.
+
+## Sons (`app/assets/sons/`)
+Efeitos sintetizados por `ferramentas/gerar_sons.py` (sem licença de terceiros): `python3 ferramentas/gerar_sons.py`.

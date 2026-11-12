@@ -10,6 +10,7 @@ import '../jogo/partida.dart';
 import '../jogo/peca.dart';
 import '../jogo/sorteio.dart';
 import '../servicos/servicos.dart';
+import '../servicos/sons.dart';
 import '../tema.dart';
 import '../widgets/peca_widget.dart';
 import '../widgets/tabuleiro_widget.dart';
@@ -137,17 +138,20 @@ class _JogoTelaState extends State<JogoTela> {
   void _aposJogada(Jogada jogada) {
     if (jogada.linhasLimpas > 0) {
       HapticFeedback.mediumImpact();
+      _s.sons.tocar(jogada.combo >= 2 || jogada.linhasLimpas >= 2 ? Som.combo : Som.linha);
       _removidos = jogada.removidos;
       _geracao++;
       _aviso = (_textoDoAviso(jogada), _geracao);
     } else {
       HapticFeedback.lightImpact();
+      _s.sons.tocar(Som.encaixe);
     }
     _s.progresso.ganharGemas(jogada.gemas);
     _s.progresso.contarMissoes(_dia, contagemDaJogada(jogada));
     _salvar();
     setState(() {});
     if (_partida.fimDeJogo) {
+      _s.sons.tocar(Som.fim);
       if (_partida.continuou) {
         _encerrar();
       } else {

@@ -46,6 +46,11 @@ class InicioTela extends StatelessWidget {
                                   if (p.assinante) const _Selo('Encaixa+'),
                                   if (p.sequencia(dia) > 0) ...[const SizedBox(width: 8), _Sequencia(p.sequencia(dia))],
                                   const Spacer(),
+                                  IconButton(
+                                    tooltip: p.somLigado ? 'Desligar som' : 'Ligar som',
+                                    onPressed: p.alternarSom,
+                                    icon: Icon(p.somLigado ? Icons.volume_up_rounded : Icons.volume_off_rounded),
+                                  ),
                                   GemasChip(
                                     gemas: p.gemas,
                                     aoTocar: () => _abrir(context, LojaTela(servicos: servicos)),

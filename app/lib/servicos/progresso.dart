@@ -22,6 +22,13 @@ class Progresso extends ChangeNotifier {
   bool get semAnuncios => _prefs.getBool('semAnuncios') ?? false;
   bool get assinante => _prefs.getBool('assinante') ?? false;
 
+  bool get somLigado => _prefs.getBool('som') ?? true;
+
+  Future<void> alternarSom() async {
+    await _prefs.setBool('som', !somLigado);
+    notifyListeners();
+  }
+
   /// Assinante também não vê anúncio entre partidas.
   bool get livreDeAnuncios => semAnuncios || assinante;
 
