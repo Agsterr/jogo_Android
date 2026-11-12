@@ -7,6 +7,9 @@ class Tabuleiro {
 
   static const int tamanho = 8;
 
+  /// Bloco de pedra das fases: não vem da mão, some quando a linha dele é limpa.
+  static const int pedra = totalCores;
+
   final List<int?> _casas;
 
   Tabuleiro copia() => Tabuleiro._(List.of(_casas));
@@ -15,6 +18,7 @@ class Tabuleiro {
   void definir(int linha, int coluna, int? cor) => _casas[linha * tamanho + coluna] = cor;
 
   bool get vazio => _casas.every((c) => c == null);
+  int get pedras => _casas.where((c) => c == pedra).length;
   int get ocupadas => _casas.where((c) => c != null).length;
 
   bool cabe(Formato formato, int linha, int coluna) {

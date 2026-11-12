@@ -91,7 +91,7 @@ class _Pintor extends CustomPainter {
         } else {
           // Linha prestes a sumir fica com a cor da peça: o jogador vê o que vai ganhar.
           final vaiSumir = cheias.contains('l$l') || cheias.contains('c$k');
-          pintarBloco(canvas, r, Cores.blocos[vaiSumir ? p!.peca.cor : cor]);
+          pintarCasa(canvas, r, vaiSumir ? p!.peca.cor : cor);
         }
       }
     }
@@ -114,7 +114,7 @@ class _Pintor extends CustomPainter {
       for (final b in removidos) {
         final r = casa(b.linha, b.coluna);
         final menor = Rect.fromCenter(center: r.center, width: r.width * escala, height: r.height * escala);
-        if (menor.width > 1) pintarBloco(canvas, menor, Cores.blocos[b.cor], opacidade: 1 - t * 0.6);
+        if (menor.width > 1) pintarCasa(canvas, menor, b.cor, opacidade: 1 - t * 0.6);
       }
     }
   }

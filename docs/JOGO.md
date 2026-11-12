@@ -40,6 +40,16 @@ bônus** e **Desafio do dia compartilhável** (mesmas peças para todo mundo, co
 Semente = data (`aaaammdd`) num sorteador próprio (mulberry32), para todo mundo receber a mesma sequência em qualquer
 versão do app. Número do desafio = dias desde 1º/11/2026. Pode repetir; vale a melhor pontuação.
 
+## Modo Fases (`app/lib/jogo/fases.dart`)
+- 60 fases em 3 mundos (Doce, Oceano, Vulcão), geradas por fórmula: sem arquivo de dados, iguais para todos.
+- Objetivos que se alternam: **limpar N linhas**, **fazer N pontos** e **quebrar as pedras** (blocos cinza já no
+  tabuleiro, que somem quando a linha ou coluna deles é limpa). Cada fase tem limite de peças.
+- Estrelas: 3 sobrando ≥ 30% das peças, 2 com ≥ 15%, senão 1. Quem usou ajuda leva 1 estrela.
+- Ajuda (uma por tentativa): **+5 peças** ou **abrir espaço**, por anúncio premiado ou 10 gemas (grátis no Encaixa+).
+- Gemas: +2 na primeira vez que passa a fase e +15 ao fechar um mundo.
+- `test/fases_test.dart` tem um **jogador automático** que joga as 60 fases: se ele não vencer alguma, o teste falha.
+  Mudou a fórmula? Rode o teste.
+
 ## Missões do dia e sequência (`app/lib/jogo/missoes.dart`)
 - 3 missões por dia, de tipos diferentes, sorteadas pela data (iguais para todos): limpar linhas, linhas de uma cor,
   combo, pontos numa partida, partidas, tabuleiro vazio, jogar o Desafio do dia. Cada uma vale de 3 a 5 gemas.

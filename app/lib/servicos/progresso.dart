@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
 
 /// Tudo que o jogador guarda no aparelho: recorde, gemas e o que comprou.
@@ -71,6 +72,26 @@ class Progresso extends ChangeNotifier {
     await ganharGemas(gemasGanhas);
     notifyListeners();
     return gemasGanhas;
+  }
+
+  // ---------- fases ----------
+
+  /// Maior fase liberada (começa na 1).
+  int get faseLiberada => _prefs.getInt('faseLiberada') ?? 1;
+  int estrelasDaFase(int numero) => _prefs.getInt('estrelas_$numero') ?? 0;
+  int get estrelasTotais => List.generate(Fase.total, (i) => estrelasDaFase(i + 1)).fold(0, (a, b) => a + b);
+
+  /// Guarda a melhor nota e libera a próxima. Devolve as gemas ganhas
+  /// (+2 na primeira vez; +15 ao terminar um mundo).
+  Future<int> concluirFase(int numero, int estrelas) async {
+    final primeiraVez = estrelasDaFase(numero) == 0;
+    if (estrelas > estrelasDaFase(numero)) await _prefs.setInt('estrelas_$numero', estrelas);
+    if (numero >= faseLiberada) await _prefs.setInt('faseLiberada', numero + 1);
+    var gemas = 0;
+    if (primeiraVez) gemas = 2 + (numero % Fase.porMundo == 0 ? 15 : 0);
+    await ganharGemas(gemas);
+    notifyListeners();
+    return gemas;
   }
 
   // ---------- missões do dia ----------

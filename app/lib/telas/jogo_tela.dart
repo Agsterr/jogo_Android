@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../app.dart';
+import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
 import '../jogo/partida.dart';
 import '../jogo/peca.dart';
@@ -23,15 +24,18 @@ abstract final class Custos {
   static const continuar = 10;
 }
 
-enum _Fim { segundaChance, resultado }
+enum _Fim { segundaChance, resultado, faseVencida, faseFalhou }
 
 class JogoTela extends StatefulWidget {
-  const JogoTela({super.key, required this.servicos, this.diario = false, this.partida});
+  const JogoTela({super.key, required this.servicos, this.diario = false, this.fase, this.partida});
 
   final Servicos servicos;
 
   /// Desafio do dia: semente fixa para todos.
   final bool diario;
+
+  /// Modo Fases: objetivo e limite de peças.
+  final Fase? fase;
 
   /// Partida pronta (usada nos testes e nas capturas de tela).
   final Partida? partida;
@@ -59,6 +63,11 @@ class _JogoTelaState extends State<JogoTela> {
   bool _novoRecorde = false;
   int _gemasDesafio = 0;
 
+  /// Fases: peças extras ganhas na ajuda (uma ajuda por tentativa).
+  int _extras = 0;
+  bool _ajudou = false;
+  int _gemasFase = 0;
+
   Servicos get _s => widget.servicos;
 
   @override
@@ -73,6 +82,7 @@ class _JogoTelaState extends State<JogoTela> {
   String get _chave => widget.diario ? 'desafio' : 'classico';
 
   Partida? _partidaSalva() {
+    if (widget.fase != null) return null;
     final json = _s.progresso.partidaSalva(_chave);
     if (json == null || (widget.diario && json['dia'] != _dia)) return null;
     try {
@@ -82,9 +92,11 @@ class _JogoTelaState extends State<JogoTela> {
     }
   }
 
-  void _salvar() => _s.progresso.salvarPartida(_chave, {..._partida.paraJson(), 'dia': _dia});
+  void _salvar() =>
+      widget.fase != null ? null : _s.progresso.salvarPartida(_chave, {..._partida.paraJson(), 'dia': _dia});
 
-  Partida _novaPartida() => Partida(semente: widget.diario ? _dia : DateTime.now().microsecondsSinceEpoch);
+  Partida _novaPartida() =>
+      widget.fase?.novaPartida() ?? Partida(semente: widget.diario ? _dia : DateTime.now().microsecondsSinceEpoch);
 
   // ---------- arrastar e soltar ----------
 
@@ -150,6 +162,10 @@ class _JogoTelaState extends State<JogoTela> {
     _s.progresso.contarMissoes(_dia, contagemDaJogada(jogada));
     _salvar();
     setState(() {});
+    if (widget.fase case final fase?) {
+      _conferirFase(fase);
+      return;
+    }
     if (_partida.fimDeJogo) {
       _s.sons.tocar(Som.fim);
       if (_partida.continuou) {
@@ -174,6 +190,63 @@ class _JogoTelaState extends State<JogoTela> {
       if (j.gemas > 0) '+${j.gemas} ${j.gemas == 1 ? 'gema' : 'gemas'}',
     ];
     return partes.join('\n');
+  }
+
+  // ---------- fases ----------
+
+  int _restantes(Fase fase) => fase.pecasRestantes(_partida) + _extras;
+
+  Future<void> _conferirFase(Fase fase) async {
+    if (fase.concluida(_partida)) {
+      _s.sons.tocar(Som.combo);
+      // Quem precisou de ajuda leva no máximo 1 estrela.
+      final estrelas = _ajudou ? 1 : fase.estrelas(_partida);
+      final gemas = await _s.progresso.concluirFase(fase.numero, estrelas);
+      await _s.progresso.contarMissoes(_dia, {TipoMissao.partidas: 1});
+      if (mounted) {
+        setState(() {
+          _gemasFase = gemas;
+          _fim = _Fim.faseVencida;
+        });
+      }
+    } else if (_restantes(fase) <= 0 || _partida.fimDeJogo) {
+      _s.sons.tocar(Som.fim);
+      setState(() => _fim = _Fim.faseFalhou);
+    }
+  }
+
+  /// Sem peças: +5 peças. Sem espaço: limpa o meio do tabuleiro.
+  void _ajudarNaFase() => setState(() {
+    _ajudou = true;
+    if (_partida.fimDeJogo) {
+      _partida.continuar();
+    } else {
+      _extras += 5;
+    }
+    _fim = null;
+  });
+
+  Future<void> _ajudaComAnuncio() async {
+    if (await _s.anuncios.mostrarPremiado()) {
+      _ajudarNaFase();
+    } else if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Anúncio indisponível agora. Tente de novo.')));
+    }
+  }
+
+  Future<void> _ajudaComGemas() async {
+    if (await _s.progresso.gastarGemas(Custos.continuar)) _ajudarNaFase();
+  }
+
+  Future<void> _irParaFase(int numero) async {
+    await _intersticial();
+    if (!mounted) return;
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => JogoTela(servicos: _s, fase: Fase.numero(numero)),
+      ),
+    );
   }
 
   // ---------- reforços e fim ----------
@@ -300,6 +373,11 @@ class _JogoTelaState extends State<JogoTela> {
             onPressed: () => Navigator.of(context).maybePop(),
             icon: const Icon(Icons.arrow_back_rounded),
           ),
+          if (widget.fase case final fase?)
+            Text(
+              'FASE ${fase.numero}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
+            ),
           if (widget.diario)
             Text(
               'DESAFIO #${numeroDoDesafio(_s.hoje())}',
@@ -312,7 +390,55 @@ class _JogoTelaState extends State<JogoTela> {
     ),
   );
 
-  Widget _placar() => Column(
+  Widget _placar() => widget.fase == null ? _placarDePontos() : _placarDaFase(widget.fase!);
+
+  Widget _placarDaFase(Fase fase) {
+    final feito = fase.progresso(_partida).clamp(0, fase.alvo);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          Text(
+            fase.texto,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: feito / fase.alvo,
+                    minHeight: 12,
+                    backgroundColor: Cores.casa,
+                    color: Cores.blocos[3],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text('$feito/${fase.alvo}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+            decoration: BoxDecoration(
+              color: _restantes(fase) <= 3 ? Cores.destaque : Cores.painel,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'Peças: ${_restantes(fase)}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _placarDePontos() => Column(
     children: [
       Text('${_partida.pontos}', style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w700, height: 1.1)),
       Row(
@@ -460,13 +586,91 @@ class _JogoTelaState extends State<JogoTela> {
             builder: (context, _) => Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: _fim == _Fim.segundaChance ? _segundaChance() : _resultado(),
+              children: switch (_fim) {
+                _Fim.segundaChance => _segundaChance(),
+                _Fim.faseVencida => _faseVencida(widget.fase!),
+                _Fim.faseFalhou => _faseFalhou(widget.fase!),
+                _ => _resultado(),
+              },
             ),
           ),
         ),
       ),
     ),
   );
+
+  List<Widget> _faseVencida(Fase fase) {
+    final estrelas = _s.progresso.estrelasDaFase(fase.numero);
+    return [
+      Text(
+        'Fase ${fase.numero} concluída!',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+      ),
+      const SizedBox(height: 12),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          for (var i = 1; i <= 3; i++)
+            Icon(Icons.star_rounded, size: i == 2 ? 64 : 52, color: i <= estrelas ? Cores.ouro : Cores.casa),
+        ],
+      ),
+      if (_gemasFase > 0)
+        Text(
+          '+$_gemasFase gemas',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Cores.gema, fontSize: 18, fontWeight: FontWeight.w700),
+        ),
+      const SizedBox(height: 20),
+      if (fase.numero < Fase.total)
+        FilledButton.icon(
+          onPressed: () => _irParaFase(fase.numero + 1),
+          icon: const Icon(Icons.arrow_forward_rounded),
+          label: const Text('Próxima fase'),
+        ),
+      TextButton(onPressed: _sair, child: const Text('Mapa')),
+    ];
+  }
+
+  List<Widget> _faseFalhou(Fase fase) {
+    final semEspaco = _partida.fimDeJogo;
+    return [
+      Text(
+        semEspaco ? 'Sem espaço!' : 'Acabaram as peças!',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+      ),
+      const SizedBox(height: 4),
+      Text(
+        'Faltou pouco: ${fase.progresso(_partida)}/${fase.alvo}',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 18, color: Cores.textoFraco),
+      ),
+      const SizedBox(height: 20),
+      if (!_ajudou) ...[
+        FilledButton.icon(
+          onPressed: _s.progresso.assinante ? _ajudarNaFase : _ajudaComAnuncio,
+          icon: Icon(_s.progresso.assinante ? Icons.workspace_premium_rounded : Icons.smart_display_rounded),
+          label: Text(semEspaco ? 'Abrir espaço' : '+5 peças'),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(minimumSize: const Size(64, 48)),
+          onPressed: _s.progresso.gemas >= Custos.continuar ? _ajudaComGemas : null,
+          icon: const IconeGema(),
+          label: const Text('Usar ${Custos.continuar} gemas'),
+        ),
+      ] else
+        FilledButton.icon(
+          onPressed: () => _irParaFase(fase.numero),
+          icon: const Icon(Icons.replay_rounded),
+          label: const Text('Tentar de novo'),
+        ),
+      const SizedBox(height: 4),
+      if (!_ajudou) TextButton(onPressed: () => _irParaFase(fase.numero), child: const Text('Tentar de novo')),
+      TextButton(onPressed: _sair, child: const Text('Mapa')),
+    ];
+  }
 
   List<Widget> _segundaChance() {
     final p = _s.progresso;

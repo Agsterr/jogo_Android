@@ -14,6 +14,7 @@ class Jogada {
     required this.combo,
     required this.tabuleiroLimpo,
     required this.removidos,
+    this.pedrasQuebradas = 0,
   });
 
   final int pontos;
@@ -22,17 +23,21 @@ class Jogada {
   final int combo;
   final bool tabuleiroLimpo;
   final List<BlocoRemovido> removidos;
+  final int pedrasQuebradas;
 
   int get gemas => linhasDeUmaCor + (tabuleiroLimpo ? 3 : 0);
 }
 
 /// Regras de uma partida. Sem Flutter: dá para testar tudo em Dart puro.
 class Partida {
-  Partida({required int semente}) : _sorteio = Sorteio(semente) {
+  /// [inicial] é o tabuleiro de partida das fases (com pedras).
+  Partida({required int semente, Tabuleiro? inicial})
+    : _sorteio = Sorteio(semente),
+      tabuleiro = inicial ?? Tabuleiro() {
     _novaMao();
   }
 
-  Partida._salva(this._sorteio);
+  Partida._salva(this._sorteio) : tabuleiro = Tabuleiro();
 
   /// Para salvar no aparelho (o "Desfazer" não é salvo).
   Map<String, Object?> paraJson() => {
@@ -56,6 +61,8 @@ class Partida {
     'combo': combo,
     'semLimpar': _semLimpar,
     'continuou': continuou,
+    'jogadas': jogadas,
+    'linhas': linhas,
   };
 
   factory Partida.deJson(Map<String, Object?> j) {
@@ -75,7 +82,9 @@ class Partida {
       ..pontos = j['pontos']! as int
       ..combo = j['combo']! as int
       .._semLimpar = j['semLimpar']! as int
-      ..continuou = j['continuou']! as bool;
+      ..continuou = j['continuou']! as bool
+      ..jogadas = (j['jogadas'] as int?) ?? 0
+      ..linhas = (j['linhas'] as int?) ?? 0;
     return p;
   }
 
@@ -85,7 +94,13 @@ class Partida {
   static const int folgaCombo = 3;
 
   final Sorteio _sorteio;
-  Tabuleiro tabuleiro = Tabuleiro();
+  Tabuleiro tabuleiro;
+
+  /// Peças colocadas nesta partida (as fases têm limite).
+  int jogadas = 0;
+
+  /// Linhas e colunas limpas na partida toda.
+  int linhas = 0;
   List<Peca?> mao = const [];
   int pontos = 0;
   int combo = 0;
@@ -121,7 +136,7 @@ class Partida {
     final deUmaCor = [
       for (final l in completas.linhas) List.generate(Tabuleiro.tamanho, (k) => tabuleiro.cor(l, k)),
       for (final k in completas.colunas) List.generate(Tabuleiro.tamanho, (l) => tabuleiro.cor(l, k)),
-    ].where((cores) => cores.toSet().length == 1).length;
+    ].where((cores) => cores.toSet().length == 1 && cores.first != Tabuleiro.pedra).length;
     final removidos = [for (final (l, k) in casas) (linha: l, coluna: k, cor: tabuleiro.cor(l, k)!)];
     for (final (l, k) in casas) {
       tabuleiro.definir(l, k, null);
@@ -138,6 +153,8 @@ class Partida {
       combo = 0;
     }
     pontos += ganho;
+    jogadas++;
+    this.linhas += linhas;
 
     mao = [...mao]..[indice] = null;
     if (mao.every((p) => p == null)) _novaMao();
@@ -149,6 +166,7 @@ class Partida {
       combo: linhas > 0 ? combo : 0,
       tabuleiroLimpo: limpo,
       removidos: removidos,
+      pedrasQuebradas: removidos.where((b) => b.cor == Tabuleiro.pedra).length,
     );
   }
 
@@ -196,13 +214,15 @@ class _Estado {
     : tabuleiro = p.tabuleiro.copia(),
       mao = List.of(p.mao),
       pontos = p.pontos,
+      jogadas = p.jogadas,
+      linhas = p.linhas,
       combo = p.combo,
       semLimpar = p._semLimpar,
       sorteio = p._sorteio.copia();
 
   final Tabuleiro tabuleiro;
   final List<Peca?> mao;
-  final int pontos, combo, semLimpar;
+  final int pontos, jogadas, linhas, combo, semLimpar;
   final Sorteio sorteio;
 
   void restaurar(Partida p) {
@@ -210,6 +230,8 @@ class _Estado {
       ..tabuleiro = tabuleiro
       ..mao = mao
       ..pontos = pontos
+      ..jogadas = jogadas
+      ..linhas = linhas
       ..combo = combo
       .._semLimpar = semLimpar;
     p._sorteio.restaurarDe(sorteio);

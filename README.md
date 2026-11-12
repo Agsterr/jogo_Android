@@ -2,11 +2,12 @@
 
 Quebra-cabeça de blocos para Android: arraste as peças para a grade 8×8, complete linhas e colunas para limpá-las e
 encadeie combos. Linha **de uma cor só** vale bônus e gema. Todo dia há um **Desafio do dia** com as mesmas peças para
-todo mundo, e o resultado pode ser compartilhado.
+todo mundo, e o resultado pode ser compartilhado. Há também **60 fases** com objetivos e estrelas, **missões diárias**
+com baú e **sequência de dias** 🔥.
 
-| Início | Jogando | Combo | Segunda chance | Loja |
-|---|---|---|---|---|
-| ![](docs/telas/1-inicio.png) | ![](docs/telas/2-jogo-arrastando.png) | ![](docs/telas/3-jogo-combo.png) | ![](docs/telas/4-segunda-chance.png) | ![](docs/telas/6-loja.png) |
+| Início | Jogando | Combo | Fases | Fase com pedras | Loja |
+|---|---|---|---|---|---|
+| ![](docs/telas/1-inicio.png) | ![](docs/telas/2-jogo-arrastando.png) | ![](docs/telas/3-jogo-combo.png) | ![](docs/telas/9-mapa.png) | ![](docs/telas/10-fase-pedras.png) | ![](docs/telas/6-loja.png) |
 
 ## Por que Flutter (Dart)
 

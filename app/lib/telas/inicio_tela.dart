@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
+import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
 import '../jogo/sorteio.dart';
 import '../servicos/progresso.dart';
@@ -9,6 +12,7 @@ import '../tema.dart';
 import '../widgets/peca_widget.dart';
 import 'jogo_tela.dart';
 import 'loja_tela.dart';
+import 'mapa_tela.dart';
 
 class InicioTela extends StatelessWidget {
   const InicioTela({super.key, required this.servicos});
@@ -98,6 +102,22 @@ class InicioTela extends StatelessWidget {
                                     onPressed: () => _abrir(context, JogoTela(servicos: servicos)),
                                     icon: const Icon(Icons.play_arrow_rounded, size: 34),
                                     label: Text(p.temPartidaSalva('classico') ? 'CONTINUAR' : 'JOGAR'),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  FilledButton.icon(
+                                    style: FilledButton.styleFrom(
+                                      minimumSize: const Size(64, 54),
+                                      backgroundColor: Cores.blocos[4],
+                                      foregroundColor: const Color(0xFF052E3D),
+                                      textStyle: const TextStyle(
+                                        fontFamily: fonteJogo,
+                                        fontSize: 21,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    onPressed: () => _abrir(context, MapaTela(servicos: servicos)),
+                                    icon: const Icon(Icons.map_rounded, size: 26),
+                                    label: Text('FASES · ${math.min(p.faseLiberada, Fase.total)}/${Fase.total}'),
                                   ),
                                   const SizedBox(height: 14),
                                   _CartaoDesafio(

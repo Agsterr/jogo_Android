@@ -11,6 +11,7 @@ abstract final class Cores {
   static const gema = Color(0xFF3FE0D0);
   static const ouro = Color(0xFFFFC94A);
   static const destaque = Color(0xFFFF5A8A);
+  static const pedra = Color(0xFF8E8AA6);
 
   /// Uma cor por tipo de bloco (o índice vem de `Peca.cor`).
   static const blocos = [
@@ -72,5 +73,25 @@ void pintarBloco(Canvas canvas, Rect r, Color cor, {double opacidade = 1}) {
   canvas.drawRRect(
     RRect.fromRectAndRadius(brilho, Radius.circular(brilho.height)),
     Paint()..color = Colors.white.withValues(alpha: 0.45 * opacidade),
+  );
+}
+
+/// Desenha a casa do tabuleiro: bloco colorido ou pedra (índice `Tabuleiro.pedra`).
+void pintarCasa(Canvas canvas, Rect r, int cor, {double opacidade = 1}) {
+  if (cor < Cores.blocos.length) return pintarBloco(canvas, r, Cores.blocos[cor], opacidade: opacidade);
+  pintarBloco(canvas, r, Cores.pedra, opacidade: opacidade);
+  final risco = Paint()
+    ..color = Colors.black.withValues(alpha: 0.35 * opacidade)
+    ..strokeWidth = r.width * 0.06
+    ..strokeCap = StrokeCap.round
+    ..style = PaintingStyle.stroke;
+  canvas.drawPath(
+    Path()
+      ..moveTo(r.left + r.width * 0.3, r.top + r.height * 0.35)
+      ..lineTo(r.left + r.width * 0.5, r.top + r.height * 0.55)
+      ..lineTo(r.left + r.width * 0.45, r.top + r.height * 0.75)
+      ..moveTo(r.left + r.width * 0.5, r.top + r.height * 0.55)
+      ..lineTo(r.left + r.width * 0.72, r.top + r.height * 0.5),
+    risco,
   );
 }
