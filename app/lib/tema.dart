@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'jogo/temas.dart';
+
 /// Cores e desenho dos blocos. A arte do jogo é toda vetorial, feita aqui.
 abstract final class Cores {
   static const fundoTopo = Color(0xFF2B1B72);
@@ -22,6 +24,9 @@ abstract final class Cores {
     Color(0xFF2EC4F1), // azul
     Color(0xFFA96BFF), // roxo
   ];
+
+  /// Cores das peças: mudam com o tema escolhido na loja (`Progresso.usarTema`).
+  static List<Color> pecas = TemaDeBlocos.classico.cores;
 
   static const fundo = LinearGradient(
     begin: Alignment.topCenter,
@@ -78,7 +83,7 @@ void pintarBloco(Canvas canvas, Rect r, Color cor, {double opacidade = 1}) {
 
 /// Desenha a casa do tabuleiro: bloco colorido ou pedra (índice `Tabuleiro.pedra`).
 void pintarCasa(Canvas canvas, Rect r, int cor, {double opacidade = 1}) {
-  if (cor < Cores.blocos.length) return pintarBloco(canvas, r, Cores.blocos[cor], opacidade: opacidade);
+  if (cor < Cores.pecas.length) return pintarBloco(canvas, r, Cores.pecas[cor], opacidade: opacidade);
   pintarBloco(canvas, r, Cores.pedra, opacidade: opacidade);
   final risco = Paint()
     ..color = Colors.black.withValues(alpha: 0.35 * opacidade)

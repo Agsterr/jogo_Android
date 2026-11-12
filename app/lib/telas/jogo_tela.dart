@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../app.dart';
+import '../jogo/eventos.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
 import '../jogo/partida.dart';
@@ -158,7 +159,7 @@ class _JogoTelaState extends State<JogoTela> {
       HapticFeedback.lightImpact();
       _s.sons.tocar(Som.encaixe);
     }
-    _s.progresso.ganharGemas(jogada.gemas);
+    _s.progresso.ganharGemas(jogada.gemas * multiplicadorDeGemas(_s.hoje()));
     _s.progresso.contarMissoes(_dia, contagemDaJogada(jogada));
     _salvar();
     setState(() {});
@@ -176,6 +177,8 @@ class _JogoTelaState extends State<JogoTela> {
     }
   }
 
+  String _textoGemas(int n) => '+$n ${n == 1 ? 'gema' : 'gemas'}';
+
   String _textoDoAviso(Jogada j) {
     final partes = <String>[
       if (j.tabuleiroLimpo)
@@ -187,7 +190,7 @@ class _JogoTelaState extends State<JogoTela> {
       else
         'Boa!',
       '+${j.pontos}',
-      if (j.gemas > 0) '+${j.gemas} ${j.gemas == 1 ? 'gema' : 'gemas'}',
+      if (j.gemas > 0) _textoGemas(j.gemas * multiplicadorDeGemas(_s.hoje())),
     ];
     return partes.join('\n');
   }

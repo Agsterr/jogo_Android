@@ -31,14 +31,14 @@ Future<void> carregarFontes() async {
   }
 }
 
-Future<Servicos> servicosDeTeste({Map<String, Object> valores = const {}}) async {
+Future<Servicos> servicosDeTeste({Map<String, Object> valores = const {}, DateTime? hoje}) async {
   SharedPreferences.setMockInitialValues(valores);
   final progresso = await Progresso.carregar();
   return Servicos(
     progresso: progresso,
     anuncios: SemAnuncios(),
     compras: ComprasFicticias(progresso),
-    hoje: () => DateTime(2026, 11, 12, 9),
+    hoje: () => hoje ?? DateTime(2026, 11, 12, 9),
   );
 }
 

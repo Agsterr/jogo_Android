@@ -31,7 +31,7 @@ class _Pintor extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final c = size.width / peca.formato.colunas;
     final folga = c * 0.05;
-    final cor = apagada ? const Color(0xFF6B6390) : Cores.blocos[peca.cor];
+    final cor = apagada ? const Color(0xFF6B6390) : Cores.pecas[peca.cor];
     for (final cel in peca.formato.celulas) {
       pintarBloco(
         canvas,

@@ -1,5 +1,6 @@
 import 'package:encaixa/jogo/partida.dart';
 import 'package:encaixa/jogo/peca.dart';
+import 'package:encaixa/jogo/temas.dart';
 import 'package:encaixa/telas/jogo_tela.dart';
 import 'package:encaixa/telas/loja_tela.dart';
 import 'package:encaixa/widgets/tabuleiro_widget.dart';
@@ -183,6 +184,23 @@ void main() {
     await tester.pump();
     expect(s.progresso.gemas, 5, reason: 'botão desativado');
     expect(s.progresso.premiadosNoDia(20261113), 0, reason: 'zera no dia seguinte');
+  });
+
+  testWidgets('evento de Natal: banner e tema grátis', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(valores: {'gemas': 42}, hoje: DateTime(2026, 12, 22, 20));
+    addTearDown(() => s.progresso.usarTema(TemaDeBlocos.classico));
+    await tester.pumpWidget(appDeTeste(s));
+    await tester.pumpAndSettle();
+    expect(find.text('Evento de Natal'), findsOneWidget);
+    await tester.tap(find.text('Tema grátis'));
+    await tester.pumpAndSettle();
+    expect(s.progresso.temaAtivo.id, 'natal');
+    await capturar(tester, '13-evento-natal');
+    await tester.pumpWidget(appDeTeste(s, tela: LojaTela(servicos: s)));
+    await tester.pump();
+    await tester.scrollUntilVisible(find.text('Galáxia'), 200);
+    await capturar(tester, '14-loja-temas');
   });
 
   testWidgets('tela pequena com fonte grande não estoura', (tester) async {

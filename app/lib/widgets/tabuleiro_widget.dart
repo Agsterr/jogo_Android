@@ -103,7 +103,7 @@ class _Pintor extends CustomPainter {
         pintarBloco(
           canvas,
           casa(l, k),
-          p.valida ? Cores.blocos[p.peca.cor] : Colors.white,
+          p.valida ? Cores.pecas[p.peca.cor] : Colors.white,
           opacidade: p.valida ? 0.55 : 0.18,
         );
       }

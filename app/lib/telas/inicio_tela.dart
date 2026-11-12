@@ -3,9 +3,11 @@ import 'dart:math' as math;
 import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
+import '../jogo/eventos.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
 import '../jogo/sorteio.dart';
+import '../jogo/temas.dart';
 import '../servicos/progresso.dart';
 import '../servicos/servicos.dart';
 import '../tema.dart';
@@ -127,6 +129,10 @@ class InicioTela extends StatelessWidget {
                                     aoTocar: () => _abrir(context, JogoTela(servicos: servicos, diario: true)),
                                   ),
                                   const SizedBox(height: 14),
+                                  if (_BannerEvento.temAlgo(hoje)) ...[
+                                    _BannerEvento(progresso: p, agora: hoje),
+                                    const SizedBox(height: 14),
+                                  ],
                                   _CartaoMissoes(progresso: p, dia: dia),
                                   const SizedBox(height: 14),
                                   OutlinedButton.icon(
@@ -447,4 +453,71 @@ class _Bau extends StatelessWidget {
     icon: Icon(aberto ? Icons.inventory_2_outlined : Icons.redeem_rounded, color: pronto ? Cores.ouro : null),
     label: Text(aberto ? 'Aberto' : '+$gemasDoBau'),
   );
+}
+
+/// Evento com prazo (com tema grátis) ou aviso de gemas em dobro no fim de semana.
+class _BannerEvento extends StatelessWidget {
+  const _BannerEvento({required this.progresso, required this.agora});
+
+  final Progresso progresso;
+  final DateTime agora;
+
+  static bool temAlgo(DateTime agora) => eventoAtivo(agora) != null || fimDeSemana(agora);
+
+  @override
+  Widget build(BuildContext context) {
+    final evento = eventoAtivo(agora);
+    final tema = evento?.tema == null ? null : TemaDeBlocos.porId(evento!.tema);
+    final podePegar = tema != null && !progresso.temTema(tema);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(
+          colors: evento == null
+              ? [Cores.blocos[4], Cores.blocos[3]]
+              : [const Color(0xFFC62828), const Color(0xFF2E7D32)],
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(evento == null ? Icons.weekend_rounded : Icons.celebration_rounded, size: 30),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  evento == null ? 'Fim de semana' : 'Evento de ${evento.nome}',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                ),
+                Text(
+                  evento == null
+                      ? 'Gemas em dobro nas linhas de uma cor'
+                      : 'Gemas em dobro · termina em ${tempoRestante(agora, evento.fim)}',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+          if (podePegar)
+            FilledButton(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(64, 40),
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF8E1B1B),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              onPressed: () async {
+                await progresso.guardarTema(tema);
+                await progresso.usarTema(tema);
+              },
+              child: const Text('Tema grátis', style: TextStyle(fontSize: 15)),
+            )
+          else
+            const Text('x2', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+        ],
+      ),
+    );
+  }
 }

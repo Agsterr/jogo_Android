@@ -5,10 +5,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
+import '../jogo/temas.dart';
+import '../tema.dart';
 
 /// Tudo que o jogador guarda no aparelho: recorde, gemas e o que comprou.
 class Progresso extends ChangeNotifier {
-  Progresso(this._prefs);
+  Progresso(this._prefs) {
+    Cores.pecas = temaAtivo.cores;
+  }
 
   static Future<Progresso> carregar() async => Progresso(await SharedPreferences.getInstance());
 
@@ -72,6 +76,40 @@ class Progresso extends ChangeNotifier {
     await ganharGemas(gemasGanhas);
     notifyListeners();
     return gemasGanhas;
+  }
+
+  // ---------- temas ----------
+
+  /// Tema em uso; volta ao Clássico se o jogador perdeu o direito (ex.: assinatura acabou).
+  TemaDeBlocos get temaAtivo {
+    final t = TemaDeBlocos.porId(_prefs.getString('tema'));
+    return temTema(t) ? t : TemaDeBlocos.classico;
+  }
+
+  /// Tem o tema? (grátis, comprado, assinante ou evento em andamento)
+  bool temTema(TemaDeBlocos t, {String? eventoAtivo}) =>
+      (t.preco == 0 && !t.assinante && t.evento == null) ||
+      (_prefs.getStringList('temas') ?? []).contains(t.id) ||
+      (t.assinante && assinante) ||
+      (t.evento != null && t.evento == eventoAtivo);
+
+  Future<bool> comprarTema(TemaDeBlocos t) async {
+    if (t.preco == 0 || temTema(t) || !await gastarGemas(t.preco)) return false;
+    await _prefs.setStringList('temas', [...?_prefs.getStringList('temas'), t.id]);
+    notifyListeners();
+    return true;
+  }
+
+  /// Tema de evento pego durante o evento fica para sempre.
+  Future<void> guardarTema(TemaDeBlocos t) async {
+    if ((_prefs.getStringList('temas') ?? []).contains(t.id)) return;
+    await _prefs.setStringList('temas', [...?_prefs.getStringList('temas'), t.id]);
+  }
+
+  Future<void> usarTema(TemaDeBlocos t) async {
+    await _prefs.setString('tema', t.id);
+    Cores.pecas = t.cores;
+    notifyListeners();
   }
 
   // ---------- fases ----------
@@ -167,6 +205,7 @@ class Progresso extends ChangeNotifier {
 
   Future<void> definirAssinante(bool valor) async {
     await _prefs.setBool('assinante', valor);
+    Cores.pecas = temaAtivo.cores;
     notifyListeners();
   }
 

@@ -1,7 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
+import '../jogo/eventos.dart';
 import '../jogo/sorteio.dart';
+import '../jogo/temas.dart';
 import '../servicos/compras.dart';
 import '../servicos/servicos.dart';
 import '../tema.dart';
@@ -27,6 +29,19 @@ class LojaTela extends StatelessWidget {
     } else if (context.mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Anúncio indisponível agora. Tente de novo.')));
+    }
+  }
+
+  Future<void> _escolherTema(BuildContext context, TemaDeBlocos t) async {
+    final p = servicos.progresso;
+    final evento = eventoAtivo(servicos.hoje())?.id;
+    if (p.temTema(t, eventoAtivo: evento)) {
+      if (t.evento != null) await p.guardarTema(t);
+      return p.usarTema(t);
+    }
+    if (await p.comprarTema(t)) return p.usarTema(t);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gemas insuficientes.')));
     }
   }
 
@@ -90,6 +105,18 @@ class LojaTela extends StatelessWidget {
                     descricao: qtd >= 1000 ? 'Melhor valor' : (qtd >= 300 ? 'Mais popular' : 'Para começar'),
                     botao: preco(id),
                     aoTocar: pode ? () => compras.comprar(id) : null,
+                  ),
+                ],
+                const SizedBox(height: 20),
+                const Text('Temas', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                const Text('Mude as cores das peças.', style: TextStyle(color: Cores.textoFraco)),
+                for (final t in TemaDeBlocos.todos) ...[
+                  const SizedBox(height: 8),
+                  _ItemTema(
+                    tema: t,
+                    temTema: p.temTema(t, eventoAtivo: eventoAtivo(servicos.hoje())?.id),
+                    emUso: p.temaAtivo.id == t.id,
+                    aoTocar: () => _escolherTema(context, t),
                   ),
                 ],
                 const SizedBox(height: 16),
@@ -209,4 +236,70 @@ class _Aviso extends StatelessWidget {
     padding: const EdgeInsets.only(bottom: 12),
     child: Text(texto, style: const TextStyle(color: Cores.ouro)),
   );
+}
+
+class _ItemTema extends StatelessWidget {
+  const _ItemTema({required this.tema, required this.temTema, required this.emUso, required this.aoTocar});
+
+  final TemaDeBlocos tema;
+  final bool temTema, emUso;
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) {
+    final bloqueado = !temTema && (tema.assinante || tema.evento != null);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 12, 10),
+      decoration: BoxDecoration(color: Cores.painel.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(18)),
+      child: Row(
+        children: [
+          SizedBox(width: 96, height: 32, child: CustomPaint(painter: _Amostra(tema))),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tema.nome, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                if (tema.assinante || tema.evento != null)
+                  Text(
+                    tema.assinante ? 'Exclusivo Encaixa+' : 'Grátis no evento',
+                    style: const TextStyle(color: Cores.textoFraco, fontSize: 13),
+                  ),
+              ],
+            ),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(88, 40)),
+            onPressed: emUso || bloqueado ? null : aoTocar,
+            child: emUso
+                ? const Text('Em uso')
+                : temTema
+                ? const Text('Usar')
+                : bloqueado
+                ? const Icon(Icons.lock_rounded, size: 20)
+                : Row(mainAxisSize: MainAxisSize.min, children: [const IconeGema(tamanho: 16), Text(' ${tema.preco}')]),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Seis blocos pequenos com as cores do tema.
+class _Amostra extends CustomPainter {
+  const _Amostra(this.tema);
+
+  final TemaDeBlocos tema;
+
+  @override
+  void paint(Canvas canvas, Size s) {
+    final lado = s.width / 6;
+    for (var i = 0; i < 6; i++) {
+      final r = Rect.fromLTWH(i * lado + 1, (s.height - lado) / 2, lado - 2, lado - 2);
+      pintarBloco(canvas, r, tema.cores[i]);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_Amostra antigo) => antigo.tema != tema;
 }

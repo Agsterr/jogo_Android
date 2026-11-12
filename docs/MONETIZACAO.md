@@ -27,7 +27,21 @@ Os preços são ponto de partida; o Play converte para outras moedas. Teste A/B 
 ### Economia de gemas
 - Começa com 15 gemas (dá para provar Desfazer e Trocar).
 - Ganha: linha de uma cor (+1), tabuleiro limpo (+3), Desafio do dia (+5/dia), anúncio premiado (+5), assinatura (+10/dia).
-- Gasta: Desfazer 3, Trocar 5, Segunda chance 10.
+- Ganha também: fases (+2 na primeira vez, +15 por mundo), missões do dia (3 a 5 cada + baú de 10),
+  sequência de dias (+5/+15/+30/+60 nos dias 3/7/14/30).
+- Fim de semana (sex. 18h a dom.) e eventos: gemas das linhas de uma cor e do tabuleiro limpo em dobro.
+- Gasta: Desfazer 3, Trocar 5, Segunda chance / ajuda nas fases 10, **temas de blocos** 150 a 300.
+
+### Temas e eventos (`app/lib/jogo/temas.dart`, `app/lib/jogo/eventos.dart`)
+| Tema | Como conseguir |
+|---|---|
+| Clássico | grátis |
+| Doce, Oceano, Neon | 150, 200, 300 gemas |
+| Galáxia | exclusivo Encaixa+ |
+| Natal | grátis durante o evento de Natal (18 a 26/12); quem pega fica com ele |
+
+Eventos ficam numa lista no app (Natal 2026, Carnaval 2027). Para lançar evento sem atualizar o app, falta o
+Firebase Remote Config (#6, #15).
 
 ### Limites conhecidos (viraram issues)
 - Compras validadas só no aparelho. Falta verificação no servidor e aviso de cancelamento em tempo real (RTDN).
