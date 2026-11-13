@@ -9,7 +9,12 @@ enum TipoMissao {
   pontos('Faça {} pontos numa partida', maximo: true),
   partidas('Jogue {} partidas'),
   limpo('Deixe o tabuleiro vazio'),
-  desafio('Jogue o Desafio do dia');
+  desafio('Jogue o Desafio do dia'),
+  fases('Vença {} fases'),
+  tresEstrelas('Ganhe 3 estrelas numa fase'),
+  arena('Jogue uma partida na Arena'),
+  pecas('Coloque {} peças'),
+  multiLinhas('Limpe 2 linhas de uma vez {} vezes');
 
   const TipoMissao(this.modelo, {this.maximo = false});
 
@@ -27,8 +32,9 @@ class Missao {
   String get texto => tipo.modelo.replaceAll('{}', '$alvo');
 }
 
-/// Gemas do baú ao concluir as 3 missões do dia.
-const gemasDoBau = 10;
+/// Missões por dia e gemas do baú ao concluir todas.
+const missoesPorDia = 5;
+const gemasDoBau = 15;
 
 const _opcoes = [
   Missao(TipoMissao.linhas, 15, 3),
@@ -40,13 +46,20 @@ const _opcoes = [
   Missao(TipoMissao.partidas, 3, 3),
   Missao(TipoMissao.limpo, 1, 5),
   Missao(TipoMissao.desafio, 1, 3),
+  Missao(TipoMissao.fases, 2, 4),
+  Missao(TipoMissao.fases, 4, 6),
+  Missao(TipoMissao.tresEstrelas, 1, 5),
+  Missao(TipoMissao.arena, 1, 3),
+  Missao(TipoMissao.pecas, 40, 3),
+  Missao(TipoMissao.pecas, 80, 5),
+  Missao(TipoMissao.multiLinhas, 3, 4),
 ];
 
-/// Três missões de tipos diferentes, iguais para todo mundo no mesmo dia.
+/// [missoesPorDia] missões de tipos diferentes, iguais para todo mundo no mesmo dia.
 List<Missao> missoesDoDia(int dia) {
   final sorteio = Sorteio(dia * 31 + 7);
   final escolhidas = <Missao>[];
-  while (escolhidas.length < 3) {
+  while (escolhidas.length < missoesPorDia) {
     final m = _opcoes[sorteio.proximo(_opcoes.length)];
     if (escolhidas.every((e) => e.tipo != m.tipo)) escolhidas.add(m);
   }
@@ -58,6 +71,8 @@ Map<TipoMissao, int> contagemDaJogada(Jogada j) => {
   TipoMissao.linhas: j.linhasLimpas,
   TipoMissao.umaCor: j.linhasDeUmaCor,
   TipoMissao.combo: j.combo,
+  TipoMissao.pecas: 1,
+  TipoMissao.multiLinhas: j.linhasLimpas >= 2 ? 1 : 0,
   TipoMissao.limpo: j.tabuleiroLimpo ? 1 : 0,
 };
 

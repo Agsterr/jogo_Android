@@ -47,7 +47,9 @@ Semente = data (`aaaammdd`) num sorteador próprio (mulberry32), para todo mundo
 versão do app. Número do desafio = dias desde 1º/11/2026. Pode repetir; vale a melhor pontuação.
 
 ## Modo Fases (`app/lib/jogo/fases.dart`)
-- **140 fases em 7 mundos** (Doce, Oceano, Vulcão, Floresta, Gelo, Deserto, Galáxia), iguais para todos.
+- **300 fases em 15 mundos** (Doce, Oceano, Vulcão, Floresta, Gelo, Deserto, Galáxia, Neon, Cristal, Selva, Nuvens,
+  Piratas, Robôs, Dragões, Arco-íris), iguais para todos. Da 141 em diante é o "modo mestre": alvos maiores, até 18
+  blocos soltos e folga de peças caindo até 8%.
 - Objetivos: **limpar N linhas**, **fazer N pontos**, **quebrar as pedras**, **linhas de uma cor só** (fase com 3 cores)
   e **combo xN**. As 10 primeiras ensinam um objetivo por vez; a última de cada mundo é um "chefe" de pedras.
 - A dificuldade sobe sozinha: alvos maiores, mais pedras, **blocos soltos** no tabuleiro a partir do 2º mundo e menos
@@ -65,9 +67,12 @@ versão do app. Número do desafio = dias desde 1º/11/2026. Pode repetir; vale 
 - Prêmios pegos na tela da Arena, uma vez por semana. Ranking mundial por posição: issue do Play Games.
 
 ## Missões do dia e sequência (`app/lib/jogo/missoes.dart`)
-- 3 missões por dia, de tipos diferentes, sorteadas pela data (iguais para todos): limpar linhas, linhas de uma cor,
-  combo, pontos numa partida, partidas, tabuleiro vazio, jogar o Desafio do dia. Cada uma vale de 3 a 5 gemas.
-- Pegando as 3, o **baú** dá +10 gemas. Tudo zera à meia-noite.
+- 5 missões por dia, de tipos diferentes, sorteadas pela data (iguais para todos): limpar linhas, linhas de uma cor,
+  combo, pontos numa partida, partidas, tabuleiro vazio, Desafio do dia, vencer fases, 3 estrelas, jogar a Arena,
+  colocar peças e limpar 2 linhas de uma vez. Cada uma vale de 3 a 6 gemas.
+- Pegando as 5, o **baú** dá +15 gemas. Tudo zera à meia-noite.
+- **Roda da sorte** (`app/lib/jogo/roda.dart`): 1 giro grátis por dia e mais 2 vendo anúncio (grátis no Encaixa+);
+  prêmios de 5 a 50 gemas (50 é raro).
 - **Sequência 🔥:** dias seguidos jogando o Desafio do dia. Prêmio extra no 3º (+5), 7º (+15), 14º (+30) e 30º (+60) dia.
 
 ## Ideias para depois (não fazer antes de medir)

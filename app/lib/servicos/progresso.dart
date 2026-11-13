@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../jogo/arena.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
+import '../jogo/roda.dart';
 import '../jogo/temas.dart';
 import '../tema.dart';
 
@@ -127,6 +128,21 @@ class Progresso extends ChangeNotifier {
     await ganharGemas(gemasGanhas);
     notifyListeners();
     return gemasGanhas;
+  }
+
+  // ---------- roda da sorte ----------
+
+  int girosNoDia(int dia) => _prefs.getInt('rodaDia') == dia ? (_prefs.getInt('rodaGiros') ?? 0) : 0;
+
+  /// Gira a roda: devolve a fatia sorteada e já dá as gemas. `null` se acabaram os giros do dia.
+  Future<int?> girarRoda(int dia) async {
+    final giro = girosNoDia(dia);
+    if (giro >= Roda.girosPorDia) return null;
+    final fatia = Roda.sortear(dia, giro);
+    await _prefs.setInt('rodaDia', dia);
+    await _prefs.setInt('rodaGiros', giro + 1);
+    await ganharGemas(Roda.premios[fatia]);
+    return fatia;
   }
 
   // ---------- arena da semana ----------
@@ -255,7 +271,7 @@ class Progresso extends ChangeNotifier {
   }
 
   Future<bool> abrirBau(int dia) async {
-    if (bauAberto(dia) || !List.generate(3, (i) => missaoPega(dia, i)).every((p) => p)) return false;
+    if (bauAberto(dia) || !List.generate(missoesPorDia, (i) => missaoPega(dia, i)).every((p) => p)) return false;
     await _prefs.setBool('bauAberto', true);
     await ganharGemas(gemasDoBau);
     return true;

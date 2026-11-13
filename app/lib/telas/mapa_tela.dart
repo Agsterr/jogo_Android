@@ -176,7 +176,15 @@ Color corDoMundo(int mundo) => const [
   Color(0xFF7FD8FF), // Gelo
   Color(0xFFE0A030), // Deserto
   Color(0xFF8B5CFF), // Galáxia
-][mundo % 7];
+  Color(0xFFFF1FD1), // Neon
+  Color(0xFF40E0D0), // Cristal
+  Color(0xFF3CB043), // Selva
+  Color(0xFF9EC9FF), // Nuvens
+  Color(0xFFC0392B), // Piratas
+  Color(0xFF95A5C6), // Robôs
+  Color(0xFFE74C3C), // Dragões
+  Color(0xFFFFB800), // Arco-íris
+][mundo % 15];
 
 /// Caminho pontilhado ligando as fases (aceso até a fase atual).
 class _Trilha extends CustomPainter {

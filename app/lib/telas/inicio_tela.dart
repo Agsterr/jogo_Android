@@ -7,6 +7,7 @@ import '../jogo/arena.dart';
 import '../jogo/eventos.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
+import '../jogo/roda.dart';
 import '../jogo/sorteio.dart';
 import '../jogo/temas.dart';
 import '../servicos/progresso.dart';
@@ -20,6 +21,7 @@ import 'arena_tela.dart';
 import 'jogo_tela.dart';
 import 'loja_tela.dart';
 import 'mapa_tela.dart';
+import 'roda_tela.dart';
 
 class InicioTela extends StatefulWidget {
   const InicioTela({super.key, required this.servicos});
@@ -166,6 +168,11 @@ class _InicioTelaState extends State<InicioTela> {
                         ),
                         termina: tempoRestante(hoje, Arena.fim(hoje)),
                         aoTocar: () => _abrir(ArenaTela(servicos: servicos)),
+                      ),
+                      const SizedBox(height: 14),
+                      _CartaoRoda(
+                        giros: p.girosNoDia(dia),
+                        aoTocar: () => _abrir(RodaTela(servicos: servicos)),
                       ),
                       const SizedBox(height: 14),
                       if (p.sequenciaPerdida(dia) > 0) ...[
@@ -383,7 +390,7 @@ class _CartaoMissoes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final missoes = missoesDoDia(dia);
-    final todasPegas = List.generate(3, (i) => progresso.missaoPega(dia, i)).every((p) => p);
+    final todasPegas = List.generate(missoesPorDia, (i) => progresso.missaoPega(dia, i)).every((p) => p);
     final aberto = progresso.bauAberto(dia);
     return CartaoVidro(
       padding: const EdgeInsets.fromLTRB(14, 8, 10, 12),
@@ -807,6 +814,80 @@ class _CartaoArena extends StatelessWidget {
                   const Text('termina em', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
                   Text(termina, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                 ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Atalho da Roda da sorte: destaca quando há giro grátis.
+class _CartaoRoda extends StatelessWidget {
+  const _CartaoRoda({required this.giros, required this.aoTocar});
+
+  final int giros;
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) {
+    const cores = [Color(0xFF00C2FF), Color(0xFF8B5CFF)];
+    final gratis = giros == 0;
+    final restantes = Roda.girosPorDia - giros;
+    return Semantics(
+      button: true,
+      label: 'Roda da sorte',
+      child: GestureDetector(
+        onTap: aoTocar,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            gradient: const LinearGradient(colors: cores),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 1.5),
+            boxShadow: [
+              BoxShadow(color: Color.lerp(cores.last, Colors.black, 0.45)!, offset: const Offset(0, 5)),
+              BoxShadow(color: cores.first.withValues(alpha: 0.4), blurRadius: 18),
+            ],
+          ),
+          child: Row(
+            children: [
+              Badge(
+                isLabelVisible: gratis,
+                backgroundColor: Cores.destaque,
+                child: const Icon(
+                  Icons.casino_rounded,
+                  size: 40,
+                  color: Colors.white,
+                  shadows: [Shadow(color: Color(0xFF2A0B5E), offset: Offset(0, 3))],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const TextoContornado('Roda da sorte', tamanho: 21, alinhamento: TextAlign.start),
+                    Text(
+                      gratis
+                          ? 'Giro grátis hoje!'
+                          : (restantes > 0 ? 'Mais $restantes giros com anúncio' : 'Volte amanhã'),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: gratis ? Colors.white : Colors.white.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  gratis ? 'GIRAR' : 'até 50',
+                  style: TextStyle(fontWeight: FontWeight.w700, color: gratis ? const Color(0xFF5B2BD6) : Colors.white),
+                ),
               ),
             ],
           ),

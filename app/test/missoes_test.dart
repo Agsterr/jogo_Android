@@ -14,7 +14,7 @@ void main() {
   test('3 missões de tipos diferentes, iguais no mesmo dia', () {
     final a = missoesDoDia(hoje), b = missoesDoDia(hoje);
     expect(a.map((m) => m.texto), b.map((m) => m.texto));
-    expect(a.map((m) => m.tipo).toSet(), hasLength(3));
+    expect(a.map((m) => m.tipo).toSet(), hasLength(missoesPorDia));
     expect(missoesDoDia(20261113).map((m) => m.texto), isNot(a.map((m) => m.texto)));
   });
 
@@ -42,7 +42,7 @@ void main() {
       await p.contarMissao(hoje, m.tipo, m.alvo);
     }
     expect(await p.abrirBau(hoje), isFalse, reason: 'precisa pegar as 3 antes');
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < missoesPorDia; i++) {
       expect(await p.pegarMissao(hoje, i), isTrue);
       expect(await p.pegarMissao(hoje, i), isFalse);
     }

@@ -24,9 +24,25 @@ enum Objetivo {
 class Fase {
   const Fase._(this.numero, this.objetivo, this.alvo, this.pecas, this.inicial, this.cores, this.semente);
 
-  static const total = 140;
+  static const total = 300;
   static const porMundo = 20;
-  static const mundos = ['Doce', 'Oceano', 'Vulcão', 'Floresta', 'Gelo', 'Deserto', 'Galáxia'];
+  static const mundos = [
+    'Doce',
+    'Oceano',
+    'Vulcão',
+    'Floresta',
+    'Gelo',
+    'Deserto',
+    'Galáxia',
+    'Neon',
+    'Cristal',
+    'Selva',
+    'Nuvens',
+    'Piratas',
+    'Robôs',
+    'Dragões',
+    'Arco-íris',
+  ];
 
   final int numero;
   final Objetivo objetivo;
@@ -107,20 +123,23 @@ class Fase {
   }
 
   static Fase _gerar(int n) {
-    final dificuldade = (n - 1) / (total - 1); // 0 a 1
+    // As 140 primeiras sobem de 0 a 1; da 141 à 300 o "modo mestre" ([extra] de 0 a 1) aperta mais.
+    // (Fórmula das 140 primeiras igual à de antes: quem já jogou não vê a fase mudar.)
+    final dificuldade = math.min(1.0, (n - 1) / 139);
+    final extra = math.max(0, n - 140) / 160;
     final objetivo = _objetivo(n);
-    // Folga sobre o que o robô precisou: 80% a mais no começo, 12% no fim; chefes mais apertados.
-    final folga = 1.8 - 0.68 * dificuldade - (n % porMundo == 0 ? 0.08 : 0);
+    // Folga sobre o que o robô precisou: 80% a mais no começo, 12% na 140, 8% na 300; chefes mais apertados.
+    final folga = 1.8 - 0.68 * dificuldade - 0.04 * extra - (n % porMundo == 0 ? 0.08 : 0);
     var alvo = switch (objetivo) {
-      Objetivo.linhas => 2 + (dificuldade * 14).round(),
-      Objetivo.pontos => ((100 + dificuldade * 1500) / 50).round() * 50,
-      Objetivo.pedras => 3 + (dificuldade * 9).round() + (n % porMundo == 0 ? 2 : 0),
-      Objetivo.umaCor => 1 + (dificuldade * 3).round(),
-      Objetivo.combo => 2 + (dificuldade * 4).round(),
+      Objetivo.linhas => 2 + (dificuldade * 14).round() + (extra * 4).round(),
+      Objetivo.pontos => ((100 + dificuldade * 1500 + extra * 500) / 50).round() * 50,
+      Objetivo.pedras => 3 + (dificuldade * 9).round() + (extra * 2).round() + (n % porMundo == 0 ? 2 : 0),
+      Objetivo.umaCor => 1 + (dificuldade * 3).round() + (extra * 1).round(),
+      Objetivo.combo => 2 + (dificuldade * 4).round() + (extra * 1).round(),
     };
     final cores = objetivo == Objetivo.umaCor ? 3 : totalCores;
-    // Blocos soltos no começo a partir do 2º mundo (até 14), deixando o tabuleiro "sujo".
-    final soltos = n <= porMundo ? 0 : (dificuldade * 14).round();
+    // Blocos soltos no começo a partir do 2º mundo (até 14; até 18 no modo mestre), deixando o tabuleiro "sujo".
+    final soltos = n <= porMundo ? 0 : (dificuldade * 14 + extra * 4).round();
 
     // Tenta variações até o robô vencer; se não der, alivia o alvo e tenta de novo.
     for (var tentativa = 0; ; tentativa++) {

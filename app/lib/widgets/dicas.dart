@@ -70,16 +70,22 @@ abstract final class Dicas {
   ]);
 
   static const missoes = Dica('missoes', 'Missões e baú', Icons.redeem_rounded, Color(0xFF00E08A), [
-    'Todo dia aparecem 3 missões novas.',
+    'Todo dia aparecem 5 missões novas.',
     'Elas avançam sozinhas enquanto você joga qualquer modo.',
     'Missão completa? Toque no botão verde para pegar as gemas.',
-    'Pegou as 3? Abra o baú: +10 gemas.',
+    'Pegou as 5? Abra o baú: +15 gemas.',
   ]);
 
   static const presente = Dica('presente', 'Presente do dia', Icons.card_giftcard_rounded, Color(0xFFFFCC33), [
     'Entre todo dia e pegue um presente de gemas.',
     'Dias seguidos aumentam o presente: o 7º dia vale 30 gemas.',
     'Pulou um dia? O calendário recomeça.',
+  ]);
+
+  static const roda = Dica('roda', 'Roda da sorte', Icons.casino_rounded, Color(0xFF00C2FF), [
+    'Todo dia você ganha 1 giro grátis na Roda da sorte.',
+    'Pode girar mais 2 vezes vendo um anúncio (grátis no Encaixa+).',
+    'Cada giro dá de 5 a 50 gemas.',
   ]);
 
   static const eventos = Dica('eventos', 'Eventos', Icons.celebration_rounded, Color(0xFFFF2E7E), [
@@ -115,6 +121,7 @@ abstract final class Dicas {
     arena,
     missoes,
     presente,
+    roda,
     eventos,
     gemas,
   ];

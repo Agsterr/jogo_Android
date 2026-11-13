@@ -4,6 +4,7 @@ import 'package:encaixa/jogo/temas.dart';
 import 'package:encaixa/telas/arena_tela.dart';
 import 'package:encaixa/telas/jogo_tela.dart';
 import 'package:encaixa/telas/loja_tela.dart';
+import 'package:encaixa/telas/roda_tela.dart';
 import 'package:encaixa/widgets/tabuleiro_widget.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -244,6 +245,20 @@ void main() {
     await tester.tap(find.text('+25'));
     await tester.pump();
     expect(s.progresso.gemas, 67);
+  });
+
+  testWidgets('Roda da sorte: giro grátis dá gemas e depois pede anúncio', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(valores: {'gemas': 10});
+    await tester.pumpWidget(appDeTeste(s, tela: RodaTela(servicos: s)));
+    await tester.pump();
+    await capturar(tester, '22-roda');
+    await tester.tap(find.text('GIRAR GRÁTIS').first);
+    await tester.pumpAndSettle();
+    expect(s.progresso.gemas, greaterThan(10));
+    expect(find.textContaining('gemas!'), findsWidgets);
+    expect(find.text('GIRAR DE NOVO'), findsWidgets);
+    await capturar(tester, '23-roda-premio');
   });
 
   testWidgets('tela pequena com fonte grande não estoura', (tester) async {

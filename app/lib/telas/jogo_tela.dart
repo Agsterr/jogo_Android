@@ -265,7 +265,11 @@ class _JogoTelaState extends State<JogoTela> {
       // Quem precisou de ajuda leva no máximo 1 estrela.
       final estrelas = _ajudou ? 1 : fase.estrelas(_partida);
       final gemas = await _s.progresso.concluirFase(fase.numero, estrelas);
-      await _s.progresso.contarMissoes(_dia, {TipoMissao.partidas: 1});
+      await _s.progresso.contarMissoes(_dia, {
+        TipoMissao.partidas: 1,
+        TipoMissao.fases: 1,
+        if (estrelas == 3) TipoMissao.tresEstrelas: 1,
+      });
       if (mounted) {
         setState(() {
           _gemasFase = gemas;
@@ -352,7 +356,10 @@ class _JogoTelaState extends State<JogoTela> {
     final recorde = await _s.progresso.fimDePartida(pontos);
     await _s.progresso.contarMissoes(_dia, {TipoMissao.partidas: 1, TipoMissao.pontos: pontos});
     final gemasDesafio = widget.diario ? await _s.progresso.concluirDesafio(_dia, pontos) : 0;
-    if (widget.arena) await _s.progresso.registrarArena(_semana, pontos);
+    if (widget.arena) {
+      await _s.progresso.registrarArena(_semana, pontos);
+      await _s.progresso.contarMissao(_dia, TipoMissao.arena, 1);
+    }
     if (!mounted) return;
     setState(() {
       _novoRecorde = recorde;
