@@ -4,7 +4,7 @@
 1. Play Console (taxa única de US$ 25) → **Criar app** → nome "Encaixa", jogo, gratuito.
 2. Pacote: `com.agsterr.encaixa` (definido em `app/android/app/build.gradle.kts`).
 3. Ficha da loja: ícone `docs/artes/icone-512.png`, destaque `docs/artes/destaque-1024x500.png` e as
-   **7 imagens de telefone** em `docs/play-store/` (1080×1920, na ordem 1 a 7). Para refazê-las:
+   **8 imagens de telefone** em `docs/play-store/` (1080×1920, na ordem 1 a 8). Para refazê-las:
    `cd app && flutter test test/play_store_test.dart --dart-define=CAPTURAS=true`.
 4. Política de privacidade (obrigatória com anúncios): publicar uma página e colocar o link (issue aberta).
 5. Classificação de conteúdo, público-alvo (**não** marque crianças: anúncios personalizados) e "Segurança dos dados"

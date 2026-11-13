@@ -5,6 +5,7 @@ import 'package:encaixa/telas/inicio_tela.dart';
 import 'package:encaixa/telas/jogo_tela.dart';
 import 'package:encaixa/telas/loja_tela.dart';
 import 'package:encaixa/telas/mapa_tela.dart';
+import 'package:encaixa/telas/roda_tela.dart';
 import 'package:encaixa/servicos/servicos.dart';
 import 'package:encaixa/tema.dart';
 import 'package:encaixa/widgets/doce.dart';
@@ -101,7 +102,7 @@ void main() {
   });
 
   testWidgets('3 mapa', (tester) async {
-    await vitrine(tester, '3-fases', '140 fases', '7 mundos para explorar', MapaTela(servicos: await servicos()));
+    await vitrine(tester, '3-fases', '300 fases', '15 mundos para explorar', MapaTela(servicos: await servicos()));
   });
 
   testWidgets('4 pedras', (tester) async {
@@ -131,6 +132,16 @@ void main() {
       'Novidades todo dia',
       'Missões, presentes e desafio diário',
       InicioTela(servicos: await servicos()),
+    );
+  });
+
+  testWidgets('8 roleta', (tester) async {
+    await vitrine(
+      tester,
+      '8-roleta',
+      'Prêmios toda hora',
+      'Roda da sorte diária e roleta após cada partida',
+      RodaTela(servicos: await servicos()),
     );
   });
 
