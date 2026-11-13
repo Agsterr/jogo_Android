@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -11,6 +9,7 @@ import '../servicos/sons.dart';
 import '../tema.dart';
 import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
+import '../widgets/roda_widget.dart';
 
 /// Roda da sorte diária.
 class RodaTela extends StatefulWidget {
@@ -22,20 +21,13 @@ class RodaTela extends StatefulWidget {
   State<RodaTela> createState() => _RodaTelaState();
 }
 
-class _RodaTelaState extends State<RodaTela> with SingleTickerProviderStateMixin {
-  late final _giro = AnimationController(vsync: this, duration: const Duration(milliseconds: 3600));
-  double _de = 0, _ate = 0;
+class _RodaTelaState extends State<RodaTela> {
+  final _roda = GlobalKey<RodaGiratoriaState>();
   int? _premio;
   bool _girando = false;
 
   Servicos get _s => widget.servicos;
   int get _dia => Sorteio.sementeDoDia(_s.hoje());
-
-  @override
-  void dispose() {
-    _giro.dispose();
-    super.dispose();
-  }
 
   Future<void> _girar({required bool comAnuncio}) async {
     if (_girando) return;
@@ -48,17 +40,12 @@ class _RodaTelaState extends State<RodaTela> with SingleTickerProviderStateMixin
     }
     final fatia = await _s.progresso.girarRoda(_dia);
     if (fatia == null || !mounted) return;
-    const fatiaAngulo = 2 * math.pi / 8;
-    // Para no meio da fatia sorteada, debaixo do ponteiro (topo), depois de 5 voltas.
-    final alvo = -(fatia * fatiaAngulo + fatiaAngulo / 2);
     setState(() {
       _girando = true;
       _premio = null;
-      _de = _ate % (2 * math.pi);
-      _ate = alvo - 2 * math.pi * 5;
     });
     HapticFeedback.mediumImpact();
-    await _giro.forward(from: 0);
+    await _roda.currentState?.girarPara(fatia);
     if (!mounted) return;
     _s.sons.tocar(Som.combo);
     HapticFeedback.heavyImpact();
@@ -111,27 +98,10 @@ class _RodaTelaState extends State<RodaTela> with SingleTickerProviderStateMixin
                     flex: 8,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: Stack(
-                          alignment: Alignment.topCenter,
-                          children: [
-                            Positioned.fill(
-                              top: 18,
-                              child: AnimatedBuilder(
-                                animation: _giro,
-                                builder: (context, _) {
-                                  final t = Curves.easeOutCubic.transform(_giro.value);
-                                  return Transform.rotate(
-                                    angle: _de + (_ate - _de) * t,
-                                    child: const CustomPaint(painter: _PintorRoda()),
-                                  );
-                                },
-                              ),
-                            ),
-                            const CustomPaint(size: Size(44, 46), painter: _Ponteiro()),
-                          ],
-                        ),
+                      child: RodaGiratoria(
+                        key: _roda,
+                        rotulos: [for (final p in Roda.premios) '$p'],
+                        cores: Cores.blocos,
                       ),
                     ),
                   ),
@@ -177,101 +147,4 @@ class _RodaTelaState extends State<RodaTela> with SingleTickerProviderStateMixin
       ),
     );
   }
-}
-
-/// A roda: 8 fatias coloridas com o prêmio, aro com luzes e miolo.
-class _PintorRoda extends CustomPainter {
-  const _PintorRoda();
-
-  @override
-  void paint(Canvas canvas, Size s) {
-    final c = s.center(Offset.zero);
-    final r = s.shortestSide / 2;
-    final fatia = 2 * math.pi / Roda.premios.length;
-    canvas.drawCircle(c, r, Paint()..color = const Color(0xFF2A0B5E));
-    final rFatia = r * 0.9;
-    for (var i = 0; i < Roda.premios.length; i++) {
-      final inicio = -math.pi / 2 + i * fatia;
-      final cor = Cores.blocos[i % Cores.blocos.length];
-      canvas.drawArc(
-        Rect.fromCircle(center: c, radius: rFatia),
-        inicio,
-        fatia,
-        true,
-        Paint()
-          ..shader = RadialGradient(colors: [Color.lerp(cor, Colors.white, 0.35)!, cor])
-              .createShader(Rect.fromCircle(center: c, radius: rFatia)),
-      );
-      canvas.drawArc(
-        Rect.fromCircle(center: c, radius: rFatia),
-        inicio,
-        fatia,
-        true,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3
-          ..color = Colors.white.withValues(alpha: 0.7),
-      );
-      // Prêmio escrito ao longo do raio.
-      canvas.save();
-      canvas.translate(c.dx, c.dy);
-      canvas.rotate(inicio + fatia / 2 + math.pi / 2);
-      final texto = TextPainter(
-        text: TextSpan(
-          text: '${Roda.premios[i]}',
-          style: TextStyle(
-            fontFamily: fonteJogo,
-            fontSize: r * 0.17,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-            shadows: const [Shadow(color: Color(0xFF2A0B5E), offset: Offset(0, 2), blurRadius: 3)],
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      texto.paint(canvas, Offset(-texto.width / 2, -rFatia * 0.82));
-      canvas.restore();
-    }
-    // Luzes do aro.
-    for (var i = 0; i < 16; i++) {
-      final a = i * 2 * math.pi / 16;
-      canvas.drawCircle(
-        c + Offset(math.cos(a), math.sin(a)) * r * 0.95,
-        r * 0.025,
-        Paint()..color = i.isEven ? Cores.ouro : Colors.white,
-      );
-    }
-    // Miolo.
-    canvas.drawCircle(c, r * 0.16, Paint()..color = Colors.white);
-    canvas.drawCircle(c, r * 0.12, Paint()..color = Cores.destaque);
-  }
-
-  @override
-  bool shouldRepaint(_PintorRoda antigo) => false;
-}
-
-/// Ponteiro dourado no topo.
-class _Ponteiro extends CustomPainter {
-  const _Ponteiro();
-
-  @override
-  void paint(Canvas canvas, Size s) {
-    final caminho = Path()
-      ..moveTo(0, 0)
-      ..lineTo(s.width, 0)
-      ..lineTo(s.width / 2, s.height)
-      ..close();
-    canvas.drawShadow(caminho, Colors.black, 4, false);
-    canvas.drawPath(caminho, Paint()..color = Cores.ouro);
-    canvas.drawPath(
-      caminho,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3
-        ..color = Colors.white,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_Ponteiro antigo) => false;
 }

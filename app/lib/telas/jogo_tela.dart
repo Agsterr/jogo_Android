@@ -21,6 +21,7 @@ import '../widgets/peca_widget.dart';
 import '../widgets/tabuleiro_widget.dart';
 import 'loja_tela.dart';
 import 'mapa_tela.dart';
+import 'roleta_partida.dart';
 
 /// Preço dos reforços e da segunda chance, em gemas.
 abstract final class Custos {
@@ -275,6 +276,7 @@ class _JogoTelaState extends State<JogoTela> {
           _gemasFase = gemas;
           _fim = _Fim.faseVencida;
         });
+        await mostrarRoletaDaPartida(context, _s);
       }
     } else if (_restantes(fase) <= 0 || _partida.fimDeJogo) {
       _s.sons.tocar(Som.fim);
@@ -366,6 +368,7 @@ class _JogoTelaState extends State<JogoTela> {
       _gemasDesafio = gemasDesafio;
       _fim = _Fim.resultado;
     });
+    await mostrarRoletaDaPartida(context, _s);
   }
 
   Future<void> _intersticial() async {

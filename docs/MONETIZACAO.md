@@ -6,7 +6,7 @@ Regra de ouro: **o anúncio nunca interrompe uma partida** e o premiado é sempr
 ## Anúncios (AdMob) — `app/lib/servicos/anuncios.dart`
 | Formato | Onde | Regra |
 |---|---|---|
-| Premiado | Segunda chance; "+5 gemas grátis" na loja | Só quando o jogador toca. Continua disponível para quem pagou |
+| Premiado | Segunda chance; "+5 gemas grátis" na loja; Roda da sorte (giros 2 e 3); roleta do fim de partida (giros extras) | Só quando o jogador toca. Continua disponível para quem pagou |
 | Intersticial | Ao sair do resultado ("Jogar de novo"/"Início") | Nunca nas 3 primeiras partidas; no máximo 1 a cada 3 partidas **e** 3 minutos (`PoliticaIntersticial`, testada) |
 | Banner | — | Não usamos: paga pouco e deixa a tela feia |
 

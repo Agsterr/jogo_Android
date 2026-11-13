@@ -61,6 +61,11 @@ versão do app. Número do desafio = dias desde 1º/11/2026. Pode repetir; vale 
 - Ajuda (uma por tentativa): **+5 peças** ou **abrir espaço**, por anúncio premiado ou 10 gemas (grátis no Encaixa+).
 - Gemas: +2 na primeira vez que passa a fase e +15 ao fechar um mundo.
 
+## Roleta da partida (`app/lib/jogo/roleta.dart`)
+- Abre no fim de cada partida (Infinito, Desafio, Arena) e de cada fase vencida.
+- Prêmios bons e ruins: Nada (2 fatias), +1, +2, +3, +5, +10 e +25 (raro).
+- 1 giro grátis; mais 2 giros vendo anúncio premiado (grátis no Encaixa+).
+
 ## Arena da semana (`app/lib/jogo/arena.dart`)
 - Torneio de segunda a domingo com as mesmas peças para todos (semente da semana). Vale a melhor partida.
 - Troféus por pontos: Bronze 500 (+10 gemas), Prata 1.500 (+25), Ouro 3.000 (+50), Diamante 6.000 (+100).

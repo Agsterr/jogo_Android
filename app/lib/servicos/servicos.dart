@@ -13,6 +13,7 @@ class Servicos {
     this.hoje = _agora,
     this.mostrarPresenteAoAbrir = true,
     this.mostrarDicas = true,
+    this.roletaAposPartida = true,
   });
 
   final Progresso progresso;
@@ -28,6 +29,9 @@ class Servicos {
 
   /// Dicas de primeira vez e tutorial (desligados nos testes de tela, ligados nos do tutorial).
   final bool mostrarDicas;
+
+  /// Roleta de prêmios no fim de cada partida (desligada nos testes de tela).
+  final bool roletaAposPartida;
 
   static DateTime _agora() => DateTime.now();
 }
