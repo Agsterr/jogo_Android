@@ -136,4 +136,25 @@ void main() {
     p.colocar(1, 5, 0);
     expect(copia.paraJson(), p.paraJson(), reason: 'próximas peças iguais');
   });
+
+  test('segunda chance limpa os blocos mas NÃO as pedras', () {
+    final p = Partida(semente: 5);
+    for (var l = 0; l < 8; l++) {
+      for (var k = 0; k < 8; k++) {
+        if ((l + k).isOdd) p.tabuleiro.definir(l, k, 0);
+      }
+    }
+    p.tabuleiro.definir(3, 4, Tabuleiro.pedra); // casa par: sem bloco em volta ocupando outra coisa
+    p.tabuleiro.definir(7, 6, Tabuleiro.pedra); // fora das 4 linhas do meio
+    p.mao = [
+      Peca(Formato.desenho(['##']), 0),
+      null,
+      null,
+    ];
+    expect(p.continuar(), isTrue);
+    expect(p.tabuleiro.cor(3, 4), Tabuleiro.pedra, reason: 'pedra no meio continua lá');
+    expect(p.tabuleiro.cor(7, 6), Tabuleiro.pedra);
+    expect(p.tabuleiro.cor(3, 3), isNull, reason: 'bloco comum some');
+    expect(p.tabuleiro.pedras, 2);
+  });
 }

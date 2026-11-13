@@ -199,13 +199,14 @@ class Partida {
     _novaMao();
   }
 
-  /// Segunda chance (uma por partida): limpa as 4 linhas do meio e dá mão nova.
+  /// Segunda chance (uma por partida): limpa os blocos das 4 linhas do meio e dá mão nova.
+  /// As pedras das fases ficam: só se quebram completando a linha, senão a ajuda venceria a fase.
   bool continuar() {
     if (continuou) return false;
     continuou = true;
     for (var l = 2; l < 6; l++) {
       for (var k = 0; k < Tabuleiro.tamanho; k++) {
-        tabuleiro.definir(l, k, null);
+        if (tabuleiro.cor(l, k) != Tabuleiro.pedra) tabuleiro.definir(l, k, null);
       }
     }
     _anterior = null;

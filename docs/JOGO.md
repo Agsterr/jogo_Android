@@ -59,6 +59,7 @@ versão do app. Número do desafio = dias desde 1º/11/2026. Pode repetir; vale 
   vence, troca a variação ou alivia o alvo. Assim **toda fase tem solução**.
 - Estrelas: 3 sobrando ≥ 30% das peças, 2 com ≥ 15%, senão 1. Quem usou ajuda leva 1 estrela.
 - Ajuda (uma por tentativa): **+5 peças** ou **abrir espaço**, por anúncio premiado ou 10 gemas (grátis no Encaixa+).
+  "Abrir espaço" limpa só os blocos coloridos das 4 linhas do meio: **as pedras ficam** (senão a ajuda venceria a fase).
 - Gemas: +2 na primeira vez que passa a fase e +15 ao fechar um mundo.
 
 ## Roleta da partida (`app/lib/jogo/roleta.dart`)

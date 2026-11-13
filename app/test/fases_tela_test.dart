@@ -118,4 +118,35 @@ void main() {
       await capturar(tester, nome);
     }
   });
+
+  testWidgets('ajuda "abrir espaço" não quebra a pedra nem vence a fase', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(valores: {'gemas': 20});
+    final fase = Fase.numero(4); // pedras
+    final partida = fase.novaPartida();
+    final pedras = partida.tabuleiro.pedras;
+    for (var l = 0; l < 8; l++) {
+      for (var k = 0; k < 8; k++) {
+        if ((l + k).isOdd && partida.tabuleiro.cor(l, k) == null) partida.tabuleiro.definir(l, k, 1);
+      }
+    }
+    partida.mao = [
+      Peca(Formato.desenho(['##', '##']), 2),
+      null,
+      null,
+    ];
+    await tester.pumpWidget(
+      appDeTeste(
+        s,
+        tela: JogoTela(servicos: s, fase: fase, partida: partida),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('Sem espaço!'), findsOneWidget);
+    await tester.tap(find.text('Usar 10 gemas').first);
+    await tester.pump();
+    expect(partida.tabuleiro.pedras, pedras, reason: 'nenhuma pedra some com a ajuda');
+    expect(fase.concluida(partida), isFalse);
+    expect(find.textContaining('concluída'), findsNothing);
+  });
 }
