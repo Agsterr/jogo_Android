@@ -38,7 +38,7 @@ class MainActivity : FlutterActivity() {
                 val nuvem = tarefa.isSuccessful && tarefa.result == true
                 val dados = StoreBytesData.Builder()
                     .setBytes(bytes)
-                    .setKeys(listOf(CHAVE))
+                    .setKey(CHAVE)
                     .setShouldBackupToCloud(nuvem)
                     .build()
                 cliente.storeBytes(dados)
