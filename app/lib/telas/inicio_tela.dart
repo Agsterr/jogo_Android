@@ -21,6 +21,7 @@ import 'arena_tela.dart';
 import 'jogo_tela.dart';
 import 'loja_tela.dart';
 import 'mapa_tela.dart';
+import 'progresso_tela.dart';
 import 'roda_tela.dart';
 
 class InicioTela extends StatefulWidget {
@@ -38,13 +39,17 @@ class _InicioTelaState extends State<InicioTela> {
   @override
   void initState() {
     super.initState();
-    // Primeira abertura do dia: mostra o presente (ensina que vale voltar todo dia).
-    if (servicos.mostrarPresenteAoAbrir) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final dia = Sorteio.sementeDoDia(servicos.hoje());
-        if (mounted && servicos.progresso.presenteDeHoje(dia) > 0) _abrirPresente(dia);
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final dia = Sorteio.sementeDoDia(servicos.hoje());
+      // Primeira abertura do dia: mostra o presente (ensina que vale voltar todo dia).
+      if (servicos.mostrarPresenteAoAbrir && servicos.progresso.presenteDeHoje(dia) > 0) {
+        _abrirPresente(dia);
+      } else if (servicos.progresso.faseLiberada >= 5) {
+        // Quem já tem progresso a perder: lembra uma vez onde fica o "Salvar progresso".
+        mostrarDicaUmaVez(context, servicos, Dicas.progresso);
+      }
+    });
   }
 
   void _abrir(Widget tela) => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => tela));
@@ -188,6 +193,11 @@ class _InicioTelaState extends State<InicioTela> {
                         altura: 50,
                         tamanhoTexto: 20,
                         aoTocar: () => _abrir(LojaTela(servicos: servicos)),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => _abrir(ProgressoTela(servicos: servicos)),
+                        icon: const Icon(Icons.save_rounded, size: 20),
+                        label: const Text('Salvar progresso'),
                       ),
                     ],
                   );

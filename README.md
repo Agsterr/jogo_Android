@@ -50,3 +50,4 @@ Telas e artes: veja [docs/TELAS.md](docs/TELAS.md). Publicação: [docs/PUBLICAR
 - [Monetização](docs/MONETIZACAO.md) — anúncios, gemas, "Sem anúncios", assinatura Encaixa+
 - [Publicar](docs/PUBLICAR.md) — Play Console, AdMob, segredos do GitHub, CI
 - [Telas e artes](docs/TELAS.md)
+- [Salvar o progresso](docs/PROGRESSO.md) — código de progresso, backup do Android, nuvem

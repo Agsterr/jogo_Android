@@ -7,6 +7,7 @@ import '../jogo/arena.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
 import '../jogo/roda.dart';
+import 'codigo_progresso.dart';
 import '../jogo/temas.dart';
 import '../tema.dart';
 
@@ -128,6 +129,42 @@ class Progresso extends ChangeNotifier {
     await ganharGemas(gemasGanhas);
     notifyListeners();
     return gemasGanhas;
+  }
+
+  // ---------- código de progresso ----------
+
+  /// Gera o código com o progresso de agora ([agora] em ms) e lembra a hora: códigos mais velhos
+  /// que ela são recusados depois (senão dava para gastar as gemas e colar o código antigo de novo).
+  Future<String> gerarCodigo(int agora) async {
+    final codigo = CodigoProgresso.gerar({for (final k in _prefs.getKeys()) k: _prefs.get(k)}, agora: agora);
+    await _prefs.setInt('codigoEm', agora);
+    return codigo;
+  }
+
+  /// O código só vale se for mais novo que o último gerado ou recuperado neste aparelho.
+  bool codigoRecente(Map<String, Object> dados) => (dados['salvoEm']! as int) > (_prefs.getInt('codigoEm') ?? 0);
+
+  /// Troca o progresso deste aparelho pelo do código (compras e partida em andamento ficam como estão).
+  Future<void> restaurarCodigo(Map<String, Object> dados) async {
+    for (final chave in _prefs.getKeys().toList()) {
+      if (CodigoProgresso.vai(chave)) await _prefs.remove(chave);
+    }
+    for (final MapEntry(key: chave, value: valor) in dados.entries) {
+      if (chave == 'salvoEm') continue;
+      switch (valor) {
+        case final int v:
+          await _prefs.setInt(chave, v);
+        case final bool v:
+          await _prefs.setBool(chave, v);
+        case final String v:
+          await _prefs.setString(chave, v);
+        case final List<String> v:
+          await _prefs.setStringList(chave, v);
+      }
+    }
+    await _prefs.setInt('codigoEm', dados['salvoEm']! as int);
+    Cores.pecas = temaAtivo.cores;
+    notifyListeners();
   }
 
   // ---------- roda da sorte ----------

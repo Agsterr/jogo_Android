@@ -8,6 +8,7 @@ import '../servicos/compras.dart';
 import '../servicos/servicos.dart';
 import '../tema.dart';
 import '../widgets/peca_widget.dart';
+import 'progresso_tela.dart';
 
 class LojaTela extends StatelessWidget {
   const LojaTela({super.key, required this.servicos});
@@ -121,6 +122,12 @@ class LojaTela extends StatelessWidget {
                 ],
                 const SizedBox(height: 16),
                 TextButton(onPressed: pode ? compras.restaurar : null, child: const Text('Restaurar compras')),
+                TextButton(
+                  onPressed: () =>
+                      Navigator.of(context)
+                          .push(MaterialPageRoute<void>(builder: (_) => ProgressoTela(servicos: servicos))),
+                  child: const Text('Salvar ou recuperar progresso'),
+                ),
               ],
             );
           },

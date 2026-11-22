@@ -88,6 +88,13 @@ abstract final class Dicas {
     'Cada giro dá de 5 a 50 gemas.',
   ]);
 
+  static const progresso = Dica('progresso', 'Salvar o progresso', Icons.save_rounded, Color(0xFF3FE0D0), [
+    'Trocar de celular ou desinstalar o jogo apaga as fases e as gemas.',
+    'Antes, toque em "Salvar progresso" (no fim da tela inicial, ou na Loja) e copie o código.',
+    'No celular novo, abra o mesmo botão, cole o código e toque em Recuperar.',
+    'As compras (Sem anúncios e Encaixa+) voltam em Loja > Restaurar compras.',
+  ]);
+
   static const eventos = Dica('eventos', 'Eventos', Icons.celebration_rounded, Color(0xFFFF2E7E), [
     'Eventos duram alguns dias e aparecem no banner da tela inicial.',
     'Durante o evento, linhas de uma cor e tabuleiro limpo dão gemas EM DOBRO.',
@@ -122,6 +129,7 @@ abstract final class Dicas {
     missoes,
     presente,
     roda,
+    progresso,
     eventos,
     gemas,
   ];

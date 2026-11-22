@@ -2,6 +2,7 @@ import 'package:encaixa/jogo/partida.dart';
 import 'package:encaixa/jogo/peca.dart';
 import 'package:encaixa/jogo/temas.dart';
 import 'package:encaixa/telas/arena_tela.dart';
+import 'package:encaixa/telas/inicio_tela.dart';
 import 'package:encaixa/telas/jogo_tela.dart';
 import 'package:encaixa/telas/loja_tela.dart';
 import 'package:encaixa/telas/roda_tela.dart';
@@ -277,5 +278,33 @@ void main() {
     await capturar(tester, '8-pequena-jogo');
     await tester.pumpWidget(appDeTeste(s, tela: LojaTela(servicos: s)));
     await tester.pump();
+  });
+
+  testWidgets('quem já tem progresso vê uma vez o aviso de onde salvar', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(valores: {'faseLiberada': 6}, dicas: true);
+    await tester.pumpWidget(appDeTeste(s));
+    await tester.pumpAndSettle();
+    expect(find.text('Salvar o progresso'), findsWidgets);
+    expect(find.textContaining('fim da tela inicial'), findsOneWidget);
+    await capturar(tester, '29-aviso-salvar');
+    await tester.tap(find.text('ENTENDI').first);
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      appDeTeste(
+        s,
+        tela: InicioTela(key: UniqueKey(), servicos: s),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Salvar o progresso'), findsNothing, reason: 'só aparece uma vez');
+  });
+
+  testWidgets('quem está começando não é incomodado com o aviso', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(valores: {'faseLiberada': 2}, dicas: true);
+    await tester.pumpWidget(appDeTeste(s));
+    await tester.pumpAndSettle();
+    expect(find.text('Salvar o progresso'), findsNothing);
   });
 }
