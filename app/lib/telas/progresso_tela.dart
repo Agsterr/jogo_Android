@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
@@ -5,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../app.dart';
 import '../jogo/fases.dart';
 import '../servicos/codigo_progresso.dart';
+import '../servicos/copia_automatica.dart';
 import '../servicos/servicos.dart';
 import '../tema.dart';
 import '../widgets/doce.dart';
@@ -25,6 +27,12 @@ class _ProgressoTelaState extends State<ProgressoTela> {
   String? _erro;
 
   Servicos get _s => widget.servicos;
+
+  @override
+  void initState() {
+    super.initState();
+    _s.copia?.salvarAgora(); // atualiza a cópia automática e o estado mostrado abaixo
+  }
 
   @override
   void dispose() {
@@ -173,6 +181,7 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                     ],
                   ),
                 ),
+                if (_s.copia case final copia?) ...[const SizedBox(height: 12), _CartaoCopiaAutomatica(copia.status)],
                 const SizedBox(height: 20),
                 const TextoContornado('1. Salvar', tamanho: 22, alinhamento: TextAlign.start),
                 const SizedBox(height: 4),
@@ -266,4 +275,72 @@ class _ProgressoTelaState extends State<ProgressoTela> {
       ),
     );
   }
+}
+
+/// Mostra se a cópia automática está funcionando neste celular.
+class _CartaoCopiaAutomatica extends StatelessWidget {
+  const _CartaoCopiaAutomatica(this.status);
+
+  final ValueListenable<StatusCopia> status;
+
+  static String _hora(DateTime d) => '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<StatusCopia>(
+    valueListenable: status,
+    builder: (context, s, _) {
+      final (icone, cor, titulo, texto) = switch (s.estado) {
+        EstadoCopia.aindaNao => (
+          Icons.sync_rounded,
+          Cores.textoFraco,
+          'Cópia automática',
+          'Salvando o seu progresso automaticamente...',
+        ),
+        EstadoCopia.naNuvem => (
+          Icons.cloud_done_rounded,
+          Cores.blocos[3],
+          'Cópia automática ligada',
+          'Seu progresso está salvo no Google (backup na nuvem). Se reinstalar o jogo ou trocar de celular, ele volta sozinho.',
+        ),
+        EstadoCopia.soNoCelular => (
+          Icons.check_circle_rounded,
+          Cores.blocos[3],
+          'Cópia automática ligada',
+          'Salva neste celular: se reinstalar o jogo, ele volta sozinho (com o Backup do Google ligado). '
+              'Para trocar de celular, use o código abaixo.',
+        ),
+        EstadoCopia.indisponivel => (
+          Icons.warning_amber_rounded,
+          Cores.ouro,
+          'Cópia automática indisponível',
+          'Este celular não permitiu a cópia automática. Use o código abaixo para não perder o progresso.',
+        ),
+      };
+      return CartaoVidro(
+        cores: [cor, Cores.brilhoCiano],
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icone, color: cor, size: 30),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(titulo, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 2),
+                  Text(texto, style: const TextStyle(fontSize: 14, height: 1.3)),
+                  if (s.quando != null && s.estado != EstadoCopia.indisponivel)
+                    Text(
+                      'Última cópia: ${_hora(s.quando!)}',
+                      style: const TextStyle(fontSize: 13, color: Cores.textoFraco),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

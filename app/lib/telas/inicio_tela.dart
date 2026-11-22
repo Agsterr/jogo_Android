@@ -42,6 +42,20 @@ class _InicioTelaState extends State<InicioTela> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final dia = Sorteio.sementeDoDia(servicos.hoje());
+      // Reinstalou e o progresso voltou sozinho: conta ao jogador.
+      if (servicos.progresso.recuperadoAutomaticamente) {
+        servicos.progresso.recuperadoAutomaticamente = false;
+        final r = servicos.progresso.resumo;
+        mostrarDica(
+          context,
+          Dica('recuperado', 'Progresso recuperado!', Icons.cloud_done_rounded, Cores.blocos[3], [
+            'Encontramos o seu progresso salvo automaticamente.',
+            'Fase ${r.fase.clamp(1, Fase.total)} · ${r.estrelas} estrelas',
+            '${r.gemas} gemas · Recorde ${r.recorde}',
+          ], botao: 'CONTINUAR'),
+        );
+        return;
+      }
       // Primeira abertura do dia: mostra o presente (ensina que vale voltar todo dia).
       if (servicos.mostrarPresenteAoAbrir && servicos.progresso.presenteDeHoje(dia) > 0) {
         _abrirPresente(dia);

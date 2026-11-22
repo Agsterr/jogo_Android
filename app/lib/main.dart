@@ -6,6 +6,7 @@ import 'app.dart';
 import 'jogo/sorteio.dart';
 import 'servicos/anuncios.dart';
 import 'servicos/compras.dart';
+import 'servicos/copia_automatica.dart';
 import 'servicos/progresso.dart';
 import 'servicos/servicos.dart';
 import 'servicos/sons.dart';
@@ -16,11 +17,16 @@ Future<void> main() async {
 
   final progresso = await Progresso.carregar();
   final android = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+  // Reinstalou? Recupera o progresso antes de mostrar a primeira tela (no máximo 3 s de espera).
+  final automatico = SalvamentoAutomatico(progresso, android ? CopiaBlockStore() : const SemCopia());
+  await automatico.recuperarSeVazio().timeout(const Duration(seconds: 3), onTimeout: () => false);
+  automatico.iniciar();
   final servicos = Servicos(
     progresso: progresso,
     anuncios: android ? AnunciosAdMob() : SemAnuncios(),
     compras: android ? ComprasPlay(progresso) : ComprasFicticias(progresso),
     sons: SonsDoJogo(progresso),
+    copia: automatico,
   );
   runApp(EncaixaApp(servicos: servicos));
 

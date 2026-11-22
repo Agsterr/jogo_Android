@@ -6,13 +6,16 @@ import 'doce.dart';
 
 /// Um texto de ajuda: aparece uma vez como janela e fica na tela "Como jogar".
 class Dica {
-  const Dica(this.id, this.titulo, this.icone, this.cor, this.linhas);
+  const Dica(this.id, this.titulo, this.icone, this.cor, this.linhas, {this.botao = 'ENTENDI'});
 
   final String id;
   final String titulo;
   final IconData icone;
   final Color cor;
   final List<String> linhas;
+
+  /// Texto do botão que fecha a janela.
+  final String botao;
 }
 
 abstract final class Dicas {
@@ -89,8 +92,9 @@ abstract final class Dicas {
   ]);
 
   static const progresso = Dica('progresso', 'Salvar o progresso', Icons.save_rounded, Color(0xFF3FE0D0), [
-    'Trocar de celular ou desinstalar o jogo apaga as fases e as gemas.',
-    'Antes, toque em "Salvar progresso" (no fim da tela inicial, ou na Loja) e copie o código.',
+    'O jogo salva o seu progresso sozinho. Se você reinstalar, ele tenta recuperar na primeira abertura.',
+    'Funciona melhor com o Backup do Google ligado (Configurações > Google > Backup).',
+    'Para garantir, ou para trocar de celular, toque em "Salvar progresso" (no fim da tela inicial, ou na Loja) e copie o código.',
     'No celular novo, abra o mesmo botão, cole o código e toque em Recuperar.',
     'As compras (Sem anúncios e Encaixa+) voltam em Loja > Restaurar compras.',
   ]);
@@ -185,7 +189,7 @@ class DialogoDica extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           BotaoDoce(
-            texto: 'ENTENDI',
+            texto: dica.botao,
             cor: Cores.blocos[3],
             altura: 50,
             tamanhoTexto: 20,

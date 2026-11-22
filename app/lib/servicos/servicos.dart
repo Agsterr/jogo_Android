@@ -1,5 +1,6 @@
 import 'anuncios.dart';
 import 'compras.dart';
+import 'copia_automatica.dart';
 import 'progresso.dart';
 import 'sons.dart';
 
@@ -14,12 +15,16 @@ class Servicos {
     this.mostrarPresenteAoAbrir = true,
     this.mostrarDicas = true,
     this.roletaAposPartida = true,
+    this.copia,
   });
 
   final Progresso progresso;
   final Anuncios anuncios;
   final Compras compras;
   final Sons sons;
+
+  /// Cópia automática do progresso (recupera sozinho depois de reinstalar). `null` nos testes de tela.
+  final SalvamentoAutomatico? copia;
 
   /// Relógio injetável: os testes fixam o dia do desafio.
   final DateTime Function() hoje;

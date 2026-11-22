@@ -63,6 +63,11 @@ android {
     }
 }
 
+dependencies {
+    // Block Store: guarda o progresso fora dos dados do app (sobrevive a reinstalar). Ver MainActivity.kt.
+    implementation("com.google.android.gms:play-services-auth-blockstore:16.4.0")
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17

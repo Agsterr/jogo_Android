@@ -14,6 +14,9 @@ mkdir -p emulador
 adb exec-out screencap -p > emulador/tela.png
 adb logcat -d > emulador/logcat.txt
 
+echo "===== Cópia automática do progresso (Block Store) ====="
+grep -E "EncaixaCopia" emulador/logcat.txt || echo "(nenhuma linha EncaixaCopia: o jogo não chamou o Block Store)"
+
 echo "===== Erros do Android ====="
 grep -E "FATAL EXCEPTION|AndroidRuntime|Caused by|E/flutter|libc   :|DEBUG   :" emulador/logcat.txt | head -120
 

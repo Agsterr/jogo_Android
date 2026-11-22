@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:encaixa/app.dart';
 import 'package:encaixa/servicos/anuncios.dart';
 import 'package:encaixa/servicos/compras.dart';
+import 'package:encaixa/servicos/copia_automatica.dart';
 import 'package:encaixa/servicos/progresso.dart';
 import 'package:encaixa/servicos/servicos.dart';
 import 'package:flutter/rendering.dart';
@@ -36,17 +37,22 @@ Future<Servicos> servicosDeTeste({
   DateTime? hoje,
   bool dicas = false,
   bool roleta = false,
+  CopiaAutomatica? copia,
 }) async {
   SharedPreferences.setMockInitialValues(valores);
   final progresso = await Progresso.carregar();
+  DateTime agora() => hoje ?? DateTime(2026, 11, 12, 9);
   return Servicos(
     progresso: progresso,
     anuncios: SemAnuncios(),
     compras: ComprasFicticias(progresso),
-    hoje: () => hoje ?? DateTime(2026, 11, 12, 9),
+    hoje: agora,
     mostrarPresenteAoAbrir: false,
     mostrarDicas: dicas,
     roletaAposPartida: roleta,
+    copia: copia == null
+        ? null
+        : SalvamentoAutomatico(progresso, copia, pausa: const Duration(milliseconds: 50), relogio: agora),
   );
 }
 

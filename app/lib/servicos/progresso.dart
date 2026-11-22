@@ -131,6 +131,13 @@ class Progresso extends ChangeNotifier {
     return gemasGanhas;
   }
 
+  /// O progresso acabou de voltar sozinho da cópia automática (a tela inicial avisa o jogador uma vez).
+  bool recuperadoAutomaticamente = false;
+
+  /// Resumo do progresso de agora, para avisar o jogador.
+  ({int fase, int estrelas, int gemas, int recorde}) get resumo =>
+      (fase: faseLiberada, estrelas: estrelasTotais, gemas: gemas, recorde: recorde);
+
   // ---------- código de progresso ----------
 
   /// Gera o código com o progresso de agora ([agora] em ms) e lembra a hora: códigos mais velhos
