@@ -2,7 +2,15 @@ import 'dart:ui' show Color;
 
 /// Visual das peças (6 cores). Itens cosméticos: gemas, assinatura ou evento.
 class TemaDeBlocos {
-  const TemaDeBlocos(this.id, this.nome, this.cores, {this.preco = 0, this.assinante = false, this.evento});
+  const TemaDeBlocos(
+    this.id,
+    this.nome,
+    this.cores, {
+    this.preco = 0,
+    this.assinante = false,
+    this.evento,
+    this.marcoDias,
+  });
 
   final String id;
   final String nome;
@@ -16,6 +24,9 @@ class TemaDeBlocos {
 
   /// Id do evento que libera o tema de graça enquanto durar.
   final String? evento;
+
+  /// Prêmio de sequência: libera depois de tantos dias seguidos no Desafio do dia (fica para sempre).
+  final int? marcoDias;
 
   static const classico = TemaDeBlocos('classico', 'Clássico', [
     Color(0xFFFF3D6E),
@@ -76,6 +87,14 @@ class TemaDeBlocos {
       Color(0xFF66BB6A),
       Color(0xFFC62828),
     ], evento: 'natal-2026'),
+    TemaDeBlocos('chama', 'Chama', [
+      Color(0xFFFF2D2D),
+      Color(0xFFFF6A00),
+      Color(0xFFFFB800),
+      Color(0xFFFFE066),
+      Color(0xFFFF4D8D),
+      Color(0xFFC81D6B),
+    ], marcoDias: 30),
   ];
 
   static TemaDeBlocos porId(String? id) => todos.firstWhere((t) => t.id == id, orElse: () => classico);

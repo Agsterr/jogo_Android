@@ -1000,6 +1000,9 @@ class _JogoTelaState extends State<JogoTela> {
           [
             'Desafio do dia concluído!',
             if (_gemasDesafio > 0) '+$_gemasDesafio gemas',
+            if (premioDaSequencia(_s.progresso.sequencia(_dia)) > 0 && _gemasDesafio > 0)
+              'Marco de ${_s.progresso.sequencia(_dia)} dias! 🎉',
+            if (_s.progresso.sequencia(_dia) == 30 && _gemasDesafio > 0) 'Tema Chama liberado na Loja!',
             '🔥 ${_s.progresso.sequencia(_dia)} ${_s.progresso.sequencia(_dia) == 1 ? 'dia' : 'dias seguidos'}',
           ].join('\n'),
           textAlign: TextAlign.center,

@@ -97,16 +97,28 @@ class _InicioTelaState extends State<InicioTela> {
                         Row(
                           children: [
                             if (p.assinante) const _Selo('Encaixa+'),
-                            if (p.sequencia(dia) > 0) ...[const SizedBox(width: 8), _Sequencia(p.sequencia(dia))],
+                            ...[
+                              const SizedBox(width: 8),
+                              _Sequencia(
+                                p.sequencia(dia),
+                                aoTocar: () => showDialog<void>(
+                                  context: context,
+                                  builder: (_) =>
+                                      _DialogoSequencia(dias: p.sequencia(dia), feitoHoje: p.desafioFeito == dia),
+                                ),
+                              ),
+                            ],
                             const Spacer(),
                             IconButton(
                               tooltip: 'Como jogar',
+                              visualDensity: VisualDensity.compact,
                               onPressed: () => _abrir(AjudaTela(servicos: servicos)),
                               icon: const Icon(Icons.help_rounded),
                             ),
                             _BotaoPresente(disponivel: p.presenteDeHoje(dia) > 0, aoTocar: () => _abrirPresente(dia)),
                             IconButton(
                               tooltip: p.somLigado ? 'Desligar som' : 'Ligar som',
+                              visualDensity: VisualDensity.compact,
                               onPressed: p.alternarSom,
                               icon: Icon(p.somLigado ? Icons.volume_up_rounded : Icons.volume_off_rounded),
                             ),
@@ -386,26 +398,117 @@ class _BlocosDeFundo extends CustomPainter {
 }
 
 class _Sequencia extends StatelessWidget {
-  const _Sequencia(this.dias);
+  const _Sequencia(this.dias, {required this.aoTocar});
 
   final int dias;
+  final VoidCallback aoTocar;
 
   @override
   Widget build(BuildContext context) => Tooltip(
     message: 'Dias seguidos no Desafio do dia',
-    child: Container(
-      padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
-      decoration: BoxDecoration(color: Cores.painel.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(20)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.local_fire_department_rounded, color: Cores.blocos[1], size: 20),
-          const SizedBox(width: 2),
-          Text('$dias', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        ],
+    child: GestureDetector(
+      onTap: aoTocar,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
+        decoration: BoxDecoration(color: Cores.painel.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(20)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.local_fire_department_rounded, color: Cores.blocos[1], size: 20),
+            const SizedBox(width: 2),
+            Text('$dias', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          ],
+        ),
       ),
     ),
   );
+}
+
+/// Marcos da sequência: o que já foi, quanto falta e o prêmio de cada um.
+class _DialogoSequencia extends StatelessWidget {
+  const _DialogoSequencia({required this.dias, required this.feitoHoje});
+
+  final int dias;
+  final bool feitoHoje;
+
+  @override
+  Widget build(BuildContext context) {
+    final proximo = proximoMarco(dias);
+    final chama = TemaDeBlocos.porId('chama');
+    return AlertDialog(
+      backgroundColor: Cores.painel,
+      scrollable: true,
+      title: const FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text('Sequência do Desafio', textAlign: TextAlign.center),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.local_fire_department_rounded, color: Cores.blocos[1], size: 34),
+              Text(
+                ' $dias ${dias == 1 ? 'dia' : 'dias'}',
+                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            proximo == null
+                ? 'Todos os marcos conquistados!'
+                : (feitoHoje
+                      ? 'Hoje já valeu. Faltam ${proximo - dias} para o próximo prêmio.'
+                      : 'Jogue o Desafio de hoje: faltam ${proximo - dias} para o próximo prêmio.'),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 14, height: 1.3),
+          ),
+          const SizedBox(height: 12),
+          for (final m in marcosDaSequencia)
+            Container(
+              margin: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: dias >= m ? Cores.blocos[3].withValues(alpha: 0.3) : Cores.casa,
+                borderRadius: BorderRadius.circular(14),
+                border: m == proximo ? Border.all(color: Cores.ouro, width: 2) : null,
+              ),
+              child: Row(
+                children: [
+                  Icon(dias >= m ? Icons.check_circle_rounded : Icons.lock_outline_rounded, size: 22),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text('$m dias', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const IconeGema(tamanho: 16),
+                  Text(' +${premioDaSequencia(m)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  if (m == chama.marcoDias) ...[
+                    const SizedBox(width: 6),
+                    const Icon(Icons.palette_rounded, size: 20, color: Cores.ouro),
+                    const Text(' Tema', style: TextStyle(fontSize: 13)),
+                  ],
+                ],
+              ),
+            ),
+          const SizedBox(height: 4),
+          const Text(
+            'Pulou um dia? Dá para recuperar a sequência uma vez por semana.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: Cores.textoFraco),
+          ),
+        ],
+      ),
+      actionsAlignment: MainAxisAlignment.center,
+      actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Fechar'))],
+    );
+  }
 }
 
 /// As 3 missões do dia e o baú.
@@ -621,6 +724,7 @@ class _BotaoPresente extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IconButton(
     tooltip: 'Presente do dia',
+    visualDensity: VisualDensity.compact,
     onPressed: aoTocar,
     icon: Badge(
       isLabelVisible: disponivel,

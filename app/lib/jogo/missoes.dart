@@ -85,6 +85,17 @@ int premioDaSequencia(int dias) => switch (dias) {
   _ => 0,
 };
 
+/// Dias que dão prêmio na sequência, em ordem.
+const marcosDaSequencia = [3, 7, 14, 30];
+
+/// Próximo marco da sequência (o primeiro maior que [dias]), ou `null` depois do último.
+int? proximoMarco(int dias) {
+  for (final m in marcosDaSequencia) {
+    if (m > dias) return m;
+  }
+  return null;
+}
+
 /// Dia anterior no formato aaaammdd.
 int diaAnterior(int dia) {
   final d = DateTime.utc(dia ~/ 10000, dia ~/ 100 % 100, dia % 100).subtract(const Duration(days: 1));

@@ -131,6 +131,10 @@ class Progresso extends ChangeNotifier {
       await _prefs.setInt('sequencia', dias);
       gemasGanhas = 5 + premioDaSequencia(dias);
       await contarMissao(dia, TipoMissao.desafio, 1);
+      // Prêmio de 30 dias: tema exclusivo, guardado para sempre.
+      for (final t in TemaDeBlocos.todos) {
+        if (t.marcoDias != null && dias >= t.marcoDias!) await guardarTema(t);
+      }
     }
     await _prefs.setInt('desafioFeito', dia);
     await _prefs.setInt('desafioPontos', pontos);
@@ -233,7 +237,7 @@ class Progresso extends ChangeNotifier {
 
   /// Tem o tema? (grátis, comprado, assinante ou evento em andamento)
   bool temTema(TemaDeBlocos t, {String? eventoAtivo}) =>
-      (t.preco == 0 && !t.assinante && t.evento == null) ||
+      (t.preco == 0 && !t.assinante && t.evento == null && t.marcoDias == null) ||
       (_prefs.getStringList('temas') ?? []).contains(t.id) ||
       (t.assinante && assinante) ||
       (t.evento != null && t.evento == eventoAtivo);

@@ -116,3 +116,8 @@ Desligado por padrão. Em **Como jogar** há o interruptor "Lembrete do Desafio"
 notificação (Android 13+) e agenda **uma** notificação local para as 19h (horário do celular). Ela é reagendada a cada
 abertura do jogo e ao concluir o Desafio: se hoje já foi jogado ou já passou das 19h, vai para amanhã. Alarme inexato
 (pode variar alguns minutos), sem servidor. **Ainda não testado em celular real** (issue #14).
+
+## Sequência do Desafio (marcos)
+Tocar na chama (canto da tela inicial) abre os marcos: 3 dias (+5 gemas), 7 (+15), 14 (+30) e 30 (+60 e o tema **Chama**,
+que fica para sempre na Loja). O marco aparece no resultado do Desafio. Pulou um dia: dá para recuperar a sequência uma
+vez por semana (anúncio ou gemas).
