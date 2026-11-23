@@ -24,6 +24,10 @@ O jogo salva sozinho e recupera sozinho depois de reinstalar, sem o jogador faze
 Quando o aparelho não tem criptografia ponta a ponta, a cópia fica só no celular (estado "neste celular").
 Cada item do Block Store aceita até 4 KB; o código das 300 fases tem menos de 1,2 KB.
 
+**Teste no CI (execução #35):** o app compila e abre, mas o emulador respondeu
+`retrieveBytes(RetrieveBytesRequest) API is not available`: o Google Play services da imagem do emulador não tem o
+Block Store. Isso não prova nada sobre aparelhos reais (issue #20).
+
 **Ainda não verificado num aparelho real (issue de teste):** reinstalar e ver o progresso voltar; a restauração em
 celular novo; se a cópia do APK de teste (chave de debug) volta no APK da Play Store (assinado com outra chave).
 O emulador do CI só prova que o app abre e mostra no log (`EncaixaCopia`) se o Block Store respondeu.
@@ -57,6 +61,6 @@ missões e giros do dia.
 não vale para APK instalado à mão. Por isso o código existe.
 
 ## 4. Salvamento na nuvem com conta (precisa do usuário)
-Google Play Games (Saved Games): issues #16 e #17. Depende do app criado no Play Console (#2) e do Play Games
+Google Play Games (Saved Games): issues #16, #17 e #19; passo a passo em `docs/PLAY_GAMES.md`. Depende do app criado no Play Console (#2) e do Play Games
 configurado. Só vale a pena se quisermos ranking e salvar entre celulares com login; a cópia automática e o código já
 cobrem reinstalar e trocar de celular.

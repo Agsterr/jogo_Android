@@ -53,6 +53,23 @@ jobs:
           [ -z "${{ secrets.ADMOB_PREMIADO }}" ] && DEFINES=""
           flutter build apk --release $DEFINES
           flutter build appbundle --release $DEFINES
+      # O Google Cloud / Play Games pede o SHA-1 da chave que assinou o app. Aparece no resumo desta execução.
+      # (Impressão digital do certificado: é público, não é segredo.)
+      - name: SHA-1 da chave de assinatura (para o Play Games)
+        env:
+          SENHA: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          {
+            echo "### SHA-1 da chave de assinatura deste APK"
+            if [ -n "${ANDROID_KEYSTORE_PATH:-}" ]; then
+              echo "Chave de produção (segredos do GitHub):"
+              keytool -list -v -keystore "$ANDROID_KEYSTORE_PATH" -alias "$ALIAS" -storepass "$SENHA" | grep -E "SHA1:|SHA256:" || echo "(não consegui ler a chave)"
+            else
+              echo "Chave de teste (debug), a mesma em todas as execuções:"
+              keytool -list -v -keystore "$HOME/.android/debug.keystore" -alias androiddebugkey -storepass android -keypass android | grep -E "SHA1:|SHA256:" || echo "(não consegui ler a chave de teste)"
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
       # O SDK de anúncios fecha o app na abertura se o ID do AdMob estiver vazio no manifesto.
       - name: Conferir ID do AdMob no APK
         run: |

@@ -51,3 +51,4 @@ Telas e artes: veja [docs/TELAS.md](docs/TELAS.md). Publicação: [docs/PUBLICAR
 - [Publicar](docs/PUBLICAR.md) — Play Console, AdMob, segredos do GitHub, CI
 - [Telas e artes](docs/TELAS.md)
 - [Salvar o progresso](docs/PROGRESSO.md) — código de progresso, backup do Android, nuvem
+- [Configurar o Play Games](docs/PLAY_GAMES.md) — passo a passo no Play Console para salvar na nuvem
