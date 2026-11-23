@@ -16,7 +16,8 @@ fun segredo(nome: String): String? = (chave.getProperty(nome) ?: System.getenv(n
 
 android {
     namespace = "com.agsterr.encaixa2"
-    compileSdk = flutter.compileSdkVersion
+    // O plugin de notificações (e o androidx.core 1.19 que ele traz) exige compilar contra o Android SDK 37.
+    compileSdk = maxOf(flutter.compileSdkVersion, 37)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
