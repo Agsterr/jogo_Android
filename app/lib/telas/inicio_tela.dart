@@ -363,6 +363,24 @@ class _InicioTelaState extends State<InicioTela> {
                           ),
                         ),
                         const SizedBox(height: 14),
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: _Atalho(
+                                  icone: Icons.spa_rounded,
+                                  titulo: t('Zen'),
+                                  subtitulo: t('Sem fim e sem pressa, só para relaxar'),
+                                  cores: const [Color(0xFF00C2A8), Color(0xFF3D8BFF)],
+                                  contorno: const Color(0xFF004A52),
+                                  aoTocar: () => _abrir(JogoTela(servicos: servicos, zen: true)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
                         _CartaoMissoes(progresso: p, dia: dia),
                         const SizedBox(height: 14),
                         BotaoDoce(

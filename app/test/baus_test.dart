@@ -29,6 +29,7 @@ void main() {
           Categoria.tema => 6,
           Categoria.moldura => 3,
           Categoria.mascote => 1,
+          Categoria.fundo => 4,
         }, reason: i.id);
       }
       for (final r in Raridade.values) {
@@ -37,7 +38,7 @@ void main() {
     });
 
     test('só aparência: nenhum item mexe em pontuação (são só temas, molduras e cores)', () {
-      expect(Categoria.values, [Categoria.tema, Categoria.moldura, Categoria.mascote]);
+      expect(Categoria.values, [Categoria.tema, Categoria.moldura, Categoria.mascote, Categoria.fundo]);
     });
 
     test('o sorteio é determinístico e as raridades saem perto das chances anunciadas', () {

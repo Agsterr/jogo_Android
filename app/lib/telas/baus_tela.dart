@@ -281,6 +281,42 @@ class PreviaDoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => switch (categoria) {
     Categoria.mascote => Mascote(cor: cores.first, tamanho: tamanho),
+    Categoria.fundo => Container(
+      width: tamanho,
+      height: tamanho,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(tamanho * 0.2),
+        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [cores[0], cores[1]]),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: 0,
+            top: 0,
+            child: Container(
+              width: tamanho * 0.5,
+              height: tamanho * 0.5,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(colors: [cores[2].withValues(alpha: 0.8), cores[2].withValues(alpha: 0)]),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            bottom: 0,
+            child: Container(
+              width: tamanho * 0.5,
+              height: tamanho * 0.5,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(colors: [cores[3].withValues(alpha: 0.7), cores[3].withValues(alpha: 0)]),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
     Categoria.moldura => Container(
       width: tamanho,
       height: tamanho,
@@ -347,6 +383,7 @@ class _CartaDoItem extends StatelessWidget {
             Categoria.tema => Cores.blocos,
             Categoria.moldura => const [Cores.brilhoRosa, Color(0xFF8B5CFF), Cores.brilhoCiano],
             Categoria.mascote => [_corDoPadrao(cat)],
+            Categoria.fundo => const [Cores.fundoTopo, Cores.fundoBase, Cores.brilhoRosa, Cores.brilhoCiano],
           };
     return Semantics(
       button: tem,

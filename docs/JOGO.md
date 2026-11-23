@@ -212,3 +212,14 @@ ouvindo a própria música): liga em *Como jogar > Música de fundo*, só toca c
 - Só a **melhor marca do dia** paga gemas (paga a diferença); +15 XP do Passe na primeira pontuação do dia.
 - Pode tentar de novo à vontade. Não conta como partida do Infinito, não mexe em recorde nem missões.
 - Código: `app/lib/jogo/puzzle.dart`, testes em `app/test/puzzle_test.dart`, capturas `docs/telas/46-puzzle*.png`.
+
+## Modo Zen
+
+- Partida sem fim e sem pressa: quando nada mais cabe, o jogo tira as 2 linhas e 2 colunas mais cheias (mais, se a peça for grande) e segue.
+- Não vale recorde, gemas, missões nem conquistas. A partida fica guardada ("zen"); se voltar travada, abre espaço sozinha.
+- Código: `Partida.abrirEspaco`, `JogoTela(zen: true)`; testes em `app/test/zen_test.dart`.
+
+## Fundos do jogo (baús)
+
+- Nova categoria da coleção, 6 fundos em todas as raridades (cores: topo, base e 2 brilhos). Só aparência.
+- `Cores.fundoDoBau` é lido por `FundoJogo` (todas as telas). Testes em `app/test/fundos_test.dart`.

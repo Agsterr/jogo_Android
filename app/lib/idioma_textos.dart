@@ -5,6 +5,22 @@ abstract final class Textos {
 }
 
 const _en = <String, String>{
+  'Fundo do jogo': 'Game background',
+  'Noite azul': 'Blue night',
+  'Entardecer': 'Dusk',
+  'Aurora boreal': 'Northern lights',
+  'Ouro e noite': 'Gold and night',
+  'ZEN': 'ZEN',
+  'Zen': 'Zen',
+  'Sem fim e sem pressa, só para relaxar': 'Endless and calm, just to relax',
+  'Abrimos espaço!': 'Made some room!',
+  'No Zen a partida não acaba': 'In Zen the game never ends',
+  'Modo Zen': 'Zen mode',
+  'Sem pressa e sem fim: quando nada mais cabe, o jogo tira as linhas e colunas mais cheias e você continua.':
+      'No rush, no end: when nothing fits, the game clears the fullest rows and columns and you keep going.',
+  'Não vale recorde, gemas nem missões. É só para relaxar.': 'No records, gems or missions. It\'s just for relaxing.',
+  'A partida fica guardada: pode sair e voltar quando quiser.':
+      'Your game is saved: leave and come back whenever you like.',
   'Puzzle do dia': 'Daily puzzle',
   '{0} de 3 estrelas': '{0} of 3 stars',
   '3 peças: limpe o máximo!': '3 pieces: clear the most!',
@@ -60,7 +76,7 @@ const _en = <String, String>{
   'Itens de aparência: temas, molduras e cores': 'Cosmetic items: themes, frames and colors',
   'Você ganhou um baú! Veja em Baús e coleção.': 'You got a chest! See it in Chests and collection.',
   'Você ganha baús jogando: Desafio do dia, níveis 5, 10, 15 e 20 do Passe, álbum completo e 14 e 30 dias de sequência.': 'You earn chests by playing: daily Challenge, Pass levels 5, 10, 15 and 20, a complete album, and 14 and 30-day streaks.',
-  'Cada baú traz um item de APARÊNCIA: tema de blocos, moldura do tabuleiro ou cor do Quadrinho. Nada muda a pontuação.': 'Each chest holds a COSMETIC item: a block theme, a board frame or a Quadrinho color. Nothing changes your score.',
+  'Cada baú traz um item de APARÊNCIA: tema de blocos, moldura, cor do Quadrinho ou fundo do jogo. Nada muda a pontuação.': 'Each chest holds a COSMETIC item: a block theme, a board frame, a Quadrinho color or a game background. Nothing changes your score.',
   'As chances de cada raridade ficam sempre na tela do baú, com garantia de Raro e de Lendário.':
       'The odds of each rarity are always shown on the chest screen, with a Rare and a Legendary guarantee.',
   'Item repetido sobe de nível (até 5 estrelas) e, no máximo, vira gemas.':
@@ -696,6 +712,23 @@ const _en = <String, String>{
 };
 
 const _es = <String, String>{
+  'Fundo do jogo': 'Fondo del juego',
+  'Noite azul': 'Noche azul',
+  'Entardecer': 'Atardecer',
+  'Aurora boreal': 'Aurora boreal',
+  'Ouro e noite': 'Oro y noche',
+  'ZEN': 'ZEN',
+  'Zen': 'Zen',
+  'Sem fim e sem pressa, só para relaxar': 'Sin fin y sin prisa, solo para relajarte',
+  'Abrimos espaço!': '¡Hicimos espacio!',
+  'No Zen a partida não acaba': 'En Zen la partida nunca termina',
+  'Modo Zen': 'Modo Zen',
+  'Sem pressa e sem fim: quando nada mais cabe, o jogo tira as linhas e colunas mais cheias e você continua.':
+      'Sin prisa y sin fin: cuando nada cabe, el juego quita las filas y columnas más llenas y sigues.',
+  'Não vale recorde, gemas nem missões. É só para relaxar.':
+      'No cuenta para récord, gemas ni misiones. Es solo para relajarte.',
+  'A partida fica guardada: pode sair e voltar quando quiser.':
+      'La partida se guarda: puedes salir y volver cuando quieras.',
   'Puzzle do dia': 'Puzle del día',
   '{0} de 3 estrelas': '{0} de 3 estrellas',
   '3 peças: limpe o máximo!': '3 piezas: ¡limpia el máximo!',
@@ -750,7 +783,7 @@ const _es = <String, String>{
   'Itens de aparência: temas, molduras e cores': 'Artículos de aspecto: temas, marcos y colores',
   'Você ganhou um baú! Veja em Baús e coleção.': '¡Ganaste un cofre! Míralo en Cofres y colección.',
   'Você ganha baús jogando: Desafio do dia, níveis 5, 10, 15 e 20 do Passe, álbum completo e 14 e 30 dias de sequência.': 'Ganas cofres jugando: Desafío del día, niveles 5, 10, 15 y 20 del Pase, álbum completo y rachas de 14 y 30 días.',
-  'Cada baú traz um item de APARÊNCIA: tema de blocos, moldura do tabuleiro ou cor do Quadrinho. Nada muda a pontuação.': 'Cada cofre trae un artículo de ASPECTO: tema de bloques, marco del tablero o color de Quadrinho. Nada cambia la puntuación.',
+  'Cada baú traz um item de APARÊNCIA: tema de blocos, moldura, cor do Quadrinho ou fundo do jogo. Nada muda a pontuação.': 'Cada cofre trae un artículo de ASPECTO: tema de bloques, marco del tablero, color de Quadrinho o fondo del juego. Nada cambia la puntuación.',
   'As chances de cada raridade ficam sempre na tela do baú, com garantia de Raro e de Lendário.': 'Las probabilidades de cada rareza siempre se muestran en la pantalla del cofre, con garantía de Raro y de Legendario.',
   'Item repetido sobe de nível (até 5 estrelas) e, no máximo, vira gemas.':
       'Un artículo repetido sube de nivel (hasta 5 estrellas) y, en el máximo, se convierte en gemas.',

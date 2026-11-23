@@ -58,6 +58,7 @@ class JogoTela extends StatefulWidget {
     this.amigo,
     this.puzzle,
     this.relampago = false,
+    this.zen = false,
     this.duracao = const Duration(seconds: 60),
   });
 
@@ -80,6 +81,9 @@ class JogoTela extends StatefulWidget {
 
   /// Modo Relâmpago: o tempo corre a partir da primeira jogada e a partida acaba quando ele zera.
   final bool relampago;
+
+  /// Modo Zen: sem fim de jogo (abre espaço sozinho), sem recorde, gemas ou missões. Só para relaxar.
+  final bool zen;
 
   /// Duração do Relâmpago (os testes usam menos).
   final Duration duracao;
@@ -186,6 +190,9 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
   Partida get partidaParaTeste => _partida;
 
   @visibleForTesting
+  void abrirEspacoParaTeste() => _abrirEspaco();
+
+  @visibleForTesting
   void iniciarRelogioParaTeste() => _iniciarRelogio();
 
   @visibleForTesting
@@ -196,7 +203,13 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
     super.initState();
     _dia = Sorteio.sementeDoDia(_s.hoje());
     _partida = widget.partida ?? _partidaSalva() ?? _novaPartida();
-    if (_partida.fimDeJogo) _fim = _partida.continuou ? _Fim.resultado : _Fim.segundaChance;
+    if (_partida.fimDeJogo) {
+      if (widget.zen) {
+        _partida.abrirEspaco(); // Zen não acaba: partida guardada já travada abre espaço ao voltar
+      } else {
+        _fim = _partida.continuou ? _Fim.resultado : _Fim.segundaChance;
+      }
+    }
     if (widget.fase?.numero == 1 && _s.mostrarDicas && !_s.progresso.dicaVista('tutorial')) _tutorial = 0;
     WidgetsBinding.instance.addPostFrameCallback((_) => _dicaDeEntrada());
   }
@@ -215,7 +228,9 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
             ? Dicas.arena
             : (widget.diario
                   ? Dicas.desafio
-                  : (widget.relampago ? Dicas.relampago : (widget.puzzle != null ? Dicas.puzzle : Dicas.infinito))),
+                  : (widget.relampago
+                        ? Dicas.relampago
+                        : (widget.puzzle != null ? Dicas.puzzle : (widget.zen ? Dicas.zen : Dicas.infinito)))),
     };
     if (dica != null) await mostrarDicaUmaVez(context, _s, dica);
     // Quem já conhece o modo vê, uma vez só, os reforços novos.
@@ -253,7 +268,9 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
             ? 'desafio'
             : (widget.amigo != null
                   ? 'amigo'
-                  : (widget.relampago ? 'relampago' : (widget.puzzle != null ? 'puzzle' : 'classico'))));
+                  : (widget.relampago
+                        ? 'relampago'
+                        : (widget.puzzle != null ? 'puzzle' : (widget.zen ? 'zen' : 'classico')))));
 
   int get _semana => Arena.semana(_s.hoje());
 
@@ -280,6 +297,7 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
       !widget.diario &&
       !widget.arena &&
       !widget.relampago &&
+      !widget.zen &&
       widget.puzzle == null &&
       (widget.amigo == null || widget.amigo!.infinito);
 
@@ -399,8 +417,8 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
       );
       if (fala != null) _mascoteDiz(fala.texto, fala.humor);
     }
-    _s.progresso.registrarJogada(linhas: jogada.linhasLimpas, combo: jogada.combo);
-    if (widget.puzzle == null) {
+    if (!widget.zen) _s.progresso.registrarJogada(linhas: jogada.linhasLimpas, combo: jogada.combo);
+    if (widget.puzzle == null && !widget.zen) {
       // No puzzle as gemas vêm só das estrelas do fim (senão dava para repetir à vontade).
       _s.progresso.ganharGemas(gemasDaJogada + gemasDasMetas);
       _s.progresso.contarMissoes(_dia, contagemDaJogada(jogada));
@@ -420,7 +438,9 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
     }
     if (_partida.fimDeJogo) {
       _s.sons.tocar(Som.fim);
-      if (widget.puzzle != null) {
+      if (widget.zen) {
+        _abrirEspaco();
+      } else if (widget.puzzle != null) {
         _encerrarPuzzle();
       } else if (widget.relampago) {
         _relogio?.cancel();
@@ -585,6 +605,21 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
 
   Future<void> _continuarComGemas() async {
     if (await _s.progresso.gastarGemas(Custos.continuar)) _continuar();
+  }
+
+  /// Zen: nada cabe mais, então tira as linhas e colunas mais cheias e segue o jogo.
+  void _abrirEspaco() {
+    _partida.abrirEspaco();
+    _salvar();
+    _geracao++;
+    setState(() {
+      _aviso = _AvisoDeJogada(
+        id: _geracao,
+        titulo: t('Abrimos espaço!'),
+        nivel: 2,
+        detalhes: [t('No Zen a partida não acaba')],
+      );
+    });
   }
 
   Future<void> _encerrarPuzzle() async {
@@ -841,6 +876,11 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
               t('DESAFIO #{0}', [numeroDoDesafio(_s.hoje())]),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
             ),
+          if (widget.zen)
+            Text(
+              t('ZEN'),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
+            ),
           if (widget.puzzle != null)
             Text(
               t('PUZZLE #{0}', [numeroDoDesafio(_s.hoje())]),
@@ -853,9 +893,18 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
     ),
   );
 
-  Widget _placar() => widget.puzzle != null
+  Widget _placar() => widget.zen
+      ? _placarZen()
+      : widget.puzzle != null
       ? _placarDoPuzzle(widget.puzzle!)
       : (widget.fase == null ? _placarDePontos() : _placarDaFase(widget.fase!));
+
+  Widget _placarZen() => Column(
+    children: [
+      TextoContornado('${_partida.linhas}', tamanho: 50),
+      Text(t('linhas limpas'), style: const TextStyle(color: Cores.textoFraco, fontSize: 16)),
+    ],
+  );
 
   Widget _placarDoPuzzle(PuzzleDoDia puzzle) => Column(
     children: [

@@ -37,6 +37,9 @@ abstract final class Cores {
   static List<Color> moldura = const [brilhoRosa, Color(0xFF8B5CFF), brilhoCiano];
   static Color? mascote;
 
+  /// Fundo escolhido na coleção: topo, base e dois brilhos (`null` = o fundo violeta padrão).
+  static List<Color>? fundoDoBau;
+
   /// Desenha um símbolo em cada cor de bloco (modo para daltônicos; `Progresso.alternarSimbolos`).
   static bool simbolos = false;
 

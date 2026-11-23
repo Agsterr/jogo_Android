@@ -124,6 +124,12 @@ abstract final class Dicas {
     'Pode tentar de novo quantas vezes quiser para melhorar as estrelas.',
   ]);
 
+  static const zen = Dica('zen', 'Modo Zen', Icons.spa_rounded, Color(0xFF00C2A8), [
+    'Sem pressa e sem fim: quando nada mais cabe, o jogo tira as linhas e colunas mais cheias e você continua.',
+    'Não vale recorde, gemas nem missões. É só para relaxar.',
+    'A partida fica guardada: pode sair e voltar quando quiser.',
+  ]);
+
   static const passe = Dica('passe', 'Passe de temporada', Icons.emoji_events_rounded, Color(0xFFFF8A00), [
     'Todo mês tem um Passe novo com 20 níveis. Jogar enche a barra.',
     'Desafio do dia dá 40, baú das missões 30, fases até 19 e partidas 5 (as 10 primeiras do dia).',
@@ -145,7 +151,7 @@ abstract final class Dicas {
   static const baus = Dica('baus', 'Baús e coleção', Icons.inventory_2_rounded, Color(0xFFFFC62E), [
     'Você ganha baús jogando: Desafio do dia, níveis 5, 10, 15 e 20 do Passe, álbum completo e 14 e 30 dias de sequência.',
     'Também dá para abrir até 3 baús COMUNS por dia vendo um anúncio (com Encaixa+ é sem anúncio).',
-    'Cada baú traz um item de APARÊNCIA: tema de blocos, moldura do tabuleiro ou cor do Quadrinho. Nada muda a pontuação.',
+    'Cada baú traz um item de APARÊNCIA: tema de blocos, moldura, cor do Quadrinho ou fundo do jogo. Nada muda a pontuação.',
     'As chances de cada raridade ficam sempre na tela do baú, com garantia de Raro e de Lendário.',
     'Item repetido sobe de nível (até 5 estrelas) e, no máximo, vira gemas.',
     'Toque num item que você tem para equipar. "Padrão" volta ao visual original.',
@@ -196,6 +202,7 @@ abstract final class Dicas {
     album,
     baus,
     puzzle,
+    zen,
     passe,
     especiais,
     relampago,
@@ -224,46 +231,59 @@ class DialogoDica extends StatelessWidget {
   final Dica dica;
 
   @override
-  Widget build(BuildContext context) => Dialog(
-    backgroundColor: Colors.transparent,
-    insetPadding: const EdgeInsets.all(24),
-    child: CartaoVidro(
-      cores: [dica.cor, Cores.brilhoCiano],
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Icon(dica.icone, size: 52, color: dica.cor),
-          const SizedBox(height: 4),
-          TextoContornado(t(dica.titulo), tamanho: 26),
-          const SizedBox(height: 12),
-          ...dica.linhas.map(
-            (l) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 3),
-                    child: Icon(Icons.star_rounded, size: 16, color: dica.cor),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(t(l), style: const TextStyle(fontSize: 16, height: 1.3))),
-                ],
+  Widget build(BuildContext context) {
+    // Respeita as barras do sistema (o botão não pode ficar embaixo da barra de navegação do Android).
+    final barras = MediaQuery.viewPaddingOf(context);
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.fromLTRB(24, 24 + barras.top, 24, 24 + barras.bottom),
+      child: CartaoVidro(
+        cores: [dica.cor, Cores.brilhoCiano],
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Icon(dica.icone, size: 52, color: dica.cor),
+            const SizedBox(height: 4),
+            TextoContornado(t(dica.titulo), tamanho: 26),
+            const SizedBox(height: 12),
+            // Texto longo ou fonte grande: só as linhas rolam, o botão fica sempre à vista.
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final l in dica.linhas)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 3),
+                              child: Icon(Icons.star_rounded, size: 16, color: dica.cor),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(t(l), style: const TextStyle(fontSize: 16, height: 1.3))),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          BotaoDoce(
-            texto: t(dica.botao),
-            cor: Cores.blocos[3],
-            altura: 50,
-            tamanhoTexto: 20,
-            aoTocar: () => Navigator.of(context).pop(),
-          ),
-        ],
+            const SizedBox(height: 8),
+            BotaoDoce(
+              texto: t(dica.botao),
+              cor: Cores.blocos[3],
+              altura: 50,
+              tamanhoTexto: 20,
+              aoTocar: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

@@ -481,11 +481,13 @@ class Progresso extends ChangeNotifier {
   /// Itens equipados (id do item; `null` = o padrão de cada categoria).
   String? get molduraAtiva => _prefs.getString('molduraAtiva');
   String? get mascoteAtivo => _prefs.getString('mascoteAtivo');
+  String? get fundoAtivo => _prefs.getString('fundoAtivo');
 
   bool equipado(ItemDeBau i) => switch (i.categoria) {
     Categoria.tema => _prefs.getString('tema') == i.id,
     Categoria.moldura => molduraAtiva == i.id,
     Categoria.mascote => mascoteAtivo == i.id,
+    Categoria.fundo => fundoAtivo == i.id,
   };
 
   /// Equipa um item que o jogador tem. Devolve `false` se ele ainda não tem.
@@ -498,13 +500,15 @@ class Progresso extends ChangeNotifier {
         await _prefs.setString('molduraAtiva', i.id);
       case Categoria.mascote:
         await _prefs.setString('mascoteAtivo', i.id);
+      case Categoria.fundo:
+        await _prefs.setString('fundoAtivo', i.id);
     }
     _aplicarCosmeticos();
     notifyListeners();
     return true;
   }
 
-  /// Volta ao padrão (tema clássico, moldura clássica, Quadrinho verde).
+  /// Volta ao padrão (tema clássico, moldura clássica, Quadrinho verde, fundo roxo).
   Future<void> usarPadrao(Categoria c) async {
     switch (c) {
       case Categoria.tema:
@@ -513,6 +517,8 @@ class Progresso extends ChangeNotifier {
         await _prefs.remove('molduraAtiva');
       case Categoria.mascote:
         await _prefs.remove('mascoteAtivo');
+      case Categoria.fundo:
+        await _prefs.remove('fundoAtivo');
     }
     _aplicarCosmeticos();
     notifyListeners();
@@ -525,6 +531,8 @@ class Progresso extends ChangeNotifier {
         : [for (final c in m.cores) Color(c)];
     final q = ItensDeBau.porId(mascoteAtivo ?? '');
     Cores.mascote = q == null ? null : Color(q.cores.first);
+    final f = ItensDeBau.porId(fundoAtivo ?? '');
+    Cores.fundoDoBau = f == null ? null : [for (final c in f.cores) Color(c)];
   }
 
   // ---------- passe de temporada ----------

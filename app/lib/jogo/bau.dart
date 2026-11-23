@@ -26,7 +26,8 @@ enum Raridade {
 enum Categoria {
   tema('Tema de blocos'),
   moldura('Moldura do tabuleiro'),
-  mascote('Cor do Quadrinho');
+  mascote('Cor do Quadrinho'),
+  fundo('Fundo do jogo');
 
   const Categoria(this.nome);
 
@@ -41,7 +42,7 @@ class ItemDeBau {
   final Categoria categoria;
   final Raridade raridade;
 
-  /// Cores do item em ARGB: 6 para o tema, 3 para a moldura, 1 para o mascote.
+  /// Cores do item em ARGB: 6 para o tema, 3 para a moldura, 1 para o mascote, 4 para o fundo (topo, base e dois brilhos).
   final List<int> cores;
 }
 
@@ -68,6 +69,12 @@ abstract final class ItensDeBau {
     ItemDeBau('moldura-folha', 'Verde folha', Categoria.moldura, Raridade.comum, [0xFF9BFF8F, 0xFF2BD96B, 0xFF1F9D55]),
     ItemDeBau('mascote-rosa', 'Rosa', Categoria.mascote, Raridade.comum, [0xFFFF6FB1]),
     ItemDeBau('mascote-azul', 'Azul', Categoria.mascote, Raridade.comum, [0xFF3DA5FF]),
+    ItemDeBau('fundo-noite-azul', 'Noite azul', Categoria.fundo, Raridade.comum, [
+      0xFF1B4DB3, 0xFF0B1F4D, 0xFF00B0FF, 0xFF7BE0FF, //
+    ]),
+    ItemDeBau('fundo-floresta', 'Floresta', Categoria.fundo, Raridade.comum, [
+      0xFF16794B, 0xFF06301F, 0xFF2BD96B, 0xFFE9FF70, //
+    ]),
     // ---- raros ----
     ItemDeBau('tema-por-do-sol', 'Pôr do sol', Categoria.tema, Raridade.raro, [
       0xFFFF5E5B, 0xFFFF9B54, 0xFFFFD166, 0xFFEF476F, 0xFF9B5DE5, 0xFF2D1E8F, //
@@ -79,6 +86,12 @@ abstract final class ItensDeBau {
     ItemDeBau('moldura-neon', 'Neon', Categoria.moldura, Raridade.raro, [0xFF39FF14, 0xFF00F0FF, 0xFFFF00E5]),
     ItemDeBau('mascote-laranja', 'Laranja', Categoria.mascote, Raridade.raro, [0xFFFF8A00]),
     ItemDeBau('mascote-roxo', 'Roxo', Categoria.mascote, Raridade.raro, [0xFF9B5DE5]),
+    ItemDeBau('fundo-por-do-sol', 'Entardecer', Categoria.fundo, Raridade.raro, [
+      0xFFB5365C, 0xFF3A0F4D, 0xFFFF9B54, 0xFFFFD166, //
+    ]),
+    ItemDeBau('fundo-aurora', 'Aurora boreal', Categoria.fundo, Raridade.raro, [
+      0xFF0A5C63, 0xFF04122E, 0xFF00F5A0, 0xFF9B5DE5, //
+    ]),
     // ---- épicos ----
     ItemDeBau('tema-esmeralda', 'Esmeralda', Categoria.tema, Raridade.epico, [
       0xFF00C48C, 0xFF00F5A0, 0xFF7CFFCB, 0xFF0A9396, 0xFFE9FF70, 0xFF005F73, //
@@ -87,11 +100,17 @@ abstract final class ItensDeBau {
       0xFFFF3D6E, 0xFFFFD000, 0xFF00E08A, //
     ]),
     ItemDeBau('mascote-dourado', 'Dourado', Categoria.mascote, Raridade.epico, [0xFFFFC62E]),
+    ItemDeBau('fundo-galaxia', 'Galáxia', Categoria.fundo, Raridade.epico, [
+      0xFF3A1B8A, 0xFF080426, 0xFFFF00E5, 0xFF00F0FF, //
+    ]),
     // ---- lendários ----
     ItemDeBau('tema-ouro-real', 'Ouro real', Categoria.tema, Raridade.lendario, [
       0xFFFFD700, 0xFFFFA500, 0xFFFFF1A8, 0xFFB8860B, 0xFFFFE9A3, 0xFFDAA520, //
     ]),
     ItemDeBau('moldura-ouro', 'Ouro', Categoria.moldura, Raridade.lendario, [0xFFFFF1A8, 0xFFFFD700, 0xFFB8860B]),
+    ItemDeBau('fundo-ouro', 'Ouro e noite', Categoria.fundo, Raridade.lendario, [
+      0xFF8A5A00, 0xFF2A1A00, 0xFFFFD700, 0xFFFFF1A8, //
+    ]),
     ItemDeBau('mascote-cosmico', 'Cósmico', Categoria.mascote, Raridade.lendario, [0xFF6C4DFF]),
   ];
 

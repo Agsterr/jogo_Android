@@ -299,6 +299,35 @@ class Partida {
     );
   }
 
+  /// Modo Zen: quando nada mais cabe, tira as 2 linhas e as 2 colunas mais cheias para a partida continuar.
+  /// Devolve quantos blocos saíram.
+  int abrirEspaco() {
+    _anterior = null;
+    int cheias(bool linha, int i) => [
+      for (var k = 0; k < Tabuleiro.tamanho; k++)
+        if (tabuleiro.cor(linha ? i : k, linha ? k : i) != null) 1,
+    ].length;
+    final ordem = List.generate(Tabuleiro.tamanho, (i) => i);
+    final linhas = [...ordem]..sort((a, b) => cheias(true, b).compareTo(cheias(true, a)));
+    final colunas = [...ordem]..sort((a, b) => cheias(false, b).compareTo(cheias(false, a)));
+    var tirados = 0;
+    void limpar(int l, int k) {
+      if (tabuleiro.cor(l, k) == null) return;
+      tabuleiro.definir(l, k, null);
+      tirados++;
+    }
+
+    // Duas linhas e duas colunas; se ainda nada couber (peça grande), segue tirando mais uma de cada.
+    for (var i = 0; i < Tabuleiro.tamanho; i++) {
+      for (var k = 0; k < Tabuleiro.tamanho; k++) {
+        limpar(linhas[i], k);
+        limpar(k, colunas[i]);
+      }
+      if (i >= 1 && !fimDeJogo) break;
+    }
+    return tirados;
+  }
+
   /// Volta uma jogada (um nível só).
   bool desfazer() {
     final anterior = _anterior;

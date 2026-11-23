@@ -33,26 +33,33 @@ class FundoJogo extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: const BoxDecoration(gradient: Cores.fundo),
-    child: DecoratedBox(
+  Widget build(BuildContext context) {
+    final f = Cores.fundoDoBau;
+    final topo = f?[0] ?? Cores.fundoTopo, base = f?[1] ?? Cores.fundoBase;
+    final rosa = f?[2] ?? Cores.brilhoRosa, ciano = f?[3] ?? Cores.brilhoCiano;
+    return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(0.9, -0.85),
-          radius: 0.9,
-          colors: [Cores.brilhoRosa.withValues(alpha: 0.45), Cores.brilhoRosa.withValues(alpha: 0)],
-        ),
+        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [topo, base]),
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: RadialGradient(
-            center: const Alignment(-1, 0.75),
+            center: const Alignment(0.9, -0.85),
             radius: 0.9,
-            colors: [Cores.brilhoCiano.withValues(alpha: 0.32), Cores.brilhoCiano.withValues(alpha: 0)],
+            colors: [rosa.withValues(alpha: 0.45), rosa.withValues(alpha: 0)],
           ),
         ),
-        child: child,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(-1, 0.75),
+              radius: 0.9,
+              colors: [ciano.withValues(alpha: 0.32), ciano.withValues(alpha: 0)],
+            ),
+          ),
+          child: child,
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
