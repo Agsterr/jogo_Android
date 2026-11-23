@@ -63,10 +63,40 @@ class CopiaBlockStore implements CopiaAutomatica {
   }
 }
 
+/// Quem sabe dizer em que conta Google o progresso está sendo salvo.
+abstract interface class ContaDoJogador {
+  /// Nome do jogador conectado, ou `null` se não houver conta conectada (ou der erro).
+  Future<String?> nome();
+
+  /// Abre o login do Play Games. `true` se o jogador ficou conectado.
+  Future<bool> conectar();
+}
+
 /// Jogo salvo do Play Games Services, na conta Google (código nativo em `MainActivity.kt`).
 /// Entra sozinho com a conta; sem conta ou sem rede o canal devolve erro e o jogo segue sem a nuvem.
-class CopiaPlayGames implements CopiaAutomatica {
+class CopiaPlayGames implements CopiaAutomatica, ContaDoJogador {
   static const _canal = MethodChannel('encaixa/nuvem');
+
+  @override
+  Future<bool> conectar() async {
+    try {
+      return await _canal.invokeMethod<bool>('conectar') ?? false;
+    } on Object catch (e) {
+      debugPrint('Play Games (conectar): $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<String?> nome() async {
+    try {
+      final nome = await _canal.invokeMethod<String>('jogador');
+      return (nome == null || nome.trim().isEmpty) ? null : nome.trim();
+    } on Object catch (e) {
+      debugPrint('Play Games (jogador): $e');
+      return null;
+    }
+  }
 
   @override
   Future<ResultadoCopia> salvar(Uint8List bytes) async {
@@ -92,10 +122,37 @@ class CopiaPlayGames implements CopiaAutomatica {
 
 /// Grava em todas as cópias e, ao ler, fica com o progresso **mais avançado** (fase, depois estrelas, recorde e,
 /// por fim, o mais recente). Assim a conta Google e o Block Store se complementam.
-class CopiaDupla implements CopiaAutomatica {
+class CopiaDupla implements CopiaAutomatica, ContaDoJogador {
   const CopiaDupla(this._copias);
 
   final List<CopiaAutomatica> _copias;
+
+  @override
+  Future<bool> conectar() async {
+    for (final c in _copias) {
+      if (c is! ContaDoJogador) continue;
+      try {
+        return await (c as ContaDoJogador).conectar();
+      } on Object {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  @override
+  Future<String?> nome() async {
+    for (final c in _copias) {
+      if (c is! ContaDoJogador) continue;
+      try {
+        final nome = await (c as ContaDoJogador).nome();
+        if (nome != null) return nome;
+      } on Object {
+        continue;
+      }
+    }
+    return null;
+  }
 
   @override
   Future<ResultadoCopia> salvar(Uint8List bytes) async {
@@ -165,6 +222,38 @@ class SalvamentoAutomatico {
   final status = ValueNotifier<StatusCopia>(const StatusCopia(EstadoCopia.aindaNao));
   Timer? _timer;
 
+  /// Nome da conta Google (Play Games) em que o progresso está sendo salvo; `null` se não houver conta conectada.
+  final conta = ValueNotifier<String?>(null);
+
+  /// Este aparelho tem Play Games? (Falso nos testes, na web e fora do Android: aí a tela não pede para conectar.)
+  bool get suportaConta => _copia is ContaDoJogador;
+
+  /// Abre o login do Play Games. Se conectou, mostra o nome e já salva o progresso na conta.
+  Future<bool> conectar() async {
+    final copia = _copia;
+    if (copia is! ContaDoJogador) return false;
+    bool ok;
+    try {
+      ok = await (copia as ContaDoJogador).conectar();
+    } on Object {
+      ok = false;
+    }
+    await atualizarConta();
+    if (ok) await salvarAgora();
+    return ok;
+  }
+
+  /// Pergunta ao Play Games quem está conectado (a tela Salvar progresso mostra o nome).
+  Future<void> atualizarConta() async {
+    final copia = _copia;
+    if (copia is! ContaDoJogador) return;
+    try {
+      conta.value = await (copia as ContaDoJogador).nome();
+    } on Object {
+      conta.value = null;
+    }
+  }
+
   /// Tem algo que valha guardar? (Gemas sozinhas não contam: todo mundo começa com algumas.)
   bool get temProgresso =>
       _progresso.partidas > 0 || _progresso.faseLiberada > 1 || _progresso.recorde > 0 || _progresso.estrelasTotais > 0;
@@ -179,6 +268,7 @@ class SalvamentoAutomatico {
 
   Future<void> salvarAgora() async {
     _timer?.cancel();
+    unawaited(atualizarConta());
     if (!temProgresso) return;
     final agora = _relogio();
     final codigo = await _progresso.gerarCodigo(agora.millisecondsSinceEpoch);
@@ -220,5 +310,6 @@ class SalvamentoAutomatico {
     _timer?.cancel();
     _progresso.removeListener(_agendar);
     status.dispose();
+    conta.dispose();
   }
 }

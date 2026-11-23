@@ -181,7 +181,11 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                     ],
                   ),
                 ),
-                if (_s.copia case final copia?) ...[const SizedBox(height: 12), _CartaoCopiaAutomatica(copia.status)],
+                if (_s.copia case final copia?) ...[
+                  const SizedBox(height: 12),
+                  _CartaoCopiaAutomatica(copia.status),
+                  if (copia.suportaConta) ...[const SizedBox(height: 12), _CartaoContaGoogle(copia)],
+                ],
                 const SizedBox(height: 20),
                 const TextoContornado('1. Salvar', tamanho: 22, alinhamento: TextAlign.start),
                 const SizedBox(height: 4),
@@ -275,6 +279,93 @@ class _ProgressoTelaState extends State<ProgressoTela> {
       ),
     );
   }
+}
+
+/// Conta do Play Games em que o progresso é salvo; sem conta, pede para conectar.
+class _CartaoContaGoogle extends StatefulWidget {
+  const _CartaoContaGoogle(this.copia);
+
+  final SalvamentoAutomatico copia;
+
+  @override
+  State<_CartaoContaGoogle> createState() => _CartaoContaGoogleState();
+}
+
+class _CartaoContaGoogleState extends State<_CartaoContaGoogle> {
+  bool _conectando = false;
+  bool _falhou = false;
+
+  Future<void> _conectar() async {
+    setState(() {
+      _conectando = true;
+      _falhou = false;
+    });
+    final ok = await widget.copia.conectar();
+    if (!mounted) return;
+    setState(() {
+      _conectando = false;
+      _falhou = !ok;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<String?>(
+    valueListenable: widget.copia.conta,
+    builder: (context, nome, _) {
+      final conectado = nome != null;
+      final cor = conectado ? Cores.blocos[3] : Cores.ouro;
+      return CartaoVidro(
+        cores: [cor, Cores.brilhoCiano],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(conectado ? Icons.account_circle_rounded : Icons.login_rounded, color: cor, size: 30),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        conectado ? 'Conectado ao Play Games' : 'Conecte ao Play Games',
+                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        conectado
+                            ? 'Conta: $nome. Seu progresso é salvo na sua conta Google e volta se você trocar de celular.'
+                            : 'Sem a conta do Play Games, o progresso pode se perder se você trocar de celular ou '
+                                  'desinstalar o jogo. Conecte para salvar na sua conta Google.',
+                        style: const TextStyle(fontSize: 14, height: 1.3),
+                      ),
+                      if (_falhou && !conectado)
+                        const Text(
+                          'Não deu para conectar agora. Confira a internet e tente de novo.',
+                          style: TextStyle(fontSize: 13, color: Cores.textoFraco),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (!conectado) ...[
+              const SizedBox(height: 10),
+              BotaoDoce(
+                texto: _conectando ? 'CONECTANDO...' : 'CONECTAR AO PLAY GAMES',
+                icone: Icons.sports_esports_rounded,
+                cor: Cores.blocos[4],
+                altura: 46,
+                tamanhoTexto: 18,
+                aoTocar: _conectando ? null : _conectar,
+              ),
+            ],
+          ],
+        ),
+      );
+    },
+  );
 }
 
 /// Mostra se a cópia automática está funcionando neste celular.
