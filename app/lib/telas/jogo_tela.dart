@@ -119,6 +119,7 @@ class _JogoTelaState extends State<JogoTela> {
   bool _comecou = false;
   ({Album album, Figurinha figurinha, bool completou})? _figurinhaNova;
   ({Faixa faixa, int gemas})? _faixaNova;
+  int _bausNovos = 0;
 
   /// Fases: peças extras ganhas na ajuda (uma ajuda por tentativa).
   int _extras = 0;
@@ -569,11 +570,13 @@ class _JogoTelaState extends State<JogoTela> {
     final gemasRelampago = widget.relampago ? gemasDoRelampago(pontos) : 0;
     if (gemasRelampago > 0) await _s.progresso.ganharGemas(gemasRelampago);
     await _s.progresso.contarMissoes(_dia, {TipoMissao.partidas: 1, TipoMissao.pontos: pontos});
+    if (widget.diario) _s.progresso.pegarBausNovos(); // zera: só conta o que este Desafio der
     final gemasDesafio = widget.diario ? await _s.progresso.concluirDesafio(_dia, pontos) : 0;
     final gemasAmigo = widget.amigo == null ? 0 : await _s.progresso.concluirDesafioDeAmigo(widget.amigo!, pontos);
     if (gemasAmigo > 0) await _s.progresso.ganharXpDoPasse(_dia, XpDoPasse.amigo);
     if (widget.diario) _figurinhaNova = _s.progresso.pegarFigurinhaRecente();
     if (widget.diario) _faixaNova = _s.progresso.pegarFaixaRecente();
+    if (widget.diario) _bausNovos = _s.progresso.pegarBausNovos();
     if (widget.diario) _s.reagendarLembrete(); // hoje já jogou: o próximo lembrete passa para amanhã
     if (widget.arena) {
       await _s.progresso.registrarArena(_semana, pontos);
@@ -922,9 +925,7 @@ class _JogoTelaState extends State<JogoTela> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             // Com Martelo ou Bomba escolhido a borda fica dourada: dá para ver que ele espera o toque.
-            colors: _reforcoAtivo != null
-                ? const [Cores.ouro, Color(0xFFFF8A00), Cores.ouro]
-                : const [Cores.brilhoRosa, Color(0xFF8B5CFF), Cores.brilhoCiano],
+            colors: _reforcoAtivo != null ? const [Cores.ouro, Color(0xFFFF8A00), Cores.ouro] : Cores.moldura,
           ),
           boxShadow: [
             BoxShadow(color: Cores.brilhoRosa.withValues(alpha: 0.35), blurRadius: 28, offset: const Offset(-6, -4)),
@@ -1251,6 +1252,7 @@ class _JogoTelaState extends State<JogoTela> {
             t('Desafio do dia concluído!'),
             if (_gemasDesafio > 0) t('+{0} gemas', [_gemasDesafio]),
             if (_faixaNova case final f?) t('Faixa {0}! +{1} gemas', [t(f.faixa.nome), f.gemas]),
+            if (_bausNovos > 0) t('Baú novo na coleção!'),
             if (premioDaSequencia(_s.progresso.sequencia(_dia)) > 0 && _gemasDesafio > 0)
               t('Marco de {0} dias! 🎉', [_s.progresso.sequencia(_dia)]),
             if (_s.progresso.sequencia(_dia) == 30 && _gemasDesafio > 0) t('Tema Chama liberado na Loja!'),

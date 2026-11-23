@@ -19,6 +19,10 @@ abstract final class CodigoProgresso {
     'desafioPontos',
     'sequencia',
     'sequenciaMax',
+    'baus',
+    'bauSemRaro',
+    'bauSemLendario',
+    'bauAbertos',
     'relampagoMelhor',
     'desafiosTotal',
     'linhasMax',
@@ -31,13 +35,15 @@ abstract final class CodigoProgresso {
     'arenaSemana',
     'arenaMelhor',
   };
-  static const _listas = {'temas', 'dicas', 'arenaPremios', 'figurinhas', 'conquistas', 'amigosFeitos'};
+  static const _listas = {'temas', 'dicas', 'arenaPremios', 'figurinhas', 'conquistas', 'amigosFeitos', 'bauItens'};
 
   /// Esta chave do `SharedPreferences` faz parte do progresso que vai no código?
   static bool vai(String chave) =>
       _inteiros.contains(chave) ||
       _listas.contains(chave) ||
       chave == 'tema' ||
+      chave == 'molduraAtiva' ||
+      chave == 'mascoteAtivo' ||
       chave == 'som' ||
       chave == 'simbolos' ||
       _ehEstrela(chave);
@@ -48,7 +54,7 @@ abstract final class CodigoProgresso {
     if (_ehEstrela(chave)) return v is int && v >= 0 && v <= 3;
     if (_inteiros.contains(chave)) return v is int && v >= 0 && v <= 2000000000;
     if (_listas.contains(chave)) return v is List && v.length <= 400 && v.every((e) => e is String && e.length <= 40);
-    if (chave == 'tema') return v is String && v.length <= 30;
+    if (chave == 'tema' || chave == 'molduraAtiva' || chave == 'mascoteAtivo') return v is String && v.length <= 30;
     if (chave == 'som' || chave == 'simbolos') return v is bool;
     return false;
   }

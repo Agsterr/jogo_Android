@@ -1,5 +1,7 @@
 import 'dart:ui' show Color;
 
+import 'bau.dart';
+
 /// Visual das peças (6 cores). Itens cosméticos: gemas, assinatura ou evento.
 class TemaDeBlocos {
   const TemaDeBlocos(
@@ -11,6 +13,7 @@ class TemaDeBlocos {
     this.evento,
     this.marcoDias,
     this.passe = false,
+    this.bau = false,
   });
 
   final String id;
@@ -32,6 +35,9 @@ class TemaDeBlocos {
   /// Prêmio do nível 20 do Passe de temporada (fica para sempre).
   final bool passe;
 
+  /// Sai nos baús de itens (ficam para sempre depois de abertos).
+  final bool bau;
+
   static const classico = TemaDeBlocos('classico', 'Clássico', [
     Color(0xFFFF3D6E),
     Color(0xFFFF8A00),
@@ -41,7 +47,7 @@ class TemaDeBlocos {
     Color(0xFFA64DFF),
   ]);
 
-  static const todos = [
+  static final todos = [
     classico,
     TemaDeBlocos('doce', 'Doce', [
       Color(0xFFFF8FB1),
@@ -107,6 +113,9 @@ class TemaDeBlocos {
       Color(0xFFFFE259),
       Color(0xFF5EFCE8),
     ], passe: true),
+    // Temas que saem nos baús: o id é o do item (`tema-menta`...).
+    for (final i in ItensDeBau.todos)
+      if (i.categoria == Categoria.tema) TemaDeBlocos(i.id, i.nome, [for (final c in i.cores) Color(c)], bau: true),
   ];
 
   static TemaDeBlocos porId(String? id) => todos.firstWhere((t) => t.id == id, orElse: () => classico);

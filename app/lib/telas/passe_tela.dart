@@ -135,7 +135,14 @@ class _PasseTelaState extends State<PasseTela> {
                         gemas: gemasDoNivelDoPasse(n) * (p.assinante ? 2 : 1),
                         alcancado: n <= nivel,
                         pego: pegos.contains(n),
-                        aoPegar: () => p.pegarNivelDoPasse(dia, n),
+                        aoPegar: () async {
+                          await p.pegarNivelDoPasse(dia, n);
+                          if (p.pegarBausNovos() > 0 && context.mounted) {
+                            ScaffoldMessenger.of(context)
+                              ..clearSnackBars()
+                              ..showSnackBar(SnackBar(content: Text(t('Você ganhou um baú! Veja em Baús e coleção.'))));
+                          }
+                        },
                       ),
                     ),
                 ],

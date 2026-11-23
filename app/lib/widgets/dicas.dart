@@ -134,6 +134,14 @@ abstract final class Dicas {
     'Só aparecem no Infinito: Desafio, Arena e fases continuam com as mesmas peças para todos.',
   ]);
 
+  static const baus = Dica('baus', 'Baús e coleção', Icons.inventory_2_rounded, Color(0xFFFFC62E), [
+    'Você ganha baús jogando: Desafio do dia, níveis 5, 10, 15 e 20 do Passe, álbum completo e 14 e 30 dias de sequência.',
+    'Cada baú traz um item de APARÊNCIA: tema de blocos, moldura do tabuleiro ou cor do Quadrinho. Nada muda a pontuação.',
+    'As chances de cada raridade ficam sempre na tela do baú, com garantia de Raro e de Lendário.',
+    'Item repetido sobe de nível (até 5 estrelas) e, no máximo, vira gemas.',
+    'Toque num item que você tem para equipar. "Padrão" volta ao visual original.',
+  ]);
+
   static const album = Dica('album', 'Álbum de figurinhas', Icons.collections_bookmark_rounded, Color(0xFF00D084), [
     'Concluir o Desafio do dia dá uma figurinha nova.',
     'Abrir o baú das missões do dia também dá uma.',
@@ -177,6 +185,7 @@ abstract final class Dicas {
     presente,
     reforcos,
     album,
+    baus,
     passe,
     especiais,
     relampago,

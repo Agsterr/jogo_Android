@@ -23,6 +23,7 @@ import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
 import 'ajuda_tela.dart';
 import 'album_tela.dart';
+import 'baus_tela.dart';
 import 'conquistas_tela.dart';
 import 'passe_tela.dart';
 import 'arena_tela.dart';
@@ -321,6 +322,27 @@ class _InicioTelaState extends State<InicioTela> {
                                   contorno: const Color(0xFF7A1033),
                                   selo: p.conquistasProntas,
                                   aoTocar: () => _abrir(ConquistasTela(servicos: servicos)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: _Atalho(
+                                  icone: Icons.inventory_2_rounded,
+                                  titulo: t('Baús e coleção'),
+                                  subtitulo: p.baus > 0
+                                      ? t('{0} baú{1} para abrir!', [p.baus, p.baus == 1 ? '' : 's'])
+                                      : t('Itens de aparência: temas, molduras e cores'),
+                                  cores: const [Color(0xFFFFB800), Color(0xFF8B3DFF)],
+                                  contorno: const Color(0xFF3A1B8A),
+                                  selo: p.baus,
+                                  aoTocar: () => _abrir(BausTela(servicos: servicos)),
                                 ),
                               ),
                             ],

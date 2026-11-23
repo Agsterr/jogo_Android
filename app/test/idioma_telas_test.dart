@@ -3,6 +3,7 @@ import 'package:encaixa/jogo/fases.dart';
 import 'package:encaixa/telas/ajuda_tela.dart';
 import 'package:encaixa/telas/album_tela.dart';
 import 'package:encaixa/telas/arena_tela.dart';
+import 'package:encaixa/telas/baus_tela.dart';
 import 'package:encaixa/telas/conquistas_tela.dart';
 import 'package:encaixa/telas/mapa_tela.dart';
 import 'package:encaixa/telas/progresso_tela.dart';
@@ -74,6 +75,19 @@ void main() {
           (s) => ConquistasTela(servicos: s),
           'conquistas',
           valores: {'partidas': 60, 'recorde': 5400},
+        );
+      });
+
+      testWidgets('baús e coleção', (tester) async {
+        await abrir(
+          tester,
+          (s) => BausTela(servicos: s),
+          'baus',
+          valores: {
+            'baus': 3,
+            'bauItens': ['tema-menta:2', 'moldura-fogo:1'],
+            'temas': ['tema-menta'],
+          },
         );
       });
 

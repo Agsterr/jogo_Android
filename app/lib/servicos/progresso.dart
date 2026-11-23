@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:ui' show Color;
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../jogo/album.dart';
 import '../jogo/amigo.dart';
+import '../jogo/bau.dart';
+import '../jogo/sorteio.dart';
 import '../jogo/conquistas.dart';
 import '../jogo/passe.dart';
 import '../jogo/arena.dart';
@@ -21,6 +24,7 @@ class Progresso extends ChangeNotifier {
   Progresso(this._prefs) {
     Cores.pecas = temaAtivo.cores;
     Cores.simbolos = simbolos;
+    _aplicarCosmeticos();
   }
 
   static Future<Progresso> carregar() async => Progresso(await SharedPreferences.getInstance());
@@ -165,6 +169,8 @@ class Progresso extends ChangeNotifier {
       await contarMissao(dia, TipoMissao.desafio, 1);
       await ganharFigurinha(dia * 31 + 2);
       await ganharXpDoPasse(dia, XpDoPasse.desafio);
+      await ganharBau(); // todo Desafio concluído dá um baú de itens
+      if (dias == 14 || dias == 30) await ganharBau(); // e os marcos de 14 e 30 dias, mais um
       // Prêmio de 30 dias: tema exclusivo, guardado para sempre.
       for (final t in TemaDeBlocos.todos) {
         if (t.marcoDias != null && dias >= t.marcoDias!) await guardarTema(t);
@@ -241,6 +247,7 @@ class Progresso extends ChangeNotifier {
     await _prefs.setInt('codigoEm', dados['salvoEm']! as int);
     Cores.pecas = temaAtivo.cores;
     Cores.simbolos = simbolos;
+    _aplicarCosmeticos();
     notifyListeners();
   }
 
@@ -295,7 +302,7 @@ class Progresso extends ChangeNotifier {
 
   /// Tem o tema? (grátis, comprado, assinante ou evento em andamento)
   bool temTema(TemaDeBlocos t, {String? eventoAtivo}) =>
-      (t.preco == 0 && !t.assinante && t.evento == null && t.marcoDias == null && !t.passe) ||
+      (t.preco == 0 && !t.assinante && t.evento == null && t.marcoDias == null && !t.passe && !t.bau) ||
       (_prefs.getStringList('temas') ?? []).contains(t.id) ||
       (t.assinante && assinante) ||
       (t.evento != null && t.evento == eventoAtivo);
@@ -384,6 +391,111 @@ class Progresso extends ChangeNotifier {
     return true;
   }
 
+  // ---------- baús de itens (só aparência) ----------
+
+  /// Baús ainda fechados.
+  int get baus => _prefs.getInt('baus') ?? 0;
+
+  /// Quantos baús novos chegaram desde a última leitura (só em memória; a tela avisa e limpa).
+  int _bausNovos = 0;
+
+  int pegarBausNovos() {
+    final n = _bausNovos;
+    _bausNovos = 0;
+    return n;
+  }
+
+  Future<void> ganharBau([int quantos = 1]) async {
+    if (quantos <= 0) return;
+    await _prefs.setInt('baus', baus + quantos);
+    _bausNovos += quantos;
+    notifyListeners();
+  }
+
+  /// Nível de cada item da coleção (0 = ainda não tem).
+  Map<String, int> get itensDeBau => {
+    for (final e in _prefs.getStringList('bauItens') ?? <String>[])
+      if (e.contains(':')) e.split(':').first: int.tryParse(e.split(':').last) ?? 0,
+  };
+
+  int nivelDoItem(String id) => itensDeBau[id] ?? 0;
+
+  int get bausAbertos => _prefs.getInt('bauAbertos') ?? 0;
+
+  EstadoDoBau get estadoDoBau =>
+      EstadoDoBau(semRaro: _prefs.getInt('bauSemRaro') ?? 0, semLendario: _prefs.getInt('bauSemLendario') ?? 0);
+
+  /// Abre um baú: sorteia, guarda o item (ou sobe o nível; no máximo vira gemas) e conta a garantia.
+  /// `null` se não há baú. [semente] só serve para os testes.
+  Future<({ItemDeBau item, int nivelAntes, int nivelDepois, int gemas, bool garantido})?> abrirBauDeItens({
+    int? semente,
+  }) async {
+    if (baus <= 0) return null;
+    final r = sortearBau(Sorteio(semente ?? DateTime.now().microsecondsSinceEpoch), estadoDoBau);
+    final antes = nivelDoItem(r.item.id);
+    final depois = antes >= nivelMaximoDoItem ? antes : antes + 1;
+    final gemas = antes >= nivelMaximoDoItem ? r.item.raridade.gemasDeRepetido : 0;
+    final itens = itensDeBau..[r.item.id] = depois;
+    await _prefs.setStringList('bauItens', [for (final e in itens.entries) '${e.key}:${e.value}']);
+    await _prefs.setInt('baus', baus - 1);
+    await _prefs.setInt('bauAbertos', bausAbertos + 1);
+    await _prefs.setInt('bauSemRaro', r.estado.semRaro);
+    await _prefs.setInt('bauSemLendario', r.estado.semLendario);
+    if (r.item.categoria == Categoria.tema) await guardarTema(TemaDeBlocos.porId(r.item.id));
+    if (gemas > 0) await ganharGemas(gemas);
+    notifyListeners();
+    return (item: r.item, nivelAntes: antes, nivelDepois: depois, gemas: gemas, garantido: r.garantido);
+  }
+
+  /// Itens equipados (id do item; `null` = o padrão de cada categoria).
+  String? get molduraAtiva => _prefs.getString('molduraAtiva');
+  String? get mascoteAtivo => _prefs.getString('mascoteAtivo');
+
+  bool equipado(ItemDeBau i) => switch (i.categoria) {
+    Categoria.tema => _prefs.getString('tema') == i.id,
+    Categoria.moldura => molduraAtiva == i.id,
+    Categoria.mascote => mascoteAtivo == i.id,
+  };
+
+  /// Equipa um item que o jogador tem. Devolve `false` se ele ainda não tem.
+  Future<bool> equipar(ItemDeBau i) async {
+    if (nivelDoItem(i.id) == 0) return false;
+    switch (i.categoria) {
+      case Categoria.tema:
+        await usarTema(TemaDeBlocos.porId(i.id));
+      case Categoria.moldura:
+        await _prefs.setString('molduraAtiva', i.id);
+      case Categoria.mascote:
+        await _prefs.setString('mascoteAtivo', i.id);
+    }
+    _aplicarCosmeticos();
+    notifyListeners();
+    return true;
+  }
+
+  /// Volta ao padrão (tema clássico, moldura clássica, Quadrinho verde).
+  Future<void> usarPadrao(Categoria c) async {
+    switch (c) {
+      case Categoria.tema:
+        await usarTema(TemaDeBlocos.classico);
+      case Categoria.moldura:
+        await _prefs.remove('molduraAtiva');
+      case Categoria.mascote:
+        await _prefs.remove('mascoteAtivo');
+    }
+    _aplicarCosmeticos();
+    notifyListeners();
+  }
+
+  void _aplicarCosmeticos() {
+    final m = ItensDeBau.porId(molduraAtiva ?? '');
+    Cores.moldura = m == null
+        ? const [Cores.brilhoRosa, Color(0xFF8B5CFF), Cores.brilhoCiano]
+        : [for (final c in m.cores) Color(c)];
+    final q = ItensDeBau.porId(mascoteAtivo ?? '');
+    Cores.mascote = q == null ? null : Color(q.cores.first);
+  }
+
   // ---------- passe de temporada ----------
 
   int _mesDe(int dia) => dia ~/ 100;
@@ -432,6 +544,7 @@ class Progresso extends ChangeNotifier {
     final gemas = gemasDoNivelDoPasse(nivel) * (assinante ? 2 : 1);
     await _prefs.setStringList('passePegos', [...passePegos(dia).map((n) => '$n'), '$nivel']);
     await ganharGemas(gemas);
+    if (nivel % 5 == 0) await ganharBau(); // níveis 5, 10, 15 e 20 do Passe dão um baú
     if (nivel == niveisDoPasse) {
       for (final t in TemaDeBlocos.todos) {
         if (t.passe) await guardarTema(t);
@@ -528,7 +641,10 @@ class Progresso extends ChangeNotifier {
     if (sorteada == null) return null;
     await _prefs.setStringList('figurinhas', [...?_prefs.getStringList('figurinhas'), sorteada.figurinha.id]);
     final completou = sorteada.album.completo(figurinhas);
-    if (completou) await ganharGemas(sorteada.album.premioGemas);
+    if (completou) {
+      await ganharGemas(sorteada.album.premioGemas);
+      await ganharBau(); // álbum completo: um baú
+    }
     notifyListeners();
     return _figurinhaRecente = (album: sorteada.album, figurinha: sorteada.figurinha, completou: completou);
   }

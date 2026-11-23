@@ -22,7 +22,7 @@ class Mascote extends StatelessWidget {
     label: t('Quadrinho, o mascote'),
     child: SizedBox.square(
       dimension: tamanho,
-      child: CustomPaint(painter: _PintorMascote(humor, cor ?? Cores.pecas[3])),
+      child: CustomPaint(painter: _PintorMascote(humor, cor ?? Cores.mascote ?? Cores.pecas[3])),
     ),
   );
 }

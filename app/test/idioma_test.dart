@@ -5,6 +5,7 @@ import 'package:encaixa/idioma.dart';
 import 'package:encaixa/idioma_textos.dart';
 import 'package:encaixa/jogo/album.dart';
 import 'package:encaixa/jogo/arena.dart';
+import 'package:encaixa/jogo/bau.dart';
 import 'package:encaixa/jogo/conquistas.dart';
 import 'package:encaixa/jogo/eventos.dart';
 import 'package:encaixa/jogo/fases.dart';
@@ -60,6 +61,9 @@ void main() {
       for (final o in Objetivo.values) o.modelo,
       for (final tipo in TipoMissao.values) tipo.modelo,
       for (final tr in Arena.trofeus) tr.nome,
+      for (final i in ItensDeBau.todos) i.nome,
+      for (final r in Raridade.values) r.nome,
+      for (final c in Categoria.values) c.nome,
       'Perfeito!',
       'Fantástico!',
       'Incrível!',

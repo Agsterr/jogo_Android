@@ -33,6 +33,10 @@ abstract final class Cores {
   /// Cores das peças: mudam com o tema escolhido na loja (`Progresso.usarTema`).
   static List<Color> pecas = TemaDeBlocos.classico.cores;
 
+  /// Cores da moldura do tabuleiro (3) e do mascote (`null` = a cor padrão): vêm dos itens equipados da coleção.
+  static List<Color> moldura = const [brilhoRosa, Color(0xFF8B5CFF), brilhoCiano];
+  static Color? mascote;
+
   /// Desenha um símbolo em cada cor de bloco (modo para daltônicos; `Progresso.alternarSimbolos`).
   static bool simbolos = false;
 

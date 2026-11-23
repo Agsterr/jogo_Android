@@ -178,3 +178,17 @@ os fortes (Incrível, Fantástico: cara de "uau"), avisa quando o tabuleiro est�
 jogadas sem limpar linha**. A arte (feliz, festa, uau, triste) está em `docs/artes/mascote-*.png`, gerada em código.
 **Ranking mundial:** o código já manda a pontuação do Infinito, Desafio e Arena ao placar do Google Play Games, mas o
 botão só aparece quando o ID do placar estiver em `game_services.xml` (passo a passo em `docs/PLAY_GAMES.md`, issue #17).
+
+## Baús e coleção (só aparência)
+Os baús **se ganham jogando**; não há compra com dinheiro. Dão baú: concluir o **Desafio do dia** (1), os níveis **5, 10,
+15 e 20 do Passe**, **completar um álbum** e os marcos de **14 e 30 dias** de sequência (mais 1 cada). Cada baú traz um
+item de **aparência**: tema de blocos, moldura do tabuleiro ou cor do Quadrinho. **Nada muda a pontuação** e vale em
+todos os modos, então Desafio, Arena e ranking continuam justos.
+
+**Chances (sempre na tela do baú):** Comum 60%, Raro 28%, Épico 10%, Lendário 2%. **Garantia:** a cada 10 baús sai pelo
+menos um Raro (ou melhor) e a cada 60 um Lendário. **Repetido:** sobe de nível (até 5 estrelas) e, no máximo, vira gemas
+(5, 15, 40 ou 100 conforme a raridade). 18 itens: 6 temas, 6 molduras e 6 cores do mascote; "Padrão" volta ao visual
+original. Regras em `app/lib/jogo/bau.dart`; tela em `app/lib/telas/baus_tela.dart`.
+
+**Fora de propósito:** venda de baús por dinheiro, habilidades que mudam o jogo e itens "únicos no mundo". Motivos e
+decisões em aberto: issue "Baús com itens raros" (loot box tem regra legal e a Play exige mostrar as chances).
