@@ -1,5 +1,6 @@
 import 'partida.dart';
 import 'sorteio.dart';
+import '../idioma.dart';
 
 /// O que a missão conta. `maximo` guarda o melhor valor do dia; os outros somam.
 enum TipoMissao {
@@ -29,7 +30,7 @@ class Missao {
   final int alvo;
   final int gemas;
 
-  String get texto => tipo.modelo.replaceAll('{}', '$alvo');
+  String get texto => t(tipo.modelo).replaceAll('{}', '$alvo');
 }
 
 /// Missões por dia e gemas do baú ao concluir todas.

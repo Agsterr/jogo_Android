@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'idioma.dart';
 import 'servicos/servicos.dart';
 import 'tema.dart';
 import 'telas/inicio_tela.dart';
@@ -12,11 +13,16 @@ class EncaixaApp extends StatelessWidget {
   static final tema = temaDoJogo();
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    title: 'Encaixa',
-    debugShowCheckedModeBanner: false,
-    theme: tema,
-    home: InicioTela(servicos: servicos),
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: servicos.progresso,
+    builder: (context, _) => MaterialApp(
+      title: 'Encaixa',
+      debugShowCheckedModeBanner: false,
+      theme: tema,
+      // Trocar o idioma refaz todas as telas (a chave muda), já com os textos novos.
+      builder: (context, child) => KeyedSubtree(key: ValueKey(Idioma.atual), child: child!),
+      home: InicioTela(servicos: servicos),
+    ),
   );
 }
 

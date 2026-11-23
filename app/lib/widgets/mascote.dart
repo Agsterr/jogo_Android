@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:material_ui/material_ui.dart';
 
 import '../tema.dart';
+import '../idioma.dart';
 
 enum Humor { feliz, festa, triste, uau }
 
@@ -18,7 +19,7 @@ class Mascote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'Quadrinho, o mascote',
+    label: t('Quadrinho, o mascote'),
     child: SizedBox.square(
       dimension: tamanho,
       child: CustomPaint(painter: _PintorMascote(humor, cor ?? Cores.pecas[3])),
@@ -152,10 +153,10 @@ class _PintorMascote extends CustomPainter {
 
 /// Frase do mascote para o fim da partida: depende de como o jogador foi em relação ao recorde.
 String fraseDoMascote({required bool novoRecorde, required int pontos, required int recorde}) {
-  if (novoRecorde) return 'Você se superou! Esse é seu novo recorde!';
-  if (recorde > 0 && pontos >= recorde * 0.8) return 'Quase lá! Mais uma e você bate o recorde!';
-  if (recorde > 0 && pontos >= recorde * 0.4) return 'Boa partida! Cada jogada ensina algo.';
-  return 'Vamos de novo? Eu acredito em você!';
+  if (novoRecorde) return t('Você se superou! Esse é seu novo recorde!');
+  if (recorde > 0 && pontos >= recorde * 0.8) return t('Quase lá! Mais uma e você bate o recorde!');
+  if (recorde > 0 && pontos >= recorde * 0.4) return t('Boa partida! Cada jogada ensina algo.');
+  return t('Vamos de novo? Eu acredito em você!');
 }
 
 Humor humorDoFim({required bool novoRecorde, required int pontos, required int recorde}) {
@@ -165,13 +166,13 @@ Humor humorDoFim({required bool novoRecorde, required int pontos, required int r
 }
 
 /// Dicas que o mascote dá durante a partida.
-const dicasDoMascote = [
-  'Dica: deixe espaço livre para as peças grandes.',
-  'Dica: limpar várias linhas de uma vez vale muito mais!',
-  'Dica: uma linha toda da mesma cor dá gema e bônus.',
-  'Dica: combos seguidos multiplicam os pontos. Não deixe esfriar!',
-  'Dica: olhe as 3 peças antes de jogar a primeira.',
-  'Dica: o Martelo e a Bomba salvam partidas complicadas.',
+List<String> get dicasDoMascote => [
+  t('Dica: deixe espaço livre para as peças grandes.'),
+  t('Dica: limpar várias linhas de uma vez vale muito mais!'),
+  t('Dica: uma linha toda da mesma cor dá gema e bônus.'),
+  t('Dica: combos seguidos multiplicam os pontos. Não deixe esfriar!'),
+  t('Dica: olhe as 3 peças antes de jogar a primeira.'),
+  t('Dica: o Martelo e a Bomba salvam partidas complicadas.'),
 ];
 
 /// O que o mascote diz depois de uma jogada, ou `null` se não tem nada a dizer.
@@ -185,9 +186,9 @@ const dicasDoMascote = [
   required int ocupadas,
   required int jogadas,
 }) {
-  if (elogioNivel >= 3 && elogioTexto != null) return (texto: '$elogioTexto Uau!', humor: Humor.uau);
+  if (elogioNivel >= 3 && elogioTexto != null) return (texto: '$elogioTexto ${t('Uau!')}', humor: Humor.uau);
   if (elogioNivel >= 1 && elogioTexto != null) return (texto: elogioTexto, humor: Humor.festa);
-  if (ocupadas >= 50) return (texto: 'Cuidado, o tabuleiro está quase cheio!', humor: Humor.triste);
+  if (ocupadas >= 50) return (texto: t('Cuidado, o tabuleiro está quase cheio!'), humor: Humor.triste);
   if (semLimpar > 0 && semLimpar % 5 == 0) {
     return (texto: dicasDoMascote[(jogadas ~/ 5) % dicasDoMascote.length], humor: Humor.feliz);
   }

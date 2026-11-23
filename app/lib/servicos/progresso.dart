@@ -12,6 +12,7 @@ import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
 import '../jogo/roda.dart';
 import 'codigo_progresso.dart';
+import '../idioma.dart';
 import '../jogo/temas.dart';
 import '../tema.dart';
 
@@ -57,6 +58,15 @@ class Progresso extends ChangeNotifier {
   Future<void> alternarSimbolos() async {
     await _prefs.setBool('simbolos', !simbolos);
     Cores.simbolos = simbolos;
+    notifyListeners();
+  }
+
+  /// Idioma escolhido: "auto" segue o do celular (e cai no inglês se o dele não for suportado), ou pt, en, es.
+  String get idioma => _prefs.getString('idioma') ?? 'auto';
+
+  Future<void> definirIdioma(String valor) async {
+    await _prefs.setString('idioma', valor);
+    Idioma.definir(valor);
     notifyListeners();
   }
 

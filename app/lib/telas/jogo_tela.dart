@@ -30,6 +30,7 @@ import '../widgets/tabuleiro_widget.dart';
 import 'loja_tela.dart';
 import 'mapa_tela.dart';
 import 'roleta_partida.dart';
+import '../idioma.dart';
 
 /// Preço dos reforços e da segunda chance, em gemas.
 abstract final class Custos {
@@ -212,11 +213,12 @@ class _JogoTelaState extends State<JogoTela> {
   /// Passo do tutorial (0: arrastar, 1: encher linha, 2: objetivo) ou `null` se não há tutorial.
   int? _tutorial;
 
-  static const _textosTutorial = [
-    'Segure uma peça aqui embaixo e arraste até o tabuleiro.',
-    'Isso! Agora encha uma linha ou coluna INTEIRA: ela some e dá pontos.',
-    'Muito bem! O objetivo da fase fica lá em cima. Cumpra antes de acabar as peças: '
-        'quanto mais peças sobrarem, mais estrelas!',
+  static List<String> get _textosTutorial => [
+    t('Segure uma peça aqui embaixo e arraste até o tabuleiro.'),
+    t('Isso! Agora encha uma linha ou coluna INTEIRA: ela some e dá pontos.'),
+    t(
+      'Muito bem! O objetivo da fase fica lá em cima. Cumpra antes de acabar as peças: quanto mais peças sobrarem, mais estrelas!',
+    ),
   ];
 
   void _avancarTutorial(Jogada jogada) {
@@ -343,17 +345,21 @@ class _JogoTelaState extends State<JogoTela> {
       _geracao++;
       _aviso = _AvisoDeJogada(
         id: _geracao,
-        titulo: elogio?.texto ?? 'Meta ${Marcos.formatar(jogada.marcos.last.pontos)}!',
+        titulo:
+            (elogio != null ? t(elogio.texto) : null) ?? t('Meta {0}!', [Marcos.formatar(jogada.marcos.last.pontos)]),
         nivel: elogio?.nivel ?? 2,
         detalhes: [
-          if (elogio != null && jogada.combo >= 2) 'Combo x${jogada.combo}',
+          if (elogio != null && jogada.combo >= 2) t('Combo x{0}', [jogada.combo]),
           if (elogio != null) '+${jogada.pontos}',
           if (gemasDaJogada > 0) _textoGemas(gemasDaJogada),
           for (final m in jogada.marcos)
-            if (elogio != null) 'Meta ${Marcos.formatar(m.pontos)}! ${_textoGemas(m.gemas)}' else _textoGemas(m.gemas),
+            if (elogio != null)
+              t('Meta {0}! {1}', [Marcos.formatar(m.pontos), _textoGemas(m.gemas)])
+            else
+              _textoGemas(m.gemas),
           // Só avisa "peças maiores" enquanto o nível ainda sobe.
           if (jogada.marcos.isNotEmpty && _partida.marcosPagos <= Marcos.nivelMaximoDasPecas)
-            'Nível ${_partida.marcosPagos + 1}: peças maiores',
+            t('Nível {0}: peças maiores', [_partida.marcosPagos + 1]),
         ],
       );
     }
@@ -361,7 +367,7 @@ class _JogoTelaState extends State<JogoTela> {
     if (_tutorial == null && widget.fase == null) {
       final fala = falaAposJogada(
         elogioNivel: elogio?.nivel ?? 0,
-        elogioTexto: elogio?.texto,
+        elogioTexto: elogio == null ? null : t(elogio.texto),
         semLimpar: _partida.semLimpar,
         ocupadas: _partida.tabuleiro.ocupadas,
         jogadas: _partida.jogadas,
@@ -402,7 +408,7 @@ class _JogoTelaState extends State<JogoTela> {
     return '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
   }
 
-  String _textoGemas(int n) => '+$n ${n == 1 ? 'gema' : 'gemas'}';
+  String _textoGemas(int n) => '+$n ${t(n == 1 ? 'gema' : 'gemas')}';
 
   // ---------- fases ----------
 
@@ -450,7 +456,7 @@ class _JogoTelaState extends State<JogoTela> {
       _ajudarNaFase();
     } else if (mounted) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Anúncio indisponível agora. Tente de novo.')));
+          .showSnackBar(SnackBar(content: Text(t('Anúncio indisponível agora. Tente de novo.'))));
     }
   }
 
@@ -500,8 +506,8 @@ class _JogoTelaState extends State<JogoTela> {
     if (martelo ? !_partida.podeMartelar(linha, coluna) : _partida.blocosDaBomba(linha, coluna).isEmpty) {
       _avisarNoTabuleiro(
         _partida.tabuleiro.cor(linha, coluna) == Tabuleiro.pedra
-            ? 'Pedra só quebra completando a linha ou a coluna dela.'
-            : (martelo ? 'Toque num bloco colorido.' : 'Não tem bloco colorido nessa área.'),
+            ? t('Pedra só quebra completando a linha ou a coluna dela.')
+            : (martelo ? t('Toque num bloco colorido.') : t('Não tem bloco colorido nessa área.')),
       );
       return;
     }
@@ -543,7 +549,7 @@ class _JogoTelaState extends State<JogoTela> {
       _continuar();
     } else if (mounted) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Anúncio indisponível agora. Tente de novo.')));
+          .showSnackBar(SnackBar(content: Text(t('Anúncio indisponível agora. Tente de novo.'))));
     }
   }
 
@@ -615,21 +621,32 @@ class _JogoTelaState extends State<JogoTela> {
 
   void _compartilhar() {
     final texto = widget.arena
-        ? 'Encaixa 🏆 Arena da semana\n⭐ ${_partida.pontos} pontos'
-              '${Arena.trofeuPara(_partida.pontos) == null ? '' : ' · ${Arena.trofeuPara(_partida.pontos)!.nome}'}\n'
-              'Mesmas peças para todo mundo até domingo. Consegue me passar?\n$linkDaLoja'
+        ? t(
+            'Encaixa 🏆 Arena da semana\n⭐ {0} pontos{1}\nMesmas peças para todo mundo até domingo. Consegue me passar?\n{2}',
+            [
+              _partida.pontos,
+              Arena.trofeuPara(_partida.pontos) == null ? '' : ' · ${t(Arena.trofeuPara(_partida.pontos)!.nome)}',
+              linkDaLoja,
+            ],
+          )
         : widget.diario
-        ? 'Encaixa 🧩 Desafio #${numeroDoDesafio(_s.hoje())}\n⭐ ${_partida.pontos} pontos\n'
-              'Mesmas peças para todo mundo. Consegue me passar?\n$linkDaLoja'
+        ? t('Encaixa 🧩 Desafio #{0}\n⭐ {1} pontos\nMesmas peças para todo mundo. Consegue me passar?\n{2}', [
+            numeroDoDesafio(_s.hoje()),
+            _partida.pontos,
+            linkDaLoja,
+          ])
         : widget.relampago
-        ? 'Fiz ${_partida.pontos} pontos em 60 segundos no Encaixa ⚡ Consegue me passar?\n$linkDaLoja'
-        : 'Fiz ${_partida.pontos} pontos no Encaixa 🧩 Consegue me passar?\n$linkDaLoja';
+        ? t('Fiz {0} pontos em 60 segundos no Encaixa ⚡ Consegue me passar?\n{1}', [_partida.pontos, linkDaLoja])
+        : t('Fiz {0} pontos no Encaixa 🧩 Consegue me passar?\n{1}', [_partida.pontos, linkDaLoja]);
     final codigo = widget.fase != null || _partida.semente <= 0
         ? null
         : DesafioAmigo(semente: _partida.semente, pontos: _partida.pontos, infinito: _infinito).codigo;
     final completo = codigo == null
         ? texto
-        : '$texto\n\nQuer jogar com as mesmas peças que eu? No Encaixa, toque em "Código de amigo" e cole:\n$codigo';
+        : t('{0}\n\nQuer jogar com as mesmas peças que eu? No Encaixa, toque em "Código de amigo" e cole:\n{1}', [
+            texto,
+            codigo,
+          ]);
     SharePlus.instance.share(ShareParams(text: completo));
   }
 
@@ -731,18 +748,18 @@ class _JogoTelaState extends State<JogoTela> {
       child: Row(
         children: [
           IconButton(
-            tooltip: 'Voltar',
+            tooltip: t('Voltar'),
             onPressed: () => Navigator.of(context).maybePop(),
             icon: const Icon(Icons.arrow_back_rounded),
           ),
           if (widget.fase case final fase?)
             Text(
-              'FASE ${fase.numero}',
+              t('FASE {0}', [fase.numero]),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
             ),
           if (widget.arena)
-            const Text(
-              'ARENA DA SEMANA',
+            Text(
+              t('ARENA DA SEMANA'),
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
             ),
           if (widget.relampago)
@@ -765,12 +782,12 @@ class _JogoTelaState extends State<JogoTela> {
             ),
           if (widget.amigo case final amigo?)
             Text(
-              'AMIGO: ${amigo.pontos}',
+              t('AMIGO: {0}', [amigo.pontos]),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
             ),
           if (widget.diario)
             Text(
-              'DESAFIO #${numeroDoDesafio(_s.hoje())}',
+              t('DESAFIO #{0}', [numeroDoDesafio(_s.hoje())]),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
             ),
           const Spacer(),
@@ -819,7 +836,7 @@ class _JogoTelaState extends State<JogoTela> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              'Peças: ${_restantes(fase)}',
+              t('Peças: {0}', [_restantes(fase)]),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             ),
           ),
@@ -845,7 +862,7 @@ class _JogoTelaState extends State<JogoTela> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
               decoration: BoxDecoration(color: Cores.destaque, borderRadius: BorderRadius.circular(20)),
-              child: Text('Combo x${_partida.combo}', style: const TextStyle(fontWeight: FontWeight.w700)),
+              child: Text(t('Combo x{0}', [_partida.combo]), style: const TextStyle(fontWeight: FontWeight.w700)),
             ),
           ],
         ],
@@ -869,7 +886,7 @@ class _JogoTelaState extends State<JogoTela> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
             decoration: BoxDecoration(color: Cores.painel, borderRadius: BorderRadius.circular(12)),
-            child: Text('Nível ${pagos + 1}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            child: Text(t('Nível {0}', [pagos + 1]), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -885,7 +902,7 @@ class _JogoTelaState extends State<JogoTela> {
           ),
           const SizedBox(width: 8),
           Text(
-            proxima == null ? 'Máximo!' : 'Meta ${Marcos.formatar(proxima.pontos)} · +${proxima.gemas}',
+            proxima == null ? t('Máximo!') : t('Meta {0} · +{1}', [Marcos.formatar(proxima.pontos), proxima.gemas]),
             style: const TextStyle(fontSize: 13, color: Cores.textoFraco, fontWeight: FontWeight.w600),
           ),
         ],
@@ -945,8 +962,8 @@ class _JogoTelaState extends State<JogoTela> {
                 decoration: BoxDecoration(color: Cores.ouro, borderRadius: BorderRadius.circular(16)),
                 child: Text(
                   _reforcoAtivo == _Reforco.martelo
-                      ? 'Toque no bloco que quer tirar'
-                      : 'Toque no centro da área 3x3 que quer limpar',
+                      ? t('Toque no bloco que quer tirar')
+                      : t('Toque no centro da área 3x3 que quer limpar'),
                   style: const TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF3A2400)),
                 ),
               ),
@@ -1002,7 +1019,7 @@ class _JogoTelaState extends State<JogoTela> {
           children: [
             _BotaoReforco(
               icone: Icons.undo_rounded,
-              texto: 'Desfazer',
+              texto: t('Desfazer'),
               custo: Custos.desfazer,
               aoTocar: _partida.podeDesfazer && _fim == null
                   ? () => _usarReforco(Custos.desfazer, _partida.desfazer)
@@ -1011,7 +1028,7 @@ class _JogoTelaState extends State<JogoTela> {
             const SizedBox(width: 8),
             _BotaoReforco(
               icone: Icons.shuffle_rounded,
-              texto: 'Trocar',
+              texto: t('Trocar'),
               custo: Custos.trocar,
               aoTocar: _fim == null
                   ? () => _usarReforco(Custos.trocar, () {
@@ -1023,7 +1040,7 @@ class _JogoTelaState extends State<JogoTela> {
             const SizedBox(width: 8),
             _BotaoReforco(
               icone: Icons.hardware_rounded,
-              nome: 'Martelo',
+              nome: t('Martelo'),
               custo: Custos.martelo,
               ativo: _reforcoAtivo == _Reforco.martelo,
               aoTocar: _fim == null ? () => _alternarReforco(_Reforco.martelo, Custos.martelo) : null,
@@ -1031,7 +1048,7 @@ class _JogoTelaState extends State<JogoTela> {
             const SizedBox(width: 8),
             _BotaoReforco(
               icone: Icons.flare_rounded,
-              nome: 'Bomba',
+              nome: t('Bomba'),
               custo: Custos.bomba,
               ativo: _reforcoAtivo == _Reforco.bomba,
               aoTocar: _fim == null ? () => _alternarReforco(_Reforco.bomba, Custos.bomba) : null,
@@ -1094,7 +1111,7 @@ class _JogoTelaState extends State<JogoTela> {
     final estrelas = _s.progresso.estrelasDaFase(fase.numero);
     return [
       Text(
-        'Fase ${fase.numero} concluída!',
+        t('Fase {0} concluída!', [fase.numero]),
         textAlign: TextAlign.center,
         style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
       ),
@@ -1108,14 +1125,14 @@ class _JogoTelaState extends State<JogoTela> {
       ),
       if (_gemasFase > 0)
         Text(
-          '+$_gemasFase gemas',
+          t('+{0} gemas', [_gemasFase]),
           textAlign: TextAlign.center,
           style: const TextStyle(color: Cores.gema, fontSize: 18, fontWeight: FontWeight.w700),
         ),
       const SizedBox(height: 20),
       if (fase.numero < Fase.total)
-        _botao('Próxima fase', Icons.arrow_forward_rounded, () => _irParaFase(fase.numero + 1)),
-      TextButton(onPressed: _irParaMapa, child: const Text('Mapa')),
+        _botao(t('Próxima fase'), Icons.arrow_forward_rounded, () => _irParaFase(fase.numero + 1)),
+      TextButton(onPressed: _irParaMapa, child: Text(t('Mapa'))),
     ];
   }
 
@@ -1123,20 +1140,20 @@ class _JogoTelaState extends State<JogoTela> {
     final semEspaco = _partida.fimDeJogo;
     return [
       Text(
-        semEspaco ? 'Sem espaço!' : 'Acabaram as peças!',
+        semEspaco ? t('Sem espaço!') : t('Acabaram as peças!'),
         textAlign: TextAlign.center,
         style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
       ),
       const SizedBox(height: 4),
       Text(
-        'Faltou pouco: ${fase.progresso(_partida)}/${fase.alvo}',
+        t('Faltou pouco: {0}/{1}', [fase.progresso(_partida), fase.alvo]),
         textAlign: TextAlign.center,
         style: const TextStyle(fontSize: 18, color: Cores.textoFraco),
       ),
       const SizedBox(height: 20),
       if (!_ajudou) ...[
         _botao(
-          semEspaco ? 'Abrir espaço' : '+5 peças',
+          semEspaco ? t('Abrir espaço') : t('+5 peças'),
           _s.progresso.assinante ? Icons.workspace_premium_rounded : Icons.smart_display_rounded,
           _s.progresso.assinante ? _ajudarNaFase : _ajudaComAnuncio,
         ),
@@ -1145,46 +1162,46 @@ class _JogoTelaState extends State<JogoTela> {
           style: OutlinedButton.styleFrom(minimumSize: const Size(64, 48)),
           onPressed: _s.progresso.gemas >= Custos.continuar ? _ajudaComGemas : null,
           icon: const IconeGema(),
-          label: const Text('Usar ${Custos.continuar} gemas'),
+          label: Text(t('Usar {0} gemas', [Custos.continuar])),
         ),
       ] else
-        _botao('Tentar de novo', Icons.replay_rounded, () => _irParaFase(fase.numero)),
+        _botao(t('Tentar de novo'), Icons.replay_rounded, () => _irParaFase(fase.numero)),
       const SizedBox(height: 4),
-      if (!_ajudou) TextButton(onPressed: () => _irParaFase(fase.numero), child: const Text('Tentar de novo')),
-      TextButton(onPressed: _irParaMapa, child: const Text('Mapa')),
+      if (!_ajudou) TextButton(onPressed: () => _irParaFase(fase.numero), child: Text(t('Tentar de novo'))),
+      TextButton(onPressed: _irParaMapa, child: Text(t('Mapa'))),
     ];
   }
 
   List<Widget> _segundaChance() {
     final p = _s.progresso;
     return [
-      const Text(
-        'Sem espaço!',
+      Text(
+        t('Sem espaço!'),
         textAlign: TextAlign.center,
         style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
       ),
       const SizedBox(height: 4),
-      Text('${_partida.pontos} pontos', textAlign: TextAlign.center, style: const TextStyle(fontSize: 20)),
+      Text(t('{0} pontos', [_partida.pontos]), textAlign: TextAlign.center, style: const TextStyle(fontSize: 20)),
       const SizedBox(height: 8),
-      const Text(
-        'Limpar as 4 linhas do meio e continuar?',
+      Text(
+        t('Limpar as 4 linhas do meio e continuar?'),
         textAlign: TextAlign.center,
         style: TextStyle(color: Cores.textoFraco),
       ),
       const SizedBox(height: 20),
       if (p.assinante)
-        _botao('Continuar grátis', Icons.workspace_premium_rounded, _continuar)
+        _botao(t('Continuar grátis'), Icons.workspace_premium_rounded, _continuar)
       else
-        _botao('Assistir e continuar', Icons.smart_display_rounded, _continuarComAnuncio),
+        _botao(t('Assistir e continuar'), Icons.smart_display_rounded, _continuarComAnuncio),
       const SizedBox(height: 10),
       OutlinedButton.icon(
         style: OutlinedButton.styleFrom(minimumSize: const Size(64, 48)),
         onPressed: p.gemas >= Custos.continuar ? _continuarComGemas : null,
         icon: const IconeGema(),
-        label: const Text('Usar ${Custos.continuar} gemas'),
+        label: Text(t('Usar {0} gemas', [Custos.continuar])),
       ),
       const SizedBox(height: 4),
-      TextButton(onPressed: _encerrar, child: const Text('Não, obrigado')),
+      TextButton(onPressed: _encerrar, child: Text(t('Não, obrigado'))),
     ];
   }
 
@@ -1212,7 +1229,7 @@ class _JogoTelaState extends State<JogoTela> {
       ),
     ),
     Text(
-      _novoRecorde ? 'Novo recorde!' : 'Fim de jogo',
+      _novoRecorde ? t('Novo recorde!') : t('Fim de jogo'),
       textAlign: TextAlign.center,
       style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
     ),
@@ -1222,7 +1239,7 @@ class _JogoTelaState extends State<JogoTela> {
       style: const TextStyle(fontSize: 56, fontWeight: FontWeight.w700),
     ),
     Text(
-      'Recorde: ${widget.relampago ? _s.progresso.relampagoMelhor : _s.progresso.recorde}',
+      t('Recorde: {0}', [widget.relampago ? _s.progresso.relampagoMelhor : _s.progresso.recorde]),
       textAlign: TextAlign.center,
       style: const TextStyle(color: Cores.textoFraco),
     ),
@@ -1231,17 +1248,21 @@ class _JogoTelaState extends State<JogoTela> {
         padding: const EdgeInsets.only(top: 8),
         child: Text(
           [
-            'Desafio do dia concluído!',
-            if (_gemasDesafio > 0) '+$_gemasDesafio gemas',
-            if (_faixaNova case final f?) 'Faixa ${f.faixa.nome}! +${f.gemas} gemas',
+            t('Desafio do dia concluído!'),
+            if (_gemasDesafio > 0) t('+{0} gemas', [_gemasDesafio]),
+            if (_faixaNova case final f?) t('Faixa {0}! +{1} gemas', [t(f.faixa.nome), f.gemas]),
             if (premioDaSequencia(_s.progresso.sequencia(_dia)) > 0 && _gemasDesafio > 0)
-              'Marco de ${_s.progresso.sequencia(_dia)} dias! 🎉',
-            if (_s.progresso.sequencia(_dia) == 30 && _gemasDesafio > 0) 'Tema Chama liberado na Loja!',
+              t('Marco de {0} dias! 🎉', [_s.progresso.sequencia(_dia)]),
+            if (_s.progresso.sequencia(_dia) == 30 && _gemasDesafio > 0) t('Tema Chama liberado na Loja!'),
             if (_figurinhaNova case final f?)
               f.completou
-                  ? 'Figurinha ${f.figurinha.nome}: álbum ${f.album.nome} completo! +${f.album.premioGemas} gemas'
-                  : 'Figurinha nova: ${f.figurinha.nome}',
-            '🔥 ${_s.progresso.sequencia(_dia)} ${_s.progresso.sequencia(_dia) == 1 ? 'dia' : 'dias seguidos'}',
+                  ? t('Figurinha {0}: álbum {1} completo! +{2} gemas', [
+                      f.figurinha.nome,
+                      f.album.nome,
+                      f.album.premioGemas,
+                    ])
+                  : t('Figurinha nova: {0}', [t(f.figurinha.nome)]),
+            '🔥 ${_s.progresso.sequencia(_dia)} ${t(_s.progresso.sequencia(_dia) == 1 ? 'dia' : 'dias seguidos')}',
           ].join('\n'),
           textAlign: TextAlign.center,
           style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
@@ -1251,7 +1272,7 @@ class _JogoTelaState extends State<JogoTela> {
       Padding(
         padding: const EdgeInsets.only(top: 8),
         child: Text(
-          ['Tempo esgotado!', if (_gemasRelampago > 0) _textoGemas(_gemasRelampago)].join('\n'),
+          [t('Tempo esgotado!'), if (_gemasRelampago > 0) _textoGemas(_gemasRelampago)].join('\n'),
           textAlign: TextAlign.center,
           style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
         ),
@@ -1262,11 +1283,11 @@ class _JogoTelaState extends State<JogoTela> {
         child: Text(
           [
             _partida.pontos > amigo.pontos
-                ? 'Você venceu seu amigo! ${_partida.pontos} x ${amigo.pontos}'
+                ? t('Você venceu seu amigo! {0} x {1}', [_partida.pontos, amigo.pontos])
                 : (_partida.pontos == amigo.pontos
-                      ? 'Empate! ${_partida.pontos} x ${amigo.pontos}'
-                      : 'Quase! Faltaram ${amigo.pontos - _partida.pontos + 1} pontos para vencer'),
-            if (_gemasAmigo > 0) '+$_gemasAmigo gemas',
+                      ? t('Empate! {0} x {1}', [_partida.pontos, amigo.pontos])
+                      : t('Quase! Faltaram {0} pontos para vencer', [amigo.pontos - _partida.pontos + 1])),
+            if (_gemasAmigo > 0) t('+{0} gemas', [_gemasAmigo]),
           ].join('\n'),
           textAlign: TextAlign.center,
           style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
@@ -1277,9 +1298,9 @@ class _JogoTelaState extends State<JogoTela> {
         padding: const EdgeInsets.only(top: 8),
         child: Text(
           [
-            'Melhor da semana: ${_s.progresso.arenaMelhor(_semana)}',
-            if (Arena.trofeuPara(_s.progresso.arenaMelhor(_semana)) case final t?)
-              'Troféu ${t.nome}! Pegue o prêmio na Arena.',
+            t('Melhor da semana: {0}', [_s.progresso.arenaMelhor(_semana)]),
+            if (Arena.trofeuPara(_s.progresso.arenaMelhor(_semana)) case final trofeu?)
+              t('Troféu {0}! Pegue o prêmio na Arena.', [t(trofeu.nome)]),
           ].join('\n'),
           textAlign: TextAlign.center,
           style: const TextStyle(color: Cores.ouro, fontWeight: FontWeight.w700),
@@ -1287,7 +1308,9 @@ class _JogoTelaState extends State<JogoTela> {
       ),
     const SizedBox(height: 20),
     _botao(
-      widget.diario || widget.arena || widget.amigo != null || widget.relampago ? 'Tentar de novo' : 'Jogar de novo',
+      widget.diario || widget.arena || widget.amigo != null || widget.relampago
+          ? t('Tentar de novo')
+          : t('Jogar de novo'),
       Icons.replay_rounded,
       _jogarDeNovo,
     ),
@@ -1296,9 +1319,9 @@ class _JogoTelaState extends State<JogoTela> {
       style: OutlinedButton.styleFrom(minimumSize: const Size(64, 48)),
       onPressed: _compartilhar,
       icon: const Icon(Icons.share_rounded),
-      label: const Text('Desafiar amigos'),
+      label: Text(t('Desafiar amigos')),
     ),
-    TextButton(onPressed: _sair, child: const Text('Início')),
+    TextButton(onPressed: _sair, child: Text(t('Início'))),
   ];
 }
 
@@ -1484,7 +1507,7 @@ class _BalaoTutorialState extends State<BalaoTutorial> with SingleTickerProvider
               if (widget.aoEntender != null) ...[
                 const SizedBox(height: 10),
                 BotaoDoce(
-                  texto: 'ENTENDI',
+                  texto: t('ENTENDI'),
                   cor: Cores.blocos[3],
                   altura: 44,
                   tamanhoTexto: 18,

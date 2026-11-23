@@ -10,6 +10,7 @@ import '../tema.dart';
 import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
 import '../widgets/roda_widget.dart';
+import '../idioma.dart';
 
 /// Roda da sorte diária.
 class RodaTela extends StatefulWidget {
@@ -34,7 +35,7 @@ class _RodaTelaState extends State<RodaTela> {
     if (comAnuncio && !_s.progresso.assinante && !await _s.anuncios.mostrarPremiado()) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Anúncio indisponível agora. Tente de novo.')));
+            .showSnackBar(SnackBar(content: Text(t('Anúncio indisponível agora. Tente de novo.'))));
       }
       return;
     }
@@ -72,12 +73,17 @@ class _RodaTelaState extends State<RodaTela> {
                     child: Row(
                       children: [
                         IconButton(
-                          tooltip: 'Voltar',
+                          tooltip: t('Voltar'),
                           onPressed: () => Navigator.of(context).maybePop(),
                           icon: const Icon(Icons.arrow_back_rounded),
                         ),
-                        const TextoContornado('Roda da sorte', tamanho: 26),
-                        const Spacer(),
+                        Expanded(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: TextoContornado(t('Roda da sorte'), tamanho: 26, alinhamento: TextAlign.start),
+                          ),
+                        ),
                         GemasChip(gemas: p.gemas),
                       ],
                     ),
@@ -86,9 +92,9 @@ class _RodaTelaState extends State<RodaTela> {
                   SizedBox(
                     height: 64,
                     child: _premio == null
-                        ? const Text('Gire e ganhe gemas!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600))
+                        ? Text(t('Gire e ganhe gemas!'), style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600))
                         : TextoContornado(
-                            '+$_premio gemas!',
+                            t('+{0} gemas!', [_premio]),
                             tamanho: 44,
                             cor: const Color(0xFFFFF27A),
                             contorno: const Color(0xFFB0186A),
@@ -110,7 +116,7 @@ class _RodaTelaState extends State<RodaTela> {
                     padding: const EdgeInsets.symmetric(horizontal: 32),
                     child: giros == 0
                         ? BotaoDoce(
-                            texto: 'GIRAR GRÁTIS',
+                            texto: t('GIRAR GRÁTIS'),
                             icone: Icons.refresh_rounded,
                             cor: Cores.blocos[3],
                             altura: 62,
@@ -119,20 +125,20 @@ class _RodaTelaState extends State<RodaTela> {
                           )
                         : giros < Roda.girosPorDia
                         ? BotaoDoce(
-                            texto: 'GIRAR DE NOVO',
+                            texto: t('GIRAR DE NOVO'),
                             detalhe: p.assinante
-                                ? 'Grátis no Encaixa+ · ${Roda.girosPorDia - giros} restantes'
-                                : 'Vendo um anúncio · ${Roda.girosPorDia - giros} restantes',
+                                ? t('Grátis no Encaixa+ · {0} restantes', [Roda.girosPorDia - giros])
+                                : t('Vendo um anúncio · {0} restantes', [Roda.girosPorDia - giros]),
                             icone: p.assinante ? Icons.workspace_premium_rounded : Icons.smart_display_rounded,
                             cor: Cores.blocos[5],
                             altura: 62,
                             tamanhoTexto: 22,
                             aoTocar: _girando ? null : () => _girar(comAnuncio: true),
                           )
-                        : const Padding(
+                        : Padding(
                             padding: EdgeInsets.symmetric(vertical: 16),
                             child: Text(
-                              'Volte amanhã para girar de novo!',
+                              t('Volte amanhã para girar de novo!'),
                               textAlign: TextAlign.center,
                               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                             ),

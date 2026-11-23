@@ -1,3 +1,5 @@
+import '../idioma.dart';
+
 /// Passe de temporada: uma trilha de 20 níveis por mês. Jogar enche a barra (XP); cada nível dá gemas
 /// (o dobro para quem tem o Encaixa+) e o nível 20 dá o tema Aurora. Recomeça todo mês.
 const niveisDoPasse = 20;
@@ -42,4 +44,4 @@ const _meses = [
 ];
 
 /// "novembro" para o mês 202611.
-String nomeDoMes(int mes) => _meses[(mes % 100 - 1).clamp(0, 11)];
+String nomeDoMes(int mes) => t(_meses[(mes % 100 - 1).clamp(0, 11)]);

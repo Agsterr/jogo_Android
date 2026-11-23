@@ -9,6 +9,7 @@ import '../servicos/servicos.dart';
 import '../tema.dart';
 import '../widgets/peca_widget.dart';
 import 'progresso_tela.dart';
+import '../idioma.dart';
 
 class LojaTela extends StatelessWidget {
   const LojaTela({super.key, required this.servicos});
@@ -29,20 +30,20 @@ class LojaTela extends StatelessWidget {
       await servicos.progresso.ganharGemas(gemasPorAnuncio);
     } else if (context.mounted) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Anúncio indisponível agora. Tente de novo.')));
+          .showSnackBar(SnackBar(content: Text(t('Anúncio indisponível agora. Tente de novo.'))));
     }
   }
 
-  Future<void> _escolherTema(BuildContext context, TemaDeBlocos t) async {
+  Future<void> _escolherTema(BuildContext context, TemaDeBlocos tema) async {
     final p = servicos.progresso;
     final evento = eventoAtivo(servicos.hoje())?.id;
-    if (p.temTema(t, eventoAtivo: evento)) {
-      if (t.evento != null) await p.guardarTema(t);
-      return p.usarTema(t);
+    if (p.temTema(tema, eventoAtivo: evento)) {
+      if (tema.evento != null) await p.guardarTema(tema);
+      return p.usarTema(tema);
     }
-    if (await p.comprarTema(t)) return p.usarTema(t);
+    if (await p.comprarTema(tema)) return p.usarTema(tema);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gemas insuficientes.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t('Gemas insuficientes.'))));
     }
   }
 
@@ -51,7 +52,7 @@ class LojaTela extends StatelessWidget {
     final p = servicos.progresso, compras = servicos.compras;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Loja', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(t('Loja'), style: TextStyle(fontWeight: FontWeight.w700)),
         backgroundColor: Cores.fundoTopo,
         actions: [
           ListenableBuilder(
@@ -72,7 +73,7 @@ class LojaTela extends StatelessWidget {
             return ListView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               children: [
-                if (!pode) const _Aviso('A loja do Google Play não está disponível neste aparelho.'),
+                if (!pode) _Aviso(t('A loja do Google Play não está disponível neste aparelho.')),
                 if (compras.erro case final erro?) _Aviso(erro),
                 _CartaoAssinatura(
                   preco: preco(Produtos.assinatura),
@@ -82,35 +83,35 @@ class LojaTela extends StatelessWidget {
                 const SizedBox(height: 12),
                 _Item(
                   icone: const Icon(Icons.block_rounded, color: Cores.destaque, size: 32),
-                  titulo: 'Sem anúncios',
-                  descricao: 'Para sempre, entre partidas.',
-                  botao: p.semAnuncios ? 'Ativo' : preco(Produtos.semAnuncios),
+                  titulo: t('Sem anúncios'),
+                  descricao: t('Para sempre, entre partidas.'),
+                  botao: p.semAnuncios ? t('Ativo') : preco(Produtos.semAnuncios),
                   aoTocar: pode && !p.semAnuncios ? () => compras.comprar(Produtos.semAnuncios) : null,
                 ),
                 const SizedBox(height: 20),
-                const Text('Gemas', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
-                const Text('Use em Desfazer, Trocar e Continuar.', style: TextStyle(color: Cores.textoFraco)),
+                Text(t('Gemas'), style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                Text(t('Use em Desfazer, Trocar e Continuar.'), style: TextStyle(color: Cores.textoFraco)),
                 const SizedBox(height: 8),
                 _Item(
                   icone: const Icon(Icons.smart_display_rounded, color: Cores.gema, size: 32),
-                  titulo: '+$gemasPorAnuncio gemas grátis',
-                  descricao: 'Anúncio curto · ${p.premiadosNoDia(_dia)} de $premiadosPorDia hoje',
-                  botao: 'Assistir',
+                  titulo: t('+{0} gemas grátis', [gemasPorAnuncio]),
+                  descricao: t('Anúncio curto · {0} de {1} hoje', [p.premiadosNoDia(_dia), premiadosPorDia]),
+                  botao: t('Assistir'),
                   aoTocar: p.premiadosNoDia(_dia) < premiadosPorDia ? () => _gemasComAnuncio(context) : null,
                 ),
                 for (final MapEntry(key: id, value: qtd) in Produtos.gemas.entries) ...[
                   const SizedBox(height: 8),
                   _Item(
                     icone: const IconeGema(tamanho: 32),
-                    titulo: '$qtd gemas',
-                    descricao: qtd >= 1000 ? 'Melhor valor' : (qtd >= 300 ? 'Mais popular' : 'Para começar'),
+                    titulo: t('{0} gemas', [qtd]),
+                    descricao: qtd >= 1000 ? t('Melhor valor') : (qtd >= 300 ? t('Mais popular') : t('Para começar')),
                     botao: preco(id),
                     aoTocar: pode ? () => compras.comprar(id) : null,
                   ),
                 ],
                 const SizedBox(height: 20),
-                const Text('Temas', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
-                const Text('Mude as cores das peças.', style: TextStyle(color: Cores.textoFraco)),
+                Text(t('Temas'), style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                Text(t('Mude as cores das peças.'), style: TextStyle(color: Cores.textoFraco)),
                 for (final t in TemaDeBlocos.todos) ...[
                   const SizedBox(height: 8),
                   _ItemTema(
@@ -121,12 +122,12 @@ class LojaTela extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 16),
-                TextButton(onPressed: pode ? compras.restaurar : null, child: const Text('Restaurar compras')),
+                TextButton(onPressed: pode ? compras.restaurar : null, child: Text(t('Restaurar compras'))),
                 TextButton(
                   onPressed: () =>
                       Navigator.of(context)
                           .push(MaterialPageRoute<void>(builder: (_) => ProgressoTela(servicos: servicos))),
-                  child: const Text('Salvar ou recuperar progresso'),
+                  child: Text(t('Salvar ou recuperar progresso')),
                 ),
               ],
             );
@@ -144,7 +145,11 @@ class _CartaoAssinatura extends StatelessWidget {
   final bool ativo;
   final VoidCallback? aoAssinar;
 
-  static const _beneficios = ['Sem anúncios entre partidas', 'Continuar grátis em toda partida', '+10 gemas todo dia'];
+  static List<String> get _beneficios => [
+    t('Sem anúncios entre partidas'),
+    t('Continuar grátis em toda partida'),
+    t('+10 gemas todo dia'),
+  ];
 
   @override
   Widget build(BuildContext context) => Container(
@@ -185,12 +190,12 @@ class _CartaoAssinatura extends StatelessWidget {
           child: FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Cores.fundoTopo),
             onPressed: ativo ? null : aoAssinar,
-            child: Text(ativo ? 'Assinatura ativa' : 'Assinar por $preco/mês'),
+            child: Text(ativo ? t('Assinatura ativa') : t('Assinar por {0}/mês', [preco])),
           ),
         ),
         const SizedBox(height: 6),
-        const Text(
-          'Renova todo mês. Cancele quando quiser no Google Play.',
+        Text(
+          t('Renova todo mês. Cancele quando quiser no Google Play.'),
           style: TextStyle(fontSize: 12, color: Color(0xDDFFFFFF)),
         ),
       ],
@@ -266,14 +271,14 @@ class _ItemTema extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(tema.nome, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                Text(t(tema.nome), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                 if (tema.assinante || tema.evento != null || tema.marcoDias != null || tema.passe)
                   Text(
                     tema.assinante
-                        ? 'Exclusivo Encaixa+'
+                        ? t('Exclusivo Encaixa+')
                         : (tema.marcoDias != null
-                              ? '${tema.marcoDias} dias seguidos no Desafio'
-                              : (tema.passe ? 'Nível 20 do Passe de temporada' : 'Grátis no evento')),
+                              ? t('{0} dias seguidos no Desafio', [tema.marcoDias])
+                              : (tema.passe ? t('Nível 20 do Passe de temporada') : t('Grátis no evento'))),
                     style: const TextStyle(color: Cores.textoFraco, fontSize: 13),
                   ),
               ],
@@ -283,9 +288,9 @@ class _ItemTema extends StatelessWidget {
             style: FilledButton.styleFrom(minimumSize: const Size(88, 40)),
             onPressed: emUso || bloqueado ? null : aoTocar,
             child: emUso
-                ? const Text('Em uso')
+                ? Text(t('Em uso'))
                 : temTema
-                ? const Text('Usar')
+                ? Text(t('Usar'))
                 : bloqueado
                 ? const Icon(Icons.lock_rounded, size: 20)
                 : Row(mainAxisSize: MainAxisSize.min, children: [const IconeGema(tamanho: 16), Text(' ${tema.preco}')]),

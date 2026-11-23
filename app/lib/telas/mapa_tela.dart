@@ -8,6 +8,7 @@ import '../servicos/servicos.dart';
 import '../tema.dart';
 import '../widgets/doce.dart';
 import 'jogo_tela.dart';
+import '../idioma.dart';
 
 /// Mapa do modo Fases: trilha em curva, um mundo a cada 20 fases.
 class MapaTela extends StatefulWidget {
@@ -78,11 +79,11 @@ class _MapaTelaState extends State<MapaTela> with SingleTickerProviderStateMixin
                 child: Row(
                   children: [
                     IconButton(
-                      tooltip: 'Voltar',
+                      tooltip: t('Voltar'),
                       onPressed: () => Navigator.of(context).maybePop(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     ),
-                    const TextoContornado('Fases', tamanho: 26),
+                    TextoContornado(t('Fases'), tamanho: 26),
                     const Spacer(),
                     ListenableBuilder(
                       listenable: p,
@@ -242,7 +243,7 @@ class _FitaDoMundo extends StatelessWidget {
         ],
       ),
       child: TextoContornado(
-        'Mundo ${mundo + 1} · ${Fase.mundos[mundo]}',
+        t('Mundo {0} · {1}', [mundo + 1, Fase.mundos[mundo]]),
         tamanho: 20,
         contorno: Color.lerp(cor, Colors.black, 0.55)!,
       ),
@@ -273,7 +274,7 @@ class _NoFase extends StatelessWidget {
     final lado = atual ? 70.0 : 60.0;
     final botao = Semantics(
       button: true,
-      label: 'Fase $numero',
+      label: t('Fase {0}', [numero]),
       child: GestureDetector(
         onTap: liberada ? aoTocar : null,
         child: Container(
@@ -338,7 +339,7 @@ class _NoFase extends StatelessWidget {
                 boxShadow: const [BoxShadow(color: Colors.black26, offset: Offset(0, 3))],
               ),
               child: Text(
-                'JOGAR',
+                t('JOGAR'),
                 style: TextStyle(color: Color.lerp(cor, Colors.black, 0.4), fontWeight: FontWeight.w700),
               ),
             ),

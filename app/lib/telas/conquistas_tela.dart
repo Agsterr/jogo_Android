@@ -6,6 +6,7 @@ import '../servicos/servicos.dart';
 import '../tema.dart';
 import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
+import '../idioma.dart';
 
 const _icones = <Medida, IconData>{
   Medida.partidas: Icons.sports_esports_rounded,
@@ -49,15 +50,15 @@ class ConquistasTela extends StatelessWidget {
                   Row(
                     children: [
                       IconButton(
-                        tooltip: 'Voltar',
+                        tooltip: t('Voltar'),
                         onPressed: () => Navigator.of(context).maybePop(),
                         icon: const Icon(Icons.arrow_back_rounded),
                       ),
-                      const Expanded(
+                      Expanded(
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
-                          child: TextoContornado('Conquistas', tamanho: 26, alinhamento: TextAlign.start),
+                          child: TextoContornado(t('Conquistas'), tamanho: 26, alinhamento: TextAlign.start),
                         ),
                       ),
                       Text(
@@ -115,8 +116,8 @@ class _Linha extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(c.nome, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-                Text(c.descricao, style: const TextStyle(fontSize: 13, height: 1.2, color: Cores.textoFraco)),
+                Text(t(c.nome), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                Text(t(c.descricao), style: const TextStyle(fontSize: 13, height: 1.2, color: Cores.textoFraco)),
                 if (!feita) ...[
                   const SizedBox(height: 6),
                   ClipRRect(

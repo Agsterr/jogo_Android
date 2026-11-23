@@ -5,6 +5,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 import 'progresso.dart';
+import '../idioma.dart';
 
 /// IDs cadastrados no Play Console (Produtos no app / Assinaturas).
 abstract final class Produtos {
@@ -143,7 +144,7 @@ class ComprasPlay extends Compras {
         case PurchaseStatus.restored:
           await entregar(_progresso, compra.productID);
         case PurchaseStatus.error:
-          erro = compra.error?.message ?? 'Não foi possível concluir a compra.';
+          erro = compra.error?.message ?? t('Não foi possível concluir a compra.');
         case PurchaseStatus.pending:
         case PurchaseStatus.canceled:
           break;

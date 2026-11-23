@@ -9,6 +9,7 @@ import '../widgets/dicas.dart';
 import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
 import 'jogo_tela.dart';
+import '../idioma.dart';
 
 /// Cor de cada troféu (Bronze, Prata, Ouro, Diamante).
 const coresDosTrofeus = [Color(0xFFE08A4B), Color(0xFFCFD8E8), Color(0xFFFFCC33), Color(0xFF6FF3FF)];
@@ -39,13 +40,13 @@ class ArenaTela extends StatelessWidget {
                   Row(
                     children: [
                       IconButton(
-                        tooltip: 'Voltar',
+                        tooltip: t('Voltar'),
                         onPressed: () => Navigator.of(context).maybePop(),
                         icon: const Icon(Icons.arrow_back_rounded),
                       ),
-                      const TextoContornado('Arena', tamanho: 26),
+                      TextoContornado(t('Arena'), tamanho: 26),
                       IconButton(
-                        tooltip: 'Como funciona a Arena',
+                        tooltip: t('Como funciona a Arena'),
                         onPressed: () => mostrarDica(context, Dicas.arena),
                         icon: const Icon(Icons.info_outline_rounded),
                       ),
@@ -65,18 +66,18 @@ class ArenaTela extends StatelessWidget {
                           color: indice < 0 ? const Color(0xFF5B5480) : coresDosTrofeus[indice],
                           shadows: const [Shadow(color: Color(0xFF2A0B5E), offset: Offset(0, 4))],
                         ),
-                        TextoContornado(trofeu?.nome ?? 'Sem troféu ainda', tamanho: 24),
+                        TextoContornado(trofeu != null ? t(trofeu.nome) : t('Sem troféu ainda'), tamanho: 24),
                         const SizedBox(height: 6),
-                        const Text('Melhor partida da semana', style: TextStyle(color: Cores.textoFraco)),
+                        Text(t('Melhor partida da semana'), style: TextStyle(color: Cores.textoFraco)),
                         TextoContornado('$melhor', tamanho: 44),
                         const SizedBox(height: 4),
                         Text(
-                          'Termina em ${tempoRestante(agora, Arena.fim(agora))}',
+                          t('Termina em {0}', [tempoRestante(agora, Arena.fim(agora))]),
                           style: const TextStyle(fontWeight: FontWeight.w700, color: Cores.ouro),
                         ),
                         const SizedBox(height: 14),
                         BotaoDoce(
-                          texto: p.temPartidaSalva('arena') ? 'CONTINUAR' : 'JOGAR NA ARENA',
+                          texto: p.temPartidaSalva('arena') ? t('CONTINUAR') : t('JOGAR NA ARENA'),
                           icone: Icons.play_arrow_rounded,
                           cor: Cores.blocos[3],
                           altura: 58,
@@ -88,7 +89,7 @@ class ArenaTela extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const TextoContornado('Troféus da semana', tamanho: 21, alinhamento: TextAlign.start),
+                  TextoContornado(t('Troféus da semana'), tamanho: 21, alinhamento: TextAlign.start),
                   const SizedBox(height: 8),
                   for (var i = 0; i < Arena.trofeus.length; i++)
                     Padding(
@@ -102,14 +103,14 @@ class ArenaTela extends StatelessWidget {
                       ),
                     ),
                   const SizedBox(height: 6),
-                  const CartaoVidro(
+                  CartaoVidro(
                     child: Row(
                       children: [
                         Icon(Icons.public_rounded, size: 34, color: Cores.brilhoCiano),
                         SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Em breve: ranking com jogadores do mundo todo e prêmios por posição.',
+                            t('Em breve: ranking com jogadores do mundo todo e prêmios por posição.'),
                             style: TextStyle(fontSize: 15),
                           ),
                         ),
@@ -156,7 +157,7 @@ class _LinhaTrofeu extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${trofeu.nome} · ${trofeu.pontos} pts',
+                  t('{0} · {1} pts', [t(trofeu.nome), trofeu.pontos]),
                   style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 4),

@@ -31,6 +31,7 @@ import 'loja_tela.dart';
 import 'mapa_tela.dart';
 import 'progresso_tela.dart';
 import 'roda_tela.dart';
+import '../idioma.dart';
 
 class InicioTela extends StatefulWidget {
   const InicioTela({super.key, required this.servicos});
@@ -60,10 +61,10 @@ class _InicioTelaState extends State<InicioTela> {
         mostrarDica(
           context,
           Dica('recuperado', 'Progresso recuperado!', Icons.cloud_done_rounded, Cores.blocos[3], [
-            'Encontramos o seu progresso salvo automaticamente.',
-            'Fase ${r.fase.clamp(1, Fase.total)} · ${r.estrelas} estrelas',
-            '${r.gemas} gemas · Recorde ${r.recorde}',
-          ], botao: 'CONTINUAR'),
+            t('Encontramos o seu progresso salvo automaticamente.'),
+            t('Fase {0} · {1} estrelas', [r.fase.clamp(1, Fase.total), r.estrelas]),
+            t('{0} gemas · Recorde {1}', [r.gemas, r.recorde]),
+          ], botao: t('CONTINUAR')),
         );
         return;
       }
@@ -128,14 +129,14 @@ class _InicioTelaState extends State<InicioTela> {
                             ],
                             const Spacer(),
                             IconButton(
-                              tooltip: 'Como jogar',
+                              tooltip: t('Como jogar'),
                               visualDensity: VisualDensity.compact,
                               onPressed: () => _abrir(AjudaTela(servicos: servicos)),
                               icon: const Icon(Icons.help_rounded),
                             ),
                             _BotaoPresente(disponivel: p.presenteDeHoje(dia) > 0, aoTocar: () => _abrirPresente(dia)),
                             IconButton(
-                              tooltip: p.somLigado ? 'Desligar som' : 'Ligar som',
+                              tooltip: p.somLigado ? t('Desligar som') : t('Ligar som'),
                               visualDensity: VisualDensity.compact,
                               onPressed: p.alternarSom,
                               icon: Icon(p.somLigado ? Icons.volume_up_rounded : Icons.volume_off_rounded),
@@ -156,7 +157,7 @@ class _InicioTelaState extends State<InicioTela> {
                               if (gemas > 0 && context.mounted) {
                                 ScaffoldMessenger.of(context)
                                   ..clearSnackBars()
-                                  ..showSnackBar(SnackBar(content: Text('Boa noite! +$gemas gemas')));
+                                  ..showSnackBar(SnackBar(content: Text(t('Boa noite! +{0} gemas', [gemas]))));
                               }
                             },
                           ),
@@ -173,8 +174,8 @@ class _InicioTelaState extends State<InicioTela> {
                           children: [
                             Expanded(
                               child: BotaoDoce(
-                                texto: 'JOGAR',
-                                detalhe: 'Fase $fase',
+                                texto: t('JOGAR'),
+                                detalhe: t('Fase {0}', [fase]),
                                 icone: Icons.play_arrow_rounded,
                                 cor: Cores.blocos[3],
                                 altura: 66,
@@ -204,8 +205,10 @@ class _InicioTelaState extends State<InicioTela> {
                               Expanded(
                                 child: _Ladrilho(
                                   icone: Icons.all_inclusive_rounded,
-                                  titulo: 'Infinito',
-                                  texto: p.temPartidaSalva('classico') ? 'Continuar partida' : 'Recorde ${p.recorde}',
+                                  titulo: t('Infinito'),
+                                  texto: p.temPartidaSalva('classico')
+                                      ? t('Continuar partida')
+                                      : t('Recorde {0}', [p.recorde]),
                                   cores: [Cores.blocos[1], Cores.blocos[0]],
                                   aoTocar: () => _abrir(JogoTela(servicos: servicos)),
                                 ),
@@ -214,8 +217,10 @@ class _InicioTelaState extends State<InicioTela> {
                               Expanded(
                                 child: _Ladrilho(
                                   icone: p.desafioFeito == dia ? Icons.check_circle_rounded : Icons.event_rounded,
-                                  titulo: 'Desafio #${numeroDoDesafio(hoje)}',
-                                  texto: p.desafioFeito == dia ? 'Feito: ${p.desafioPontos}' : '+5 gemas hoje',
+                                  titulo: t('Desafio #{0}', [numeroDoDesafio(hoje)]),
+                                  texto: p.desafioFeito == dia
+                                      ? t('Feito: {0}', [p.desafioPontos])
+                                      : t('+5 gemas hoje'),
                                   cores: [Cores.blocos[5], Cores.destaque],
                                   aoTocar: () => _abrir(JogoTela(servicos: servicos, diario: true)),
                                 ),
@@ -251,10 +256,10 @@ class _InicioTelaState extends State<InicioTela> {
                               Expanded(
                                 child: _Atalho(
                                   icone: Icons.bolt_rounded,
-                                  titulo: 'Relâmpago',
+                                  titulo: t('Relâmpago'),
                                   subtitulo: p.relampagoMelhor > 0
-                                      ? '60 segundos · melhor ${p.relampagoMelhor}'
-                                      : '60 segundos para pontuar!',
+                                      ? t('60 segundos · melhor {0}', [p.relampagoMelhor])
+                                      : t('60 segundos para pontuar!'),
                                   cores: const [Color(0xFFFFD000), Color(0xFFFF6A00)],
                                   contorno: const Color(0xFF7A3000),
                                   aoTocar: () => _abrir(JogoTela(servicos: servicos, relampago: true)),
@@ -264,10 +269,13 @@ class _InicioTelaState extends State<InicioTela> {
                               Expanded(
                                 child: _Atalho(
                                   icone: Icons.workspace_premium_rounded,
-                                  titulo: 'Passe',
+                                  titulo: t('Passe'),
                                   subtitulo: p.passeProntos(dia) > 0
-                                      ? '${p.passeProntos(dia)} prêmio${p.passeProntos(dia) == 1 ? '' : 's'} para pegar!'
-                                      : 'Nível ${p.passeNivel(dia)} de $niveisDoPasse',
+                                      ? t('{0} prêmio{1} para pegar!', [
+                                          p.passeProntos(dia),
+                                          p.passeProntos(dia) == 1 ? '' : 's',
+                                        ])
+                                      : t('Nível {0} de {1}', [p.passeNivel(dia), niveisDoPasse]),
                                   cores: const [Color(0xFF7B61FF), Color(0xFFFF61D8)],
                                   contorno: const Color(0xFF3A1B8A),
                                   selo: p.passeProntos(dia),
@@ -285,9 +293,11 @@ class _InicioTelaState extends State<InicioTela> {
                               Expanded(
                                 child: _Atalho(
                                   icone: Icons.collections_bookmark_rounded,
-                                  titulo: 'Álbum',
-                                  subtitulo:
-                                      '${p.figurinhas.length} de ${Album.todos.fold(0, (soma, a) => soma + a.figurinhas.length)} figurinhas',
+                                  titulo: t('Álbum'),
+                                  subtitulo: t('{0} de {1} figurinhas', [
+                                    p.figurinhas.length,
+                                    Album.todos.fold<int>(0, (soma, a) => soma + a.figurinhas.length),
+                                  ]),
                                   cores: const [Color(0xFF00D084), Color(0xFF008F9B)],
                                   contorno: const Color(0xFF00424A),
                                   aoTocar: () => _abrir(AlbumTela(servicos: servicos)),
@@ -297,10 +307,16 @@ class _InicioTelaState extends State<InicioTela> {
                               Expanded(
                                 child: _Atalho(
                                   icone: Icons.military_tech_rounded,
-                                  titulo: 'Conquistas',
+                                  titulo: t('Conquistas'),
                                   subtitulo: p.conquistasProntas > 0
-                                      ? '${p.conquistasProntas} prêmio${p.conquistasProntas == 1 ? '' : 's'} para pegar!'
-                                      : '${Conquista.todas.where((c) => c.feita(p.estatisticas)).length} de ${Conquista.todas.length}',
+                                      ? t('{0} prêmio{1} para pegar!', [
+                                          p.conquistasProntas,
+                                          p.conquistasProntas == 1 ? '' : 's',
+                                        ])
+                                      : t('{0} de {1}', [
+                                          Conquista.todas.where((c) => c.feita(p.estatisticas)).length,
+                                          Conquista.todas.length,
+                                        ]),
                                   cores: const [Color(0xFFFFB800), Color(0xFFFF3D6E)],
                                   contorno: const Color(0xFF7A1033),
                                   selo: p.conquistasProntas,
@@ -314,7 +330,7 @@ class _InicioTelaState extends State<InicioTela> {
                         _CartaoMissoes(progresso: p, dia: dia),
                         const SizedBox(height: 14),
                         BotaoDoce(
-                          texto: 'LOJA',
+                          texto: t('LOJA'),
                           icone: Icons.storefront_rounded,
                           cor: Cores.blocos[5],
                           altura: 50,
@@ -325,17 +341,17 @@ class _InicioTelaState extends State<InicioTela> {
                           TextButton.icon(
                             onPressed: servicos.ranking.abrir,
                             icon: const Icon(Icons.leaderboard_rounded, size: 20),
-                            label: const Text('Ranking mundial'),
+                            label: Text(t('Ranking mundial')),
                           ),
                         TextButton.icon(
                           onPressed: _codigoDeAmigo,
                           icon: const Icon(Icons.group_add_rounded, size: 20),
-                          label: const Text('Código de amigo'),
+                          label: Text(t('Código de amigo')),
                         ),
                         TextButton.icon(
                           onPressed: () => _abrir(ProgressoTela(servicos: servicos)),
                           icon: const Icon(Icons.save_rounded, size: 20),
-                          label: const Text('Salvar progresso'),
+                          label: Text(t('Salvar progresso')),
                         ),
                       ],
                     ),
@@ -514,7 +530,7 @@ class _Sequencia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Tooltip(
-    message: 'Dias seguidos no Desafio do dia',
+    message: t('Dias seguidos no Desafio do dia'),
     child: GestureDetector(
       onTap: aoTocar,
       child: Container(
@@ -547,9 +563,9 @@ class _DialogoSequencia extends StatelessWidget {
     return AlertDialog(
       backgroundColor: Cores.painel,
       scrollable: true,
-      title: const FittedBox(
+      title: FittedBox(
         fit: BoxFit.scaleDown,
-        child: Text('Sequência do Desafio', textAlign: TextAlign.center),
+        child: Text(t('Sequência do Desafio'), textAlign: TextAlign.center),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -559,7 +575,7 @@ class _DialogoSequencia extends StatelessWidget {
             children: [
               Icon(Icons.local_fire_department_rounded, color: Cores.blocos[1], size: 34),
               Text(
-                ' $dias ${dias == 1 ? 'dia' : 'dias'}',
+                ' $dias ${t(dias == 1 ? 'dia' : 'dias')}',
                 style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
               ),
             ],
@@ -567,10 +583,10 @@ class _DialogoSequencia extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             proximo == null
-                ? 'Todos os marcos conquistados!'
+                ? t('Todos os marcos conquistados!')
                 : (feitoHoje
-                      ? 'Hoje já valeu. Faltam ${proximo - dias} para o próximo prêmio.'
-                      : 'Jogue o Desafio de hoje: faltam ${proximo - dias} para o próximo prêmio.'),
+                      ? t('Hoje já valeu. Faltam {0} para o próximo prêmio.', [proximo - dias])
+                      : t('Jogue o Desafio de hoje: faltam {0} para o próximo prêmio.', [proximo - dias])),
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 14, height: 1.3),
           ),
@@ -601,21 +617,21 @@ class _DialogoSequencia extends StatelessWidget {
                   if (m == chama.marcoDias) ...[
                     const SizedBox(width: 6),
                     const Icon(Icons.palette_rounded, size: 20, color: Cores.ouro),
-                    const Text(' Tema', style: TextStyle(fontSize: 13)),
+                    Text(t(' Tema'), style: TextStyle(fontSize: 13)),
                   ],
                 ],
               ),
             ),
           const SizedBox(height: 4),
-          const Text(
-            'Pulou um dia? Dá para recuperar a sequência uma vez por semana.',
+          Text(
+            t('Pulou um dia? Dá para recuperar a sequência uma vez por semana.'),
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 12, color: Cores.textoFraco),
           ),
         ],
       ),
       actionsAlignment: MainAxisAlignment.center,
-      actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Fechar'))],
+      actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(t('Fechar')))],
     );
   }
 }
@@ -639,9 +655,9 @@ class _CartaoMissoes extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(child: TextoContornado('Missões de hoje', tamanho: 19, alinhamento: TextAlign.start)),
+              Expanded(child: TextoContornado(t('Missões de hoje'), tamanho: 19, alinhamento: TextAlign.start)),
               IconButton(
-                tooltip: 'Como funcionam as missões',
+                tooltip: t('Como funcionam as missões'),
                 visualDensity: VisualDensity.compact,
                 onPressed: () => mostrarDica(context, Dicas.missoes),
                 icon: const Icon(Icons.info_outline_rounded, size: 22),
@@ -750,7 +766,7 @@ class _Bau extends StatelessWidget {
   Widget build(BuildContext context) => TextButton.icon(
     onPressed: pronto ? aoTocar : null,
     icon: Icon(aberto ? Icons.inventory_2_outlined : Icons.redeem_rounded, color: pronto ? Cores.ouro : null),
-    label: Text(aberto ? 'Aberto' : '+$gemasDoBau'),
+    label: Text(aberto ? t('Aberto') : '+$gemasDoBau'),
   );
 }
 
@@ -789,21 +805,21 @@ class _BannerEvento extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'EVENTO · termina em ${evento == null ? 'domingo' : tempoRestante(agora, evento.fim)}',
+                  t('EVENTO · termina em {0}', [evento == null ? t('domingo') : tempoRestante(agora, evento.fim)]),
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
                 ),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: TextoContornado(
-                    evento?.nome ?? 'Fim de semana',
+                    evento != null ? t(evento.nome) : t('Fim de semana'),
                     tamanho: 20,
                     alinhamento: TextAlign.start,
                     contorno: Color.lerp(cores.last, Colors.black, 0.5)!,
                   ),
                 ),
-                const Text(
-                  'Gemas em dobro · toque e saiba mais',
+                Text(
+                  t('Gemas em dobro · toque e saiba mais'),
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, height: 1.15),
                 ),
               ],
@@ -822,7 +838,7 @@ class _BannerEvento extends StatelessWidget {
                 await progresso.guardarTema(tema);
                 await progresso.usarTema(tema);
               },
-              child: const Text('Tema\ngrátis', textAlign: TextAlign.center, style: TextStyle(fontSize: 15, height: 1)),
+              child: Text(t('Tema\ngrátis'), textAlign: TextAlign.center, style: TextStyle(fontSize: 15, height: 1)),
             )
           else
             const TextoContornado('x2', tamanho: 28),
@@ -840,7 +856,7 @@ class _BotaoPresente extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IconButton(
-    tooltip: 'Presente do dia',
+    tooltip: t('Presente do dia'),
     visualDensity: VisualDensity.compact,
     onPressed: aoTocar,
     icon: Badge(
@@ -869,9 +885,9 @@ class _DialogoPresente extends StatelessWidget {
         backgroundColor: Cores.painel,
         // Com tela pequena e fonte grande o conteúdo rola em vez de o botão cobrir o último cartão.
         scrollable: true,
-        title: const FittedBox(
+        title: FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text('Presente do dia', textAlign: TextAlign.center),
+          child: Text(t('Presente do dia'), textAlign: TextAlign.center),
         ),
         content: Wrap(
           alignment: WrapAlignment.center,
@@ -891,7 +907,10 @@ class _DialogoPresente extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Text('Dia $d', style: TextStyle(fontSize: 13, color: d == atual ? Colors.white : Cores.textoFraco)),
+                    Text(
+                      t('Dia {0}', [d]),
+                      style: TextStyle(fontSize: 13, color: d == atual ? Colors.white : Cores.textoFraco),
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -910,9 +929,12 @@ class _DialogoPresente extends StatelessWidget {
         actionsAlignment: MainAxisAlignment.center,
         actions: [
           if (hoje > 0)
-            FilledButton(onPressed: () => progresso.pegarPresente(dia), child: Text('Pegar +${gemasDoPresente(hoje)}'))
+            FilledButton(
+              onPressed: () => progresso.pegarPresente(dia),
+              child: Text(t('Pegar +{0}', [gemasDoPresente(hoje)])),
+            )
           else
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Volte amanhã!')),
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(t('Volte amanhã!'))),
         ],
       );
     },
@@ -933,7 +955,7 @@ class _RecuperarSequencia extends StatelessWidget {
       await servicos.progresso.recuperarSequencia(dia);
     } else if (context.mounted) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Anúncio indisponível agora. Tente de novo.')));
+          .showSnackBar(SnackBar(content: Text(t('Anúncio indisponível agora. Tente de novo.'))));
     }
   }
 
@@ -954,10 +976,10 @@ class _RecuperarSequencia extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Sua sequência de ${p.sequenciaPerdida(dia)} dias acabou!',
+            t('Sua sequência de {0} dias acabou!', [p.sequenciaPerdida(dia)]),
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
           ),
-          const Text('Recupere agora (1 vez por semana).', style: TextStyle(color: Cores.textoFraco)),
+          Text(t('Recupere agora (1 vez por semana).'), style: TextStyle(color: Cores.textoFraco)),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -966,7 +988,7 @@ class _RecuperarSequencia extends StatelessWidget {
                   style: FilledButton.styleFrom(minimumSize: const Size(64, 44)),
                   onPressed: () => _comAnuncio(context),
                   icon: const Icon(Icons.smart_display_rounded),
-                  label: const Text('Anúncio'),
+                  label: Text(t('Anúncio')),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1007,7 +1029,7 @@ class _CartaoArena extends StatelessWidget {
     const cores = [Color(0xFFFFB800), Color(0xFFFF6A00)];
     return Semantics(
       button: true,
-      label: 'Arena da semana',
+      label: t('Arena da semana'),
       child: GestureDetector(
         onTap: aoTocar,
         child: Container(
@@ -1038,11 +1060,11 @@ class _CartaoArena extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const FittedBox(
+                    FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: TextoContornado(
-                        'Arena da semana',
+                        t('Arena da semana'),
                         tamanho: 21,
                         alinhamento: TextAlign.start,
                         contorno: Color(0xFF7A3000),
@@ -1050,10 +1072,10 @@ class _CartaoArena extends StatelessWidget {
                     ),
                     Text(
                       premioDisponivel
-                          ? 'Prêmio esperando por você!'
+                          ? t('Prêmio esperando por você!')
                           : (melhor == 0
-                                ? 'Ganhe troféus e gemas'
-                                : 'Melhor: $melhor · ${trofeu?.nome ?? 'sem troféu'}'),
+                                ? t('Ganhe troféus e gemas')
+                                : t('Melhor: {0} · {1}', [melhor, trofeu != null ? t(trofeu.nome) : t('sem troféu')])),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.15),
@@ -1070,7 +1092,7 @@ class _CartaoArena extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('termina em', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                      Text(t('termina em'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
                       Text(termina, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                     ],
                   ),
@@ -1114,7 +1136,7 @@ class _DialogoCodigoAmigoState extends State<_DialogoCodigoAmigo> {
   void _comecar() {
     final desafio = DesafioAmigo.ler(_campo.text);
     if (desafio == null) {
-      setState(() => _erro = 'Não achei um código. Cole a mensagem inteira que seu amigo mandou.');
+      setState(() => _erro = t('Não achei um código. Cole a mensagem inteira que seu amigo mandou.'));
       return;
     }
     Navigator.of(context).pop(desafio);
@@ -1124,15 +1146,15 @@ class _DialogoCodigoAmigoState extends State<_DialogoCodigoAmigo> {
   Widget build(BuildContext context) => AlertDialog(
     backgroundColor: Cores.painel,
     scrollable: true,
-    title: const FittedBox(
+    title: FittedBox(
       fit: BoxFit.scaleDown,
-      child: Text('Código de amigo', textAlign: TextAlign.center),
+      child: Text(t('Código de amigo'), textAlign: TextAlign.center),
     ),
     content: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          'Seu amigo mandou um código? Cole aqui e jogue com as mesmas peças dele. Vença a pontuação e ganhe gemas!',
+        Text(
+          t('Seu amigo mandou um código? Cole aqui e jogue com as mesmas peças dele. Vença a pontuação e ganhe gemas!'),
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 14, height: 1.3),
         ),
@@ -1144,7 +1166,7 @@ class _DialogoCodigoAmigoState extends State<_DialogoCodigoAmigo> {
           style: const TextStyle(fontSize: 14),
           onChanged: (_) => setState(() => _erro = null),
           decoration: InputDecoration(
-            hintText: 'Cole aqui (ENCAIXA-AMIGO-...)',
+            hintText: t('Cole aqui (ENCAIXA-AMIGO-...)'),
             filled: true,
             fillColor: Cores.casa,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
@@ -1164,9 +1186,9 @@ class _DialogoCodigoAmigoState extends State<_DialogoCodigoAmigo> {
     actionsAlignment: MainAxisAlignment.center,
     actionsOverflowAlignment: OverflowBarAlignment.center,
     actions: [
-      TextButton(onPressed: _colar, child: const Text('Colar')),
-      TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
-      FilledButton(onPressed: _campo.text.trim().isEmpty ? null : _comecar, child: const Text('Jogar')),
+      TextButton(onPressed: _colar, child: Text(t('Colar'))),
+      TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(t('Cancelar'))),
+      FilledButton(onPressed: _campo.text.trim().isEmpty ? null : _comecar, child: Text(t('Jogar'))),
     ],
   );
 }
@@ -1182,7 +1204,7 @@ class _PresenteDaNoite extends StatelessWidget {
     const cores = [Color(0xFF2B2FA8), Color(0xFF8B3DFF)];
     return Semantics(
       button: true,
-      label: 'Presente da noite',
+      label: t('Presente da noite'),
       child: GestureDetector(
         onTap: aoTocar,
         child: Container(
@@ -1197,12 +1219,12 @@ class _PresenteDaNoite extends StatelessWidget {
             children: [
               const Icon(Icons.nightlight_round, size: 34, color: Cores.ouro),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Presente da noite!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                    Text('Toque e leve +$gemasDaNoite gemas', style: TextStyle(fontSize: 14, height: 1.2)),
+                    Text(t('Presente da noite!'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                    Text(t('Toque e leve +{0} gemas', [gemasDaNoite]), style: TextStyle(fontSize: 14, height: 1.2)),
                   ],
                 ),
               ),
@@ -1298,7 +1320,7 @@ class _CartaoRoda extends StatelessWidget {
     final restantes = Roda.girosPorDia - giros;
     return Semantics(
       button: true,
-      label: 'Roda da sorte',
+      label: t('Roda da sorte'),
       child: GestureDetector(
         onTap: aoTocar,
         child: Container(
@@ -1329,11 +1351,11 @@ class _CartaoRoda extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const TextoContornado('Roda da sorte', tamanho: 21, alinhamento: TextAlign.start),
+                    TextoContornado(t('Roda da sorte'), tamanho: 21, alinhamento: TextAlign.start),
                     Text(
                       gratis
-                          ? 'Giro grátis hoje!'
-                          : (restantes > 0 ? 'Mais $restantes giros com anúncio' : 'Volte amanhã'),
+                          ? t('Giro grátis hoje!')
+                          : (restantes > 0 ? t('Mais {0} giros com anúncio', [restantes]) : t('Volte amanhã')),
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                     ),
                   ],
@@ -1346,7 +1368,7 @@ class _CartaoRoda extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Text(
-                  gratis ? 'GIRAR' : 'até 50',
+                  gratis ? t('GIRAR') : t('até 50'),
                   style: TextStyle(fontWeight: FontWeight.w700, color: gratis ? const Color(0xFF5B2BD6) : Colors.white),
                 ),
               ),

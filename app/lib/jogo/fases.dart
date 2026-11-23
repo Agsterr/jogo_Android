@@ -5,6 +5,7 @@ import 'peca.dart';
 import 'robo.dart';
 import 'sorteio.dart';
 import 'tabuleiro.dart';
+import '../idioma.dart';
 
 enum Objetivo {
   linhas('Limpe {} linhas'),
@@ -61,8 +62,14 @@ class Fase {
   int get mundo => (numero - 1) ~/ porMundo;
   int get pedras => inicial.where((c) => c.$3 == Tabuleiro.pedra).length;
   String get texto {
-    final t = objetivo.modelo.replaceAll('{}', '$alvo');
-    return alvo == 1 ? t.replaceAll('linhas', 'linha').replaceAll('pedras', 'pedra') : t;
+    final texto = t(objetivo.modelo).replaceAll('{}', '$alvo');
+    if (alvo != 1) return texto;
+    // Singular de "linhas", "pedras" etc. em cada idioma.
+    return switch (Idioma.atual) {
+      'en' => texto.replaceAll('lines', 'line').replaceAll('stones', 'stone').replaceAll('pieces', 'piece'),
+      'es' => texto.replaceAll('líneas', 'línea').replaceAll('piedras', 'piedra').replaceAll('piezas', 'pieza'),
+      _ => texto.replaceAll('linhas', 'linha').replaceAll('pedras', 'pedra'),
+    };
   }
 
   /// Fase de "chefe": a última de cada mundo, mais apertada.

@@ -8,6 +8,7 @@ import '../servicos/sons.dart';
 import '../tema.dart';
 import '../widgets/doce.dart';
 import '../widgets/roda_widget.dart';
+import '../idioma.dart';
 
 /// Abre a roleta do fim de partida (se estiver ligada).
 Future<void> mostrarRoletaDaPartida(BuildContext context, Servicos s, {int? semente}) async {
@@ -47,7 +48,7 @@ class _RoletaDaPartidaState extends State<RoletaDaPartida> {
     if (_giros > 0 && !_s.progresso.assinante && !await _s.anuncios.mostrarPremiado()) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Anúncio indisponível agora. Tente de novo.')));
+            .showSnackBar(SnackBar(content: Text(t('Anúncio indisponível agora. Tente de novo.'))));
       }
       return;
     }
@@ -83,20 +84,20 @@ class _RoletaDaPartidaState extends State<RoletaDaPartida> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Center(child: TextoContornado('Roleta da partida', tamanho: 26)),
+            Center(child: TextoContornado(t('Roleta da partida'), tamanho: 26)),
             const SizedBox(height: 4),
             SizedBox(
               height: 44,
               child: Center(
                 child: ultimo == null
                     ? Text(
-                        _girando ? 'Girando...' : 'Gire e tente a sorte!',
+                        _girando ? t('Girando...') : t('Gire e tente a sorte!'),
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                       )
                     : ultimo == 0
-                    ? const TextoContornado('Ah, não foi dessa vez!', tamanho: 24, cor: Color(0xFFCFC8F0))
+                    ? TextoContornado(t('Ah, não foi dessa vez!'), tamanho: 24, cor: Color(0xFFCFC8F0))
                     : TextoContornado(
-                        '+$ultimo gemas!',
+                        t('+{0} gemas!', [ultimo]),
                         tamanho: 32,
                         cor: const Color(0xFFFFF27A),
                         contorno: const Color(0xFFB0186A),
@@ -122,7 +123,7 @@ class _RoletaDaPartidaState extends State<RoletaDaPartida> {
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
-                  'Total ganho: $_total gemas',
+                  t('Total ganho: {0} gemas', [_total]),
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
                 ),
@@ -130,7 +131,7 @@ class _RoletaDaPartidaState extends State<RoletaDaPartida> {
             const SizedBox(height: 12),
             if (_giros == 0)
               BotaoDoce(
-                texto: 'GIRAR',
+                texto: t('GIRAR'),
                 icone: Icons.refresh_rounded,
                 cor: Cores.blocos[3],
                 altura: 54,
@@ -139,10 +140,10 @@ class _RoletaDaPartidaState extends State<RoletaDaPartida> {
               )
             else if (extrasRestantes > 0)
               BotaoDoce(
-                texto: 'GIRAR DE NOVO',
+                texto: t('GIRAR DE NOVO'),
                 detalhe: _s.progresso.assinante
-                    ? 'Grátis no Encaixa+ · $extrasRestantes restantes'
-                    : 'Vendo um anúncio · $extrasRestantes restantes',
+                    ? t('Grátis no Encaixa+ · {0} restantes', [extrasRestantes])
+                    : t('Vendo um anúncio · {0} restantes', [extrasRestantes]),
                 icone: _s.progresso.assinante ? Icons.workspace_premium_rounded : Icons.smart_display_rounded,
                 cor: Cores.blocos[5],
                 altura: 54,
@@ -152,7 +153,7 @@ class _RoletaDaPartidaState extends State<RoletaDaPartida> {
             const SizedBox(height: 4),
             TextButton(
               onPressed: _girando ? null : () => Navigator.of(context).pop(),
-              child: Text(_giros == 0 ? 'Agora não' : 'Continuar'),
+              child: Text(_giros == 0 ? t('Agora não') : t('Continuar')),
             ),
           ],
         ),

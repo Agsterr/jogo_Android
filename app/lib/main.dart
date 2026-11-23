@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'app.dart';
+import 'idioma.dart';
 import 'jogo/sorteio.dart';
 import 'servicos/anuncios.dart';
 import 'servicos/compras.dart';
@@ -18,6 +19,7 @@ Future<void> main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   final progresso = await Progresso.carregar();
+  Idioma.definir(progresso.idioma);
   final android = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
   // Reinstalou? Recupera o progresso antes de mostrar a primeira tela (no máximo 3 s de espera).
   final automatico = SalvamentoAutomatico(

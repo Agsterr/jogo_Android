@@ -9,6 +9,7 @@ import '../tema.dart';
 import '../widgets/dicas.dart';
 import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
+import '../idioma.dart';
 
 /// Passe de temporada do mês: 20 níveis, cada um com gemas; o último dá o tema Aurora.
 class PasseTela extends StatefulWidget {
@@ -51,7 +52,7 @@ class _PasseTelaState extends State<PasseTela> {
                   Row(
                     children: [
                       IconButton(
-                        tooltip: 'Voltar',
+                        tooltip: t('Voltar'),
                         onPressed: () => Navigator.of(context).maybePop(),
                         icon: const Icon(Icons.arrow_back_rounded),
                       ),
@@ -60,7 +61,7 @@ class _PasseTelaState extends State<PasseTela> {
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
                           child: TextoContornado(
-                            'Passe de ${nomeDoMes(dia ~/ 100)}',
+                            t('Passe de {0}', [nomeDoMes(dia ~/ 100)]),
                             tamanho: 24,
                             alinhamento: TextAlign.start,
                           ),
@@ -78,7 +79,7 @@ class _PasseTelaState extends State<PasseTela> {
                           children: [
                             Expanded(
                               child: Text(
-                                cheio ? 'Passe completo!' : 'Nível $nivel de $niveisDoPasse',
+                                cheio ? t('Passe completo!') : t('Nível {0} de {1}', [nivel, niveisDoPasse]),
                                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                               ),
                             ),
@@ -98,16 +99,27 @@ class _PasseTelaState extends State<PasseTela> {
                         const SizedBox(height: 6),
                         Text(
                           cheio
-                              ? 'Resgate os prêmios que faltam antes do fim do mês.'
-                              : 'Faltam ${xpPorNivel - noNivel} XP para o nível ${nivel + 1}. '
-                                    'Desafio +${XpDoPasse.desafio}, baú +${XpDoPasse.bau}, fase até +${XpDoPasse.fase(3)}, partida +${XpDoPasse.partida}.',
+                              ? t('Resgate os prêmios que faltam antes do fim do mês.')
+                              : t(
+                                  'Faltam {0} XP para o nível {1}. Desafio +{2}, baú +{3}, fase até +{4}, partida +{5}.',
+                                  [
+                                    xpPorNivel - noNivel,
+                                    nivel + 1,
+                                    XpDoPasse.desafio,
+                                    XpDoPasse.bau,
+                                    XpDoPasse.fase(3),
+                                    XpDoPasse.partida,
+                                  ],
+                                ),
                           style: const TextStyle(fontSize: 13, height: 1.3, color: Cores.textoFraco),
                         ),
                         if (!p.assinante) ...[
                           const SizedBox(height: 6),
                           Text(
-                            'Com o Encaixa+ as gemas do Passe vêm em dobro '
-                            '(${totalDoPasse(assinante: false)} viram ${totalDoPasse(assinante: true)}).',
+                            t('Com o Encaixa+ as gemas do Passe vêm em dobro ({0} viram {1}).', [
+                              totalDoPasse(assinante: false),
+                              totalDoPasse(assinante: true),
+                            ]),
                             style: const TextStyle(fontSize: 13, height: 1.3, color: Cores.ouro),
                           ),
                         ],
@@ -186,7 +198,7 @@ class _Nivel extends StatelessWidget {
           if (ultimo) ...[
             const SizedBox(width: 10),
             const Icon(Icons.palette_rounded, size: 20, color: Cores.ouro),
-            Flexible(child: Text(' Tema ${aurora.nome}', style: const TextStyle(fontSize: 14))),
+            Flexible(child: Text(t(' Tema {0}', [t(aurora.nome)]), style: const TextStyle(fontSize: 14))),
           ],
           const Spacer(),
           if (pronto)
@@ -196,7 +208,7 @@ class _Nivel extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 14),
               ),
               onPressed: aoPegar,
-              child: const Text('Pegar'),
+              child: Text(t('Pegar')),
             )
           else
             Icon(

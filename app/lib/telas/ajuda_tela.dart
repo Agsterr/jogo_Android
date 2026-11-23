@@ -4,6 +4,7 @@ import '../app.dart';
 import '../servicos/servicos.dart';
 import '../widgets/dicas.dart';
 import '../widgets/doce.dart';
+import '../idioma.dart';
 
 /// "Como jogar": todos os textos de ajuda numa tela só.
 class AjudaTela extends StatefulWidget {
@@ -23,9 +24,7 @@ class _AjudaTelaState extends State<AjudaTela> {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
-        ..showSnackBar(
-          const SnackBar(content: Text('Sem permissão de notificação. Ative nas configurações do celular.')),
-        );
+        ..showSnackBar(SnackBar(content: Text(t('Sem permissão de notificação. Ative nas configurações do celular.'))));
       return;
     }
     await _s.progresso.definirLembrete(ligar);
@@ -43,11 +42,11 @@ class _AjudaTelaState extends State<AjudaTela> {
               child: Row(
                 children: [
                   IconButton(
-                    tooltip: 'Voltar',
+                    tooltip: t('Voltar'),
                     onPressed: () => Navigator.of(context).maybePop(),
                     icon: const Icon(Icons.arrow_back_rounded),
                   ),
-                  const TextoContornado('Como jogar', tamanho: 26),
+                  TextoContornado(t('Como jogar'), tamanho: 26),
                 ],
               ),
             ),
@@ -60,20 +59,61 @@ class _AjudaTelaState extends State<AjudaTela> {
                     builder: (context, _) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: CartaoVidro(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.language_rounded, size: 28),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    t('Idioma'),
+                                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 4,
+                              children: [
+                                for (final (valor, nome) in [
+                                  ('auto', t('Automático')),
+                                  for (final c in Idioma.suportados) (c, Idioma.nomes[c]!),
+                                ])
+                                  ChoiceChip(
+                                    label: Text(nome),
+                                    selected: _s.progresso.idioma == valor,
+                                    onSelected: (_) => _s.progresso.definirIdioma(valor),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  ListenableBuilder(
+                    listenable: _s.progresso,
+                    builder: (context, _) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: CartaoVidro(
                         child: Row(
                           children: [
                             const Icon(Icons.notifications_active_rounded, size: 28),
                             const SizedBox(width: 12),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Lembrete do Desafio',
+                                    t('Lembrete do Desafio'),
                                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                                   ),
                                   Text(
-                                    'Um aviso às 19h, só se você ainda não jogou o Desafio do dia.',
+                                    t('Um aviso às 19h, só se você ainda não jogou o Desafio do dia.'),
                                     style: TextStyle(fontSize: 14, height: 1.3),
                                   ),
                                 ],
@@ -94,16 +134,16 @@ class _AjudaTelaState extends State<AjudaTela> {
                           children: [
                             const Icon(Icons.visibility_rounded, size: 28),
                             const SizedBox(width: 12),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Símbolos nas peças',
+                                    t('Símbolos nas peças'),
                                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                                   ),
                                   Text(
-                                    'Um desenho em cada cor, para quem tem dificuldade de distinguir cores.',
+                                    t('Um desenho em cada cor, para quem tem dificuldade de distinguir cores.'),
                                     style: TextStyle(fontSize: 14, height: 1.3),
                                   ),
                                 ],
@@ -127,14 +167,14 @@ class _AjudaTelaState extends State<AjudaTela> {
                               children: [
                                 Icon(d.icone, color: d.cor, size: 28),
                                 const SizedBox(width: 8),
-                                TextoContornado(d.titulo, tamanho: 21, alinhamento: TextAlign.start),
+                                TextoContornado(t(d.titulo), tamanho: 21, alinhamento: TextAlign.start),
                               ],
                             ),
                             const SizedBox(height: 6),
                             for (final l in d.linhas)
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
-                                child: Text('• $l', style: const TextStyle(fontSize: 15, height: 1.3)),
+                                child: Text('• ${t(l)}', style: const TextStyle(fontSize: 15, height: 1.3)),
                               ),
                           ],
                         ),

@@ -11,6 +11,7 @@ import '../servicos/servicos.dart';
 import '../tema.dart';
 import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
+import '../idioma.dart';
 
 /// Salvar o progresso num código e recuperá-lo em outro celular (ou depois de reinstalar).
 class ProgressoTela extends StatefulWidget {
@@ -51,12 +52,12 @@ class _ProgressoTelaState extends State<ProgressoTela> {
     final codigo = await _codigo();
     await Clipboard.setData(ClipboardData(text: codigo));
     if (!mounted) return;
-    _avisar('Código copiado! Guarde num lugar seguro (WhatsApp, e-mail, notas).');
+    _avisar(t('Código copiado! Guarde num lugar seguro (WhatsApp, e-mail, notas).'));
   }
 
   Future<void> _enviar() async {
     final codigo = await _codigo();
-    await SharePlus.instance.share(ShareParams(text: 'Meu progresso no Encaixa:\n$codigo'));
+    await SharePlus.instance.share(ShareParams(text: t('Meu progresso no Encaixa:\n{0}', [codigo])));
   }
 
   Future<void> _colar() async {
@@ -71,11 +72,11 @@ class _ProgressoTelaState extends State<ProgressoTela> {
   Future<void> _recuperar() async {
     final dados = CodigoProgresso.ler(_campo.text);
     if (dados == null) {
-      setState(() => _erro = 'Código inválido. Confira se copiou o código inteiro, começando com ENCAIXA1-.');
+      setState(() => _erro = t('Código inválido. Confira se copiou o código inteiro, começando com ENCAIXA1-.'));
       return;
     }
     if (!_s.progresso.codigoRecente(dados)) {
-      setState(() => _erro = 'Este código é do progresso que já está neste celular (ou é mais antigo que ele).');
+      setState(() => _erro = t('Este código é do progresso que já está neste celular (ou é mais antigo que ele).'));
       return;
     }
     setState(() => _erro = null);
@@ -84,12 +85,12 @@ class _ProgressoTelaState extends State<ProgressoTela> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Cores.painel,
-        title: const Text('Recuperar este progresso?', textAlign: TextAlign.center),
+        title: Text(t('Recuperar este progresso?'), textAlign: TextAlign.center),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Fase ${r.fase.clamp(1, Fase.total)} · ${r.estrelas} estrelas\nRecorde ${r.recorde}',
+              t('Fase {0} · {1} estrelas\nRecorde {2}', [r.fase.clamp(1, Fase.total), r.estrelas, r.recorde]),
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 17),
             ),
@@ -98,12 +99,12 @@ class _ProgressoTelaState extends State<ProgressoTela> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const IconeGema(tamanho: 20),
-                Text(' ${r.gemas} gemas', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                Text(t(' {0} gemas', [r.gemas]), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Isso substitui o progresso que está neste celular.',
+            Text(
+              t('Isso substitui o progresso que está neste celular.'),
               textAlign: TextAlign.center,
               style: TextStyle(color: Cores.ouro),
             ),
@@ -111,8 +112,8 @@ class _ProgressoTelaState extends State<ProgressoTela> {
         ),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Recuperar')),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(t('Cancelar'))),
+          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: Text(t('Recuperar'))),
         ],
       ),
     );
@@ -120,7 +121,7 @@ class _ProgressoTelaState extends State<ProgressoTela> {
     await _s.progresso.restaurarCodigo(dados);
     if (!mounted) return;
     _campo.clear();
-    _avisar('Progresso recuperado!');
+    _avisar(t('Progresso recuperado!'));
   }
 
   @override
@@ -137,13 +138,11 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                 Row(
                   children: [
                     IconButton(
-                      tooltip: 'Voltar',
+                      tooltip: t('Voltar'),
                       onPressed: () => Navigator.of(context).maybePop(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     ),
-                    const Expanded(
-                      child: TextoContornado('Salvar progresso', tamanho: 26, alinhamento: TextAlign.start),
-                    ),
+                    Expanded(child: TextoContornado(t('Salvar progresso'), tamanho: 26, alinhamento: TextAlign.start)),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -151,13 +150,13 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Seu progresso agora', style: TextStyle(color: Cores.textoFraco)),
+                      Text(t('Seu progresso agora'), style: TextStyle(color: Cores.textoFraco)),
                       const SizedBox(height: 6),
                       Row(
                         children: [
                           const Icon(Icons.map_rounded, color: Cores.brilhoCiano),
                           Text(
-                            '  Fase ${p.faseLiberada.clamp(1, Fase.total)} de ${Fase.total}',
+                            t('  Fase {0} de {1}', [p.faseLiberada.clamp(1, Fase.total), Fase.total]),
                             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                           ),
                           const Spacer(),
@@ -172,7 +171,7 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                       Row(
                         children: [
                           const IconeGema(tamanho: 22),
-                          Text(' ${p.gemas} gemas', style: const TextStyle(fontSize: 16)),
+                          Text(t(' {0} gemas', [p.gemas]), style: const TextStyle(fontSize: 16)),
                           const Spacer(),
                           const Icon(Icons.emoji_events_rounded, color: Cores.ouro, size: 22),
                           Text(' ${p.recorde}', style: const TextStyle(fontSize: 16)),
@@ -187,16 +186,17 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                   if (copia.suportaConta) ...[const SizedBox(height: 12), _CartaoContaGoogle(copia)],
                 ],
                 const SizedBox(height: 20),
-                const TextoContornado('1. Salvar', tamanho: 22, alinhamento: TextAlign.start),
+                TextoContornado(t('1. Salvar'), tamanho: 22, alinhamento: TextAlign.start),
                 const SizedBox(height: 4),
-                const Text(
-                  'Se você vai trocar de celular ou desinstalar o jogo, copie o código e guarde (mande para você '
-                  'mesmo no WhatsApp ou e-mail, ou anote nas notas).',
+                Text(
+                  t(
+                    'Se você vai trocar de celular ou desinstalar o jogo, copie o código e guarde (mande para você mesmo no WhatsApp ou e-mail, ou anote nas notas).',
+                  ),
                   style: TextStyle(fontSize: 15, height: 1.3),
                 ),
                 const SizedBox(height: 10),
                 BotaoDoce(
-                  texto: 'COPIAR CÓDIGO',
+                  texto: t('COPIAR CÓDIGO'),
                   icone: Icons.copy_rounded,
                   cor: Cores.blocos[3],
                   altura: 54,
@@ -205,7 +205,7 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                 ),
                 const SizedBox(height: 10),
                 BotaoDoce(
-                  texto: 'ENVIAR POR APP',
+                  texto: t('ENVIAR POR APP'),
                   icone: Icons.share_rounded,
                   cor: Cores.blocos[4],
                   altura: 46,
@@ -213,10 +213,10 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                   aoTocar: _enviar,
                 ),
                 const SizedBox(height: 22),
-                const TextoContornado('2. Recuperar', tamanho: 22, alinhamento: TextAlign.start),
+                TextoContornado(t('2. Recuperar'), tamanho: 22, alinhamento: TextAlign.start),
                 const SizedBox(height: 4),
-                const Text(
-                  'No celular novo (ou depois de reinstalar), cole aqui o código que você salvou.',
+                Text(
+                  t('No celular novo (ou depois de reinstalar), cole aqui o código que você salvou.'),
                   style: TextStyle(fontSize: 15, height: 1.3),
                 ),
                 const SizedBox(height: 10),
@@ -227,7 +227,7 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                   style: const TextStyle(fontSize: 14),
                   onChanged: (_) => setState(() => _erro = null),
                   decoration: InputDecoration(
-                    hintText: 'Cole aqui o código (começa com ENCAIXA1-)',
+                    hintText: t('Cole aqui o código (começa com ENCAIXA1-)'),
                     filled: true,
                     fillColor: Cores.painel,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -249,14 +249,14 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                         style: OutlinedButton.styleFrom(minimumSize: const Size(64, 52)),
                         onPressed: _colar,
                         icon: const Icon(Icons.content_paste_rounded),
-                        label: const Text('Colar'),
+                        label: Text(t('Colar')),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       flex: 2,
                       child: BotaoDoce(
-                        texto: 'RECUPERAR',
+                        texto: t('RECUPERAR'),
                         icone: Icons.restore_rounded,
                         cor: Cores.blocos[5],
                         altura: 52,
@@ -267,8 +267,8 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'As compras (Sem anúncios e Encaixa+) não vão no código: voltam em Loja > Restaurar compras.',
+                Text(
+                  t('As compras (Sem anúncios e Encaixa+) não vão no código: voltam em Loja > Restaurar compras.'),
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Cores.textoFraco, fontSize: 13),
                 ),
@@ -329,20 +329,24 @@ class _CartaoContaGoogleState extends State<_CartaoContaGoogle> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        conectado ? 'Conectado ao Play Games' : 'Conecte ao Play Games',
+                        conectado ? t('Conectado ao Play Games') : t('Conecte ao Play Games'),
                         style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         conectado
-                            ? 'Conta: $nome. Seu progresso é salvo na sua conta Google e volta se você trocar de celular.'
-                            : 'Sem a conta do Play Games, o progresso pode se perder se você trocar de celular ou '
-                                  'desinstalar o jogo. Conecte para salvar na sua conta Google.',
+                            ? t(
+                                'Conta: {0}. Seu progresso é salvo na sua conta Google e volta se você trocar de celular.',
+                                [nome],
+                              )
+                            : t(
+                                'Sem a conta do Play Games, o progresso pode se perder se você trocar de celular ou desinstalar o jogo. Conecte para salvar na sua conta Google.',
+                              ),
                         style: const TextStyle(fontSize: 14, height: 1.3),
                       ),
                       if (_falhou && !conectado)
-                        const Text(
-                          'Não deu para conectar agora. Confira a internet e tente de novo.',
+                        Text(
+                          t('Não deu para conectar agora. Confira a internet e tente de novo.'),
                           style: TextStyle(fontSize: 13, color: Cores.textoFraco),
                         ),
                     ],
@@ -353,7 +357,7 @@ class _CartaoContaGoogleState extends State<_CartaoContaGoogle> {
             if (!conectado) ...[
               const SizedBox(height: 10),
               BotaoDoce(
-                texto: _conectando ? 'CONECTANDO...' : 'CONECTAR AO PLAY GAMES',
+                texto: _conectando ? t('CONECTANDO...') : t('CONECTAR AO PLAY GAMES'),
                 icone: Icons.sports_esports_rounded,
                 cor: Cores.blocos[4],
                 altura: 46,
@@ -384,27 +388,30 @@ class _CartaoCopiaAutomatica extends StatelessWidget {
         EstadoCopia.aindaNao => (
           Icons.sync_rounded,
           Cores.textoFraco,
-          'Cópia automática',
-          'Salvando o seu progresso automaticamente...',
+          t('Cópia automática'),
+          t('Salvando o seu progresso automaticamente...'),
         ),
         EstadoCopia.naNuvem => (
           Icons.cloud_done_rounded,
           Cores.blocos[3],
-          'Cópia automática ligada',
-          'Seu progresso está salvo no Google (backup na nuvem). Se reinstalar o jogo ou trocar de celular, ele volta sozinho.',
+          t('Cópia automática ligada'),
+          t(
+            'Seu progresso está salvo no Google (backup na nuvem). Se reinstalar o jogo ou trocar de celular, ele volta sozinho.',
+          ),
         ),
         EstadoCopia.soNoCelular => (
           Icons.check_circle_rounded,
           Cores.blocos[3],
-          'Cópia automática ligada',
-          'Salva neste celular: se reinstalar o jogo, ele volta sozinho (com o Backup do Google ligado). '
-              'Para trocar de celular, use o código abaixo.',
+          t('Cópia automática ligada'),
+          t(
+            'Salva neste celular: se reinstalar o jogo, ele volta sozinho (com o Backup do Google ligado). Para trocar de celular, use o código abaixo.',
+          ),
         ),
         EstadoCopia.indisponivel => (
           Icons.warning_amber_rounded,
           Cores.ouro,
-          'Cópia automática indisponível',
-          'Este celular não permitiu a cópia automática. Use o código abaixo para não perder o progresso.',
+          t('Cópia automática indisponível'),
+          t('Este celular não permitiu a cópia automática. Use o código abaixo para não perder o progresso.'),
         ),
       };
       return CartaoVidro(
@@ -423,7 +430,7 @@ class _CartaoCopiaAutomatica extends StatelessWidget {
                   Text(texto, style: const TextStyle(fontSize: 14, height: 1.3)),
                   if (s.quando != null && s.estado != EstadoCopia.indisponivel)
                     Text(
-                      'Última cópia: ${_hora(s.quando!)}',
+                      t('Última cópia: {0}', [_hora(s.quando!)]),
                       style: const TextStyle(fontSize: 13, color: Cores.textoFraco),
                     ),
                 ],

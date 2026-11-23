@@ -1,4 +1,5 @@
 import 'package:encaixa/app.dart';
+import 'package:encaixa/idioma.dart';
 import 'package:encaixa/jogo/fases.dart';
 import 'package:encaixa/telas/arena_tela.dart';
 import 'package:encaixa/telas/inicio_tela.dart';
@@ -17,11 +18,15 @@ import 'telas_test.dart' show dedoPara, partidaDeExemplo;
 
 /// Imagens da ficha da Play Store (1080 x 1920): título grande + tela real do jogo num celular.
 /// Gere com: flutter test test/play_store_test.dart --dart-define=CAPTURAS=true  (salva em docs/play-store)
-const _pasta = '../docs/play-store';
+/// IDIOMA=en ou es gera os prints em inglês e espanhol (pastas docs/play-store/en e /es); sem ele, em português.
+const _idioma = String.fromEnvironment('IDIOMA');
+const _pasta = _idioma == '' ? '../docs/play-store' : '../docs/play-store/$_idioma';
 const _celular = Size(360, 780);
 
 void main() {
   setUpAll(carregarFontes);
+  setUp(() => Idioma.atual = _idioma == '' ? 'pt' : _idioma);
+  tearDown(() => Idioma.atual = 'pt');
 
   Future<Servicos> servicos() => servicosDeTeste(
     valores: {
@@ -153,7 +158,7 @@ void main() {
       'Escolha o seu tema de blocos',
       LojaTela(servicos: await servicos()),
       antes: () async {
-        await tester.scrollUntilVisible(find.text('Galáxia'), 300);
+        await tester.scrollUntilVisible(find.text(t('Galáxia')), 300);
         await tester.pump();
       },
     );
@@ -174,10 +179,10 @@ class _Vitrine extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 90),
-          TextoContornado(titulo, tamanho: 92, contorno: const Color(0xFF1E0750)),
+          TextoContornado(t(titulo), tamanho: 92, contorno: const Color(0xFF1E0750)),
           const SizedBox(height: 14),
           Text(
-            subtitulo,
+            t(subtitulo),
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontFamily: fonteJogo,

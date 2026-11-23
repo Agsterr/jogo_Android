@@ -6,6 +6,7 @@ import '../servicos/servicos.dart';
 import '../tema.dart';
 import '../widgets/dicas.dart';
 import '../widgets/doce.dart';
+import '../idioma.dart';
 
 const _icones = <String, IconData>{
   'star': Icons.star_rounded,
@@ -43,9 +44,9 @@ Future<void> mostrarFigurinhaNova(BuildContext context, ({Album album, Figurinha
       builder: (context) => AlertDialog(
         backgroundColor: Cores.painel,
         scrollable: true,
-        title: const FittedBox(
+        title: FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text('Figurinha nova!', textAlign: TextAlign.center),
+          child: Text(t('Figurinha nova!'), textAlign: TextAlign.center),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -54,15 +55,15 @@ Future<void> mostrarFigurinhaNova(BuildContext context, ({Album album, Figurinha
             const SizedBox(height: 10),
             Text(
               ganhou.completou
-                  ? 'Álbum ${ganhou.album.nome} completo! +${ganhou.album.premioGemas} gemas'
-                  : 'Álbum ${ganhou.album.nome}',
+                  ? t('Álbum {0} completo! +{1} gemas', [t(ganhou.album.nome), ganhou.album.premioGemas])
+                  : t('Álbum {0}', [t(ganhou.album.nome)]),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ganhou.completou ? Cores.gema : null),
             ),
           ],
         ),
         actionsAlignment: MainAxisAlignment.center,
-        actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Legal!'))],
+        actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(t('Legal!')))],
       ),
     );
 
@@ -101,33 +102,34 @@ class _AlbumTelaState extends State<AlbumTela> {
                 Row(
                   children: [
                     IconButton(
-                      tooltip: 'Voltar',
+                      tooltip: t('Voltar'),
                       onPressed: () => Navigator.of(context).maybePop(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     ),
-                    const Expanded(
+                    Expanded(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
-                        child: TextoContornado('Álbum de figurinhas', tamanho: 24, alinhamento: TextAlign.start),
+                        child: TextoContornado(t('Álbum de figurinhas'), tamanho: 24, alinhamento: TextAlign.start),
                       ),
                     ),
                   ],
                 ),
-                const Padding(
+                Padding(
                   padding: EdgeInsets.fromLTRB(4, 4, 4, 8),
                   child: Text(
-                    'Ganhe uma figurinha ao concluir o Desafio do dia e outra ao abrir o baú das missões. '
-                    'Complete o álbum e leve gemas!',
+                    t(
+                      'Ganhe uma figurinha ao concluir o Desafio do dia e outra ao abrir o baú das missões. Complete o álbum e leve gemas!',
+                    ),
                     style: TextStyle(fontSize: 14, height: 1.3),
                   ),
                 ),
                 for (final a in liberados) _SecaoAlbum(album: a, tenho: tenho),
                 if (liberados.length < Album.todos.length)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(top: 8),
                     child: Text(
-                      'Complete este álbum para liberar o próximo!',
+                      t('Complete este álbum para liberar o próximo!'),
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Cores.textoFraco),
                     ),
@@ -158,7 +160,7 @@ class _SecaoAlbum extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(child: TextoContornado(album.nome, tamanho: 21, alinhamento: TextAlign.start)),
+                Expanded(child: TextoContornado(t(album.nome), tamanho: 21, alinhamento: TextAlign.start)),
                 Text(
                   '$quantas/${album.figurinhas.length}',
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
@@ -177,7 +179,7 @@ class _SecaoAlbum extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              album.completo(tenho) ? 'Completo!' : 'Completo: +${album.premioGemas} gemas',
+              album.completo(tenho) ? t('Completo!') : t('Completo: +{0} gemas', [album.premioGemas]),
               style: const TextStyle(fontSize: 13, color: Cores.textoFraco),
             ),
             const SizedBox(height: 8),
@@ -207,7 +209,7 @@ class _Figurinha extends StatelessWidget {
   Widget build(BuildContext context) {
     final cor = Color(figurinha.cor);
     return Semantics(
-      label: tenho ? figurinha.nome : 'Figurinha ainda não conquistada',
+      label: tenho ? t(figurinha.nome) : t('Figurinha ainda não conquistada'),
       child: Container(
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
@@ -238,7 +240,7 @@ class _Figurinha extends StatelessWidget {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                tenho ? figurinha.nome : '???',
+                tenho ? t(figurinha.nome) : '???',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: tenho ? null : Colors.white38),
               ),
             ),

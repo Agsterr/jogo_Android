@@ -3,6 +3,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tzdados;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../idioma.dart';
+
 /// Hora do lembrete do Desafio do dia (horário do celular).
 const horaDoLembrete = 19;
 
@@ -73,13 +75,13 @@ class LembreteLocal implements Lembrete {
       final instante = tz.TZDateTime.now(tz.UTC).add(quando.difference(agora));
       await _android!.zonedSchedule(
         id: _id,
-        title: 'Desafio do dia no Encaixa',
-        body: 'O desafio de hoje e o presente da noite estão esperando. Mantenha a sua sequência!',
+        title: t('Desafio do dia no Encaixa'),
+        body: t('O desafio de hoje e o presente da noite estão esperando. Mantenha a sua sequência!'),
         scheduledDate: instante,
-        notificationDetails: const AndroidNotificationDetails(
+        notificationDetails: AndroidNotificationDetails(
           'desafio',
-          'Desafio do dia',
-          channelDescription: 'Lembrete diário do Desafio do dia',
+          t('Desafio do dia'),
+          channelDescription: t('Lembrete diário do Desafio do dia'),
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
         ),

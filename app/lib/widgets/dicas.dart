@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../servicos/servicos.dart';
 import '../tema.dart';
 import 'doce.dart';
+import '../idioma.dart';
 
 /// Um texto de ajuda: aparece uma vez como janela e fica na tela "Como jogar".
 class Dica {
@@ -216,7 +217,7 @@ class DialogoDica extends StatelessWidget {
         children: [
           Icon(dica.icone, size: 52, color: dica.cor),
           const SizedBox(height: 4),
-          TextoContornado(dica.titulo, tamanho: 26),
+          TextoContornado(t(dica.titulo), tamanho: 26),
           const SizedBox(height: 12),
           ...dica.linhas.map(
             (l) => Padding(
@@ -229,14 +230,14 @@ class DialogoDica extends StatelessWidget {
                     child: Icon(Icons.star_rounded, size: 16, color: dica.cor),
                   ),
                   const SizedBox(width: 8),
-                  Expanded(child: Text(l, style: const TextStyle(fontSize: 16, height: 1.3))),
+                  Expanded(child: Text(t(l), style: const TextStyle(fontSize: 16, height: 1.3))),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 8),
           BotaoDoce(
-            texto: dica.botao,
+            texto: t(dica.botao),
             cor: Cores.blocos[3],
             altura: 50,
             tamanhoTexto: 20,
