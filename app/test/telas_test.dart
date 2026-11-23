@@ -86,9 +86,10 @@ void main() {
     expect(find.text('Fase 1'), findsOneWidget);
     expect(find.text('Desafio #12'), findsWidgets);
     expect(find.text('Relâmpago'), findsWidgets);
-    expect(find.text('Passe'), findsWidgets);
+    expect(find.text('Puzzle do dia'), findsWidgets);
     await tester.drag(find.byType(ListView).first, const Offset(0, -900));
     await tester.pump();
+    expect(find.text('Passe'), findsWidgets);
     expect(find.text('Missões de hoje'), findsWidgets);
     await tester.drag(find.byType(ListView).first, const Offset(0, 3000));
     await tester.pump();

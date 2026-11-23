@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
+import '../jogo/puzzle.dart';
 import '../jogo/album.dart';
 import '../jogo/amigo.dart';
 import '../jogo/conquistas.dart';
@@ -269,18 +270,14 @@ class _InicioTelaState extends State<InicioTela> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _Atalho(
-                                  icone: Icons.workspace_premium_rounded,
-                                  titulo: t('Passe'),
-                                  subtitulo: p.passeProntos(dia) > 0
-                                      ? t('{0} prêmio{1} para pegar!', [
-                                          p.passeProntos(dia),
-                                          p.passeProntos(dia) == 1 ? '' : 's',
-                                        ])
-                                      : t('Nível {0} de {1}', [p.passeNivel(dia), niveisDoPasse]),
-                                  cores: const [Color(0xFF7B61FF), Color(0xFFFF61D8)],
-                                  contorno: const Color(0xFF3A1B8A),
-                                  selo: p.passeProntos(dia),
-                                  aoTocar: () => _abrir(PasseTela(servicos: servicos)),
+                                  icone: Icons.psychology_rounded,
+                                  titulo: t('Puzzle do dia'),
+                                  subtitulo: p.puzzleEstrelas(dia) > 0
+                                      ? t('{0} de 3 estrelas', [p.puzzleEstrelas(dia)])
+                                      : t('3 peças: limpe o máximo!'),
+                                  cores: const [Color(0xFF7C4DFF), Color(0xFF00B0FF)],
+                                  contorno: const Color(0xFF2A1B7A),
+                                  aoTocar: () => _abrir(JogoTela(servicos: servicos, puzzle: puzzleDoDia(dia))),
                                 ),
                               ),
                             ],
@@ -343,6 +340,23 @@ class _InicioTelaState extends State<InicioTela> {
                                   contorno: const Color(0xFF3A1B8A),
                                   selo: p.baus,
                                   aoTocar: () => _abrir(BausTela(servicos: servicos)),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _Atalho(
+                                  icone: Icons.workspace_premium_rounded,
+                                  titulo: t('Passe'),
+                                  subtitulo: p.passeProntos(dia) > 0
+                                      ? t('{0} prêmio{1} para pegar!', [
+                                          p.passeProntos(dia),
+                                          p.passeProntos(dia) == 1 ? '' : 's',
+                                        ])
+                                      : t('Nível {0} de {1}', [p.passeNivel(dia), niveisDoPasse]),
+                                  cores: const [Color(0xFF7B61FF), Color(0xFFFF61D8)],
+                                  contorno: const Color(0xFF3A1B8A),
+                                  selo: p.passeProntos(dia),
+                                  aoTocar: () => _abrir(PasseTela(servicos: servicos)),
                                 ),
                               ),
                             ],

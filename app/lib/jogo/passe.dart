@@ -11,6 +11,7 @@ abstract final class XpDoPasse {
   static const bau = 30;
   static const amigo = 15;
   static const partida = 5;
+  static const puzzle = 15;
 
   /// Só as primeiras partidas do dia dão XP (para não ser possível "fazer fazenda").
   static const partidasPorDia = 10;

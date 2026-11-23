@@ -203,3 +203,12 @@ Ao limpar linhas, pedacinhos de cada bloco voam e caem (confete); nas jogadas mu
 o tabuleiro treme de leve. Quem pediu **menos animação** no Android não vê nenhum dos dois. A **música de fundo**
 (`app/assets/sons/musica.wav`, gerada por `ferramentas/gerar_sons.py`, 24 s em loop) **começa desligada** (muita gente joga
 ouvindo a própria música): liga em *Como jogar > Música de fundo*, só toca com o som ligado e para quando o jogo sai da tela.
+
+## Puzzle do dia
+
+- Todo dia um tabuleiro novo, igual para todos, com **3 peças fixas** (não vêm outras). Vale limpar o máximo de linhas.
+- A meta (3 a 5 linhas) vem de uma solução plantada ao gerar o puzzle; a jogada gulosa óbvia quase nunca basta.
+- Estrelas: 3 = bateu a meta; 2 = meta menos 1 (mínimo 2 linhas); 1 = ao menos 1 linha. Gemas acumuladas 2/5/10.
+- Só a **melhor marca do dia** paga gemas (paga a diferença); +15 XP do Passe na primeira pontuação do dia.
+- Pode tentar de novo à vontade. Não conta como partida do Infinito, não mexe em recorde nem missões.
+- Código: `app/lib/jogo/puzzle.dart`, testes em `app/test/puzzle_test.dart`, capturas `docs/telas/46-puzzle*.png`.

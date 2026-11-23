@@ -117,6 +117,13 @@ abstract final class Dicas {
     'No fim, ganha 1 gema a cada 150 pontos (até 15).',
   ]);
 
+  static const puzzle = Dica('puzzle', 'Puzzle do dia', Icons.psychology_rounded, Color(0xFF7C4DFF), [
+    'Todo dia tem um tabuleiro novo, com 3 peças já definidas: não vêm outras.',
+    'Pense na ordem e nas posições para limpar o máximo de linhas.',
+    'A meta aparece em cima. Bateu a meta: 3 estrelas. Estrelas dão gemas (só uma vez por dia).',
+    'Pode tentar de novo quantas vezes quiser para melhorar as estrelas.',
+  ]);
+
   static const passe = Dica('passe', 'Passe de temporada', Icons.emoji_events_rounded, Color(0xFFFF8A00), [
     'Todo mês tem um Passe novo com 20 níveis. Jogar enche a barra.',
     'Desafio do dia dá 40, baú das missões 30, fases até 19 e partidas 5 (as 10 primeiras do dia).',
@@ -188,6 +195,7 @@ abstract final class Dicas {
     reforcos,
     album,
     baus,
+    puzzle,
     passe,
     especiais,
     relampago,

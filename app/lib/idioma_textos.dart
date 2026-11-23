@@ -5,6 +5,26 @@ abstract final class Textos {
 }
 
 const _en = <String, String>{
+  'Puzzle do dia': 'Daily puzzle',
+  '{0} de 3 estrelas': '{0} of 3 stars',
+  '3 peças: limpe o máximo!': '3 pieces: clear the most!',
+  'PUZZLE #{0}': 'PUZZLE #{0}',
+  'linhas limpas': 'lines cleared',
+  'Coloque as 3 peças e limpe {0} linhas ou mais': 'Place the 3 pieces and clear {0} lines or more',
+  'Puzzle resolvido!': 'Puzzle solved!',
+  'Puzzle concluído': 'Puzzle finished',
+  'Linhas limpas: {0} (meta: {1})': 'Lines cleared: {0} (goal: {1})',
+  'Dá para fazer mais! Tente outra ordem ou outras posições.': 'You can do better! Try another order or other spots.',
+  'Encaixa 🧠 Puzzle #{0}\n{1} de 3 estrelas (linhas: {2})\nConsegue fazer melhor?\n{3}':
+      'Encaixa 🧠 Puzzle #{0}\n{1} of 3 stars (lines: {2})\nCan you do better?\n{3}',
+  'Todo dia tem um tabuleiro novo, com 3 peças já definidas: não vêm outras.':
+      'Every day has a new board with 3 fixed pieces: no others come.',
+  'Pense na ordem e nas posições para limpar o máximo de linhas.':
+      'Think about the order and positions to clear as many lines as you can.',
+  'A meta aparece em cima. Bateu a meta: 3 estrelas. Estrelas dão gemas (só uma vez por dia).':
+      'The goal is shown on top. Reach it: 3 stars. Stars give gems (once per day).',
+  'Pode tentar de novo quantas vezes quiser para melhorar as estrelas.':
+      'You can retry as often as you like to earn more stars.',
   'Música de fundo': 'Background music',
   'Uma música calma durante o jogo. Só toca com o som ligado.':
       'A calm tune while you play. It only plays with sound on.',
@@ -676,6 +696,26 @@ const _en = <String, String>{
 };
 
 const _es = <String, String>{
+  'Puzzle do dia': 'Puzle del día',
+  '{0} de 3 estrelas': '{0} de 3 estrellas',
+  '3 peças: limpe o máximo!': '3 piezas: ¡limpia el máximo!',
+  'PUZZLE #{0}': 'PUZLE #{0}',
+  'linhas limpas': 'líneas limpias',
+  'Coloque as 3 peças e limpe {0} linhas ou mais': 'Coloca las 3 piezas y limpia {0} líneas o más',
+  'Puzzle resolvido!': '¡Puzle resuelto!',
+  'Puzzle concluído': 'Puzle terminado',
+  'Linhas limpas: {0} (meta: {1})': 'Líneas limpias: {0} (meta: {1})',
+  'Dá para fazer mais! Tente outra ordem ou outras posições.': '¡Se puede más! Prueba otro orden u otras posiciones.',
+  'Encaixa 🧠 Puzzle #{0}\n{1} de 3 estrelas (linhas: {2})\nConsegue fazer melhor?\n{3}':
+      'Encaixa 🧠 Puzle #{0}\n{1} de 3 estrellas ({2} líneas)\n¿Puedes hacerlo mejor?\n{3}',
+  'Todo dia tem um tabuleiro novo, com 3 peças já definidas: não vêm outras.':
+      'Cada día hay un tablero nuevo con 3 piezas fijas: no vienen otras.',
+  'Pense na ordem e nas posições para limpar o máximo de linhas.':
+      'Piensa en el orden y las posiciones para limpiar el máximo de líneas.',
+  'A meta aparece em cima. Bateu a meta: 3 estrelas. Estrelas dão gemas (só uma vez por dia).':
+      'La meta aparece arriba. Si la alcanzas: 3 estrellas. Las estrellas dan gemas (una vez al día).',
+  'Pode tentar de novo quantas vezes quiser para melhorar as estrelas.':
+      'Puedes reintentar las veces que quieras para mejorar las estrellas.',
   'Música de fundo': 'Música de fondo',
   'Uma música calma durante o jogo. Só toca com o som ligado.':
       'Una música tranquila mientras juegas. Solo suena con el sonido activado.',

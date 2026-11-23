@@ -51,6 +51,16 @@ class Partida {
     _novaMao();
   }
 
+  /// Puzzle do dia: um tabuleiro pronto e as 3 peças fixas, sem mão nova depois (acaba quando as 3 são jogadas).
+  factory Partida.puzzle(Tabuleiro inicial, List<Peca> pecas) {
+    final p = Partida(semente: 0, inicial: inicial.copia());
+    p.mao = [...pecas];
+    p._semReposicao = true;
+    return p;
+  }
+
+  bool _semReposicao = false;
+
   Partida._salva(this._sorteio, {this.semente = 0, this.cores = totalCores}) : tabuleiro = Tabuleiro();
 
   /// Semente do sorteio das peças desta partida (0 em partidas salvas antes de guardarmos a semente).
@@ -270,7 +280,7 @@ class Partida {
     marcosPagos += novosMarcos.length;
 
     mao = [...mao]..[indice] = null;
-    if (mao.every((p) => p == null)) _novaMao();
+    if (!_semReposicao && mao.every((p) => p == null)) _novaMao();
 
     return Jogada(
       pontos: ganho,

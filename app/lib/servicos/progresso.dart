@@ -10,6 +10,7 @@ import '../jogo/bau.dart';
 import '../jogo/sorteio.dart';
 import '../jogo/conquistas.dart';
 import '../jogo/passe.dart';
+import '../jogo/puzzle.dart';
 import '../jogo/arena.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
@@ -580,6 +581,25 @@ class Progresso extends ChangeNotifier {
         if (t.passe) await guardarTema(t);
       }
     }
+    notifyListeners();
+    return gemas;
+  }
+
+  // ---------- puzzle do dia ----------
+
+  /// Melhor marca do puzzle de hoje, em estrelas (0 = ainda não fez).
+  int puzzleEstrelas(int dia) => _prefs.getInt('puzzleDia') == dia ? (_prefs.getInt('puzzleEstrelas') ?? 0) : 0;
+
+  /// Guarda o resultado de uma tentativa. Paga só a diferença para a melhor marca do dia (gemas acumuladas por estrela)
+  /// e dá XP do Passe na primeira vez que pontua. Devolve as gemas ganhas agora.
+  Future<int> registrarPuzzle(int dia, int estrelas) async {
+    final antes = puzzleEstrelas(dia);
+    if (estrelas <= antes) return 0;
+    final gemas = gemasDoPuzzle(estrelas) - gemasDoPuzzle(antes);
+    await _prefs.setInt('puzzleDia', dia);
+    await _prefs.setInt('puzzleEstrelas', estrelas);
+    await ganharGemas(gemas);
+    if (antes == 0) await ganharXpDoPasse(dia, XpDoPasse.puzzle);
     notifyListeners();
     return gemas;
   }
