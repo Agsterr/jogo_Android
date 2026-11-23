@@ -18,6 +18,10 @@ import io.flutter.plugin.common.MethodChannel
  * Ele sobrevive a desinstalar e reinstalar (com o Backup do Google ligado) e vai para o backup na nuvem
  * quando o aparelho permite. Qualquer falha vira erro para o Dart, que a ignora: o jogo nunca fecha por isso.
  */
+/** Períodos do placar do Play Games (LeaderboardVariant.TIME_SPAN_*): o mesmo placar serve para os dois. */
+private const val TEMPO_SEMANA = 1
+private const val TEMPO_TODOS = 2
+
 class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +56,7 @@ class MainActivity : FlutterActivity() {
                 "conectar" -> conectarAoPlayGames(resultado)
                 "rankingDisponivel" -> resultado.success(getString(R.string.leaderboard_id).isNotBlank())
                 "enviarPontos" -> nuvem(resultado) { enviarPontos(chamada.argument<Number>("pontos"), resultado) }
-                "abrirRanking" -> nuvem(resultado) { abrirRanking(resultado) }
+                "abrirRanking" -> nuvem(resultado) { abrirRanking(chamada.argument<Boolean>("semana") == true, resultado) }
                 else -> resultado.notImplemented()
             }
         }
@@ -82,14 +86,14 @@ class MainActivity : FlutterActivity() {
         resultado.success(true)
     }
 
-    /** Abre a tela do placar do Google. */
-    private fun abrirRanking(resultado: MethodChannel.Result) {
+    /** Abre a tela do placar do Google: o da semana (que zera sozinho) ou o de todos os tempos. */
+    private fun abrirRanking(semana: Boolean, resultado: MethodChannel.Result) {
         val id = getString(R.string.leaderboard_id)
         if (id.isBlank()) {
             resultado.error("sem_placar", "placar não configurado", null)
             return
         }
-        PlayGames.getLeaderboardsClient(this).getLeaderboardIntent(id)
+        PlayGames.getLeaderboardsClient(this).getLeaderboardIntent(id, if (semana) TEMPO_SEMANA else TEMPO_TODOS)
             .addOnSuccessListener { intent ->
                 startActivityForResult(intent, CODIGO_RANKING)
                 resultado.success(true)

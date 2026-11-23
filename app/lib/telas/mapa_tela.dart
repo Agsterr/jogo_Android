@@ -4,9 +4,11 @@ import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
 import '../jogo/fases.dart';
+import '../jogo/figuras.dart';
 import '../servicos/servicos.dart';
 import '../tema.dart';
 import '../widgets/doce.dart';
+import '../widgets/figura_widget.dart';
 import 'jogo_tela.dart';
 import '../idioma.dart';
 
@@ -41,7 +43,7 @@ class MapaTela extends StatefulWidget {
 }
 
 class _MapaTelaState extends State<MapaTela> with SingleTickerProviderStateMixin {
-  static const _alturaNo = 100.0, _alturaMundo = 90.0;
+  static const _alturaNo = 100.0, _alturaMundo = 250.0;
 
   late final _pulso = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))
     ..repeat(reverse: true);
@@ -149,6 +151,15 @@ class _MapaTelaState extends State<MapaTela> with SingleTickerProviderStateMixin
               top: _topoDoNo(m * Fase.porMundo + 1) - _alturaMundo + 16,
               child: Center(child: _FitaDoMundo(m)),
             ),
+          for (var m = 0; m < Fase.mundos.length; m++)
+            Positioned(
+              left: 0,
+              right: 0,
+              top: _topoDoNo(m * Fase.porMundo + 1) - _alturaMundo + 72,
+              child: Center(
+                child: _CartaoDaFigura(mundo: m, feitas: Figura.feitasNoMundo(m, p.estrelasDaFase)),
+              ),
+            ),
           for (var n = 1; n <= Fase.total; n++)
             Positioned(
               left: centro(n).dx - 50,
@@ -221,6 +232,50 @@ class _Trilha extends CustomPainter {
 
   @override
   bool shouldRepaint(_Trilha antigo) => antigo.liberadas != liberadas || antigo.pontos.length != pontos.length;
+}
+
+/// A figura do mundo: cada fase vencida revela um pedaço.
+class _CartaoDaFigura extends StatelessWidget {
+  const _CartaoDaFigura({required this.mundo, required this.feitas});
+
+  final int mundo, feitas;
+
+  @override
+  Widget build(BuildContext context) {
+    final figura = Figura.doMundo(mundo);
+    const total = Fase.porMundo;
+    final completa = feitas >= total;
+    final cor = corDoMundo(mundo);
+    return Semantics(
+      label: completa
+          ? t('Figura completa: {0}', [t(figura.nome)])
+          : t('Figura do mundo: {0} de {1} pedaços', [feitas, total]),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+        decoration: BoxDecoration(
+          color: Cores.painel.withValues(alpha: 0.88),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: completa ? Cores.ouro : cor.withValues(alpha: 0.7), width: completa ? 3 : 2),
+          boxShadow: [if (completa) BoxShadow(color: Cores.ouro.withValues(alpha: 0.5), blurRadius: 16)],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FiguraWidget(figura: figura, pedacos: figura.visiveis(feitas), largura: 150),
+            const SizedBox(height: 6),
+            Text(
+              completa ? t(figura.nome) : '$feitas/$total',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                color: completa ? Cores.ouro : Cores.textoFraco,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _FitaDoMundo extends StatelessWidget {

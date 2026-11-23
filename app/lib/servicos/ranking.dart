@@ -10,8 +10,8 @@ abstract class Ranking {
   /// Manda a pontuação (o Google guarda só a melhor de cada jogador).
   Future<void> enviar(int pontos);
 
-  /// Abre o placar do Google. `false` se não deu (sem conta, sem placar).
-  Future<bool> abrir();
+  /// Abre o placar do Google, o da semana (zera sozinho) ou o de todos os tempos. `false` se não deu (sem conta, sem placar).
+  Future<bool> abrir({bool semana = false});
 }
 
 class SemRanking implements Ranking {
@@ -24,7 +24,7 @@ class SemRanking implements Ranking {
   Future<void> enviar(int pontos) async {}
 
   @override
-  Future<bool> abrir() async => false;
+  Future<bool> abrir({bool semana = false}) async => false;
 }
 
 class RankingPlayGames implements Ranking {
@@ -54,16 +54,16 @@ class RankingPlayGames implements Ranking {
   }
 
   @override
-  Future<bool> abrir() async {
+  Future<bool> abrir({bool semana = false}) async {
     if (!await disponivel()) return false;
     try {
-      return await _canal.invokeMethod<bool>('abrirRanking') ?? false;
+      return await _canal.invokeMethod<bool>('abrirRanking', {'semana': semana}) ?? false;
     } on PlatformException catch (e) {
       if (e.code != 'desconectado') return false;
       // Ainda sem login: pede a conta e tenta de novo uma vez.
       try {
         if (await _canal.invokeMethod<bool>('conectar') != true) return false;
-        return await _canal.invokeMethod<bool>('abrirRanking') ?? false;
+        return await _canal.invokeMethod<bool>('abrirRanking', {'semana': semana}) ?? false;
       } on Object {
         return false;
       }

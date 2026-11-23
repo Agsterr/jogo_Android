@@ -223,3 +223,13 @@ ouvindo a própria música): liga em *Como jogar > Música de fundo*, só toca c
 
 - Nova categoria da coleção, 6 fundos em todas as raridades (cores: topo, base e 2 brilhos). Só aparência.
 - `Cores.fundoDoBau` é lido por `FundoJogo` (todas as telas). Testes em `app/test/fundos_test.dart`.
+
+## Figuras dos mundos (modo Fases)
+
+- Cada um dos 15 mundos tem uma figura de 10x8 blocos (`app/lib/jogo/figuras.dart`), mostrada no mapa abaixo da fita do mundo.
+- Cada fase vencida revela um pouco do desenho (só pedaços com bloco); na 20ª (o chefe) a figura fica inteira, ganha moldura
+  dourada e dá **1 baú** (só na primeira vez). A tela de fase vencida mostra o pedaço novo com contorno branco.
+- Só visual: não muda dificuldade nem pontuação. Testes em `app/test/figuras_test.dart` (capturas 53).
+
+## Ranking da semana
+- Botão ao lado do ranking mundial; usa o mesmo placar do Play Games na visão semanal (veja `docs/PLAY_GAMES.md`).

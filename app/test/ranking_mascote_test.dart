@@ -14,6 +14,7 @@ class _RankingFalso implements Ranking {
   final bool pronto;
   final enviados = <int>[];
   int aberturas = 0;
+  int aberturasDaSemana = 0;
 
   @override
   Future<bool> disponivel() async => pronto;
@@ -22,8 +23,9 @@ class _RankingFalso implements Ranking {
   Future<void> enviar(int pontos) async => enviados.add(pontos);
 
   @override
-  Future<bool> abrir() async {
+  Future<bool> abrir({bool semana = false}) async {
     aberturas++;
+    if (semana) aberturasDaSemana++;
     return true;
   }
 }
@@ -83,6 +85,12 @@ void main() {
       await tester.tap(find.text('Ranking mundial'));
       await tester.pump();
       expect(falso.aberturas, 1);
+      expect(falso.aberturasDaSemana, 0);
+      expect(find.text('Ranking da semana'), findsOneWidget);
+      await tester.tap(find.text('Ranking da semana'));
+      await tester.pump();
+      expect(falso.aberturas, 2);
+      expect(falso.aberturasDaSemana, 1);
     });
   });
 

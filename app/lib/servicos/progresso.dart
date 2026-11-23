@@ -351,6 +351,8 @@ class Progresso extends ChangeNotifier {
     var gemas = 0;
     if (primeiraVez) gemas = 2 + (numero % Fase.porMundo == 0 ? 15 : 0);
     await ganharGemas(gemas);
+    // Chefe vencido pela primeira vez: a figura do mundo fica completa e vale um baú.
+    if (primeiraVez && numero % Fase.porMundo == 0) await ganharBau();
     notifyListeners();
     return gemas;
   }

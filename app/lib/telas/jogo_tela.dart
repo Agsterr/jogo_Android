@@ -12,6 +12,7 @@ import '../jogo/arena.dart';
 import '../jogo/eventos.dart';
 import '../jogo/elogios.dart';
 import '../jogo/fases.dart';
+import '../jogo/figuras.dart';
 import '../jogo/marcos.dart';
 import '../jogo/missoes.dart';
 import '../jogo/partida.dart';
@@ -25,6 +26,7 @@ import '../servicos/sons.dart';
 import '../tema.dart';
 import '../widgets/dicas.dart';
 import '../widgets/doce.dart';
+import '../widgets/figura_widget.dart';
 import '../widgets/mascote.dart';
 import '../widgets/peca_widget.dart';
 import '../widgets/tabuleiro_widget.dart';
@@ -139,6 +141,9 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
   int _extras = 0;
   bool _ajudou = false;
   int _gemasFase = 0;
+
+  /// A fase vencida agora completou a figura do mundo (e deu um baú).
+  bool _figuraCompleta = false;
 
   Servicos get _s => widget.servicos;
 
@@ -470,7 +475,9 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
       _s.sons.tocar(Som.combo);
       // Quem precisou de ajuda leva no máximo 1 estrela.
       final estrelas = _ajudou ? 1 : fase.estrelas(_partida);
+      final primeiraVez = _s.progresso.estrelasDaFase(fase.numero) == 0;
       final gemas = await _s.progresso.concluirFase(fase.numero, estrelas);
+      _figuraCompleta = primeiraVez && fase.chefe;
       if (gemas > 0) await _s.progresso.ganharXpDoPasse(_dia, XpDoPasse.fase(estrelas));
       await _s.progresso.contarMissoes(_dia, {
         TipoMissao.partidas: 1,
@@ -1258,7 +1265,25 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
           textAlign: TextAlign.center,
           style: const TextStyle(color: Cores.gema, fontSize: 18, fontWeight: FontWeight.w700),
         ),
-      const SizedBox(height: 20),
+      const SizedBox(height: 10),
+      Center(
+        child: FiguraWidget(
+          figura: Figura.doMundo(fase.mundo),
+          pedacos: Figura.doMundo(fase.mundo).visiveis(Figura.feitasNoMundo(fase.mundo, _s.progresso.estrelasDaFase)),
+          destaque: Figura.doMundo(fase.mundo).novos(Figura.posicaoNoMundo(fase.numero)),
+          largura: 130,
+        ),
+      ),
+      if (_figuraCompleta)
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(
+            t('Figura completa! Você ganhou um baú.'),
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Cores.ouro, fontSize: 17, fontWeight: FontWeight.w700),
+          ),
+        ),
+      const SizedBox(height: 14),
       if (fase.numero < Fase.total)
         _botao(t('Próxima fase'), Icons.arrow_forward_rounded, () => _irParaFase(fase.numero + 1)),
       TextButton(onPressed: _irParaMapa, child: Text(t('Mapa'))),

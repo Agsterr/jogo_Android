@@ -76,3 +76,7 @@ Arena** ao placar e mostra o botão **Ranking mundial** na tela inicial. **Fica 
 3. Cole em `app/android/app/src/main/res/values/game_services.xml`, em `leaderboard_id`, e envie. (Ou me passe o ID.)
 4. Publique a configuração do Play Games. O Google guarda só a melhor pontuação de cada jogador.
 **Não testado em aparelho.** Sem login no Play Games o botão pede a conta e tenta de novo.
+
+## Ranking da semana
+- Não precisa de outro placar: o mesmo placar do Play Games tem as visões **diária, semanal e de todos os tempos**. O botão
+  "Ranking da semana" abre a visão semanal (`TIME_SPAN_WEEKLY`) do mesmo `leaderboard_id` (issue #17); "Ranking mundial" abre todos os tempos.

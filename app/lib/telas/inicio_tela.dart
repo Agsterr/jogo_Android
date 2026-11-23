@@ -392,10 +392,20 @@ class _InicioTelaState extends State<InicioTela> {
                           aoTocar: () => _abrir(LojaTela(servicos: servicos)),
                         ),
                         if (_rankingOk)
-                          TextButton.icon(
-                            onPressed: servicos.ranking.abrir,
-                            icon: const Icon(Icons.leaderboard_rounded, size: 20),
-                            label: Text(t('Ranking mundial')),
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            children: [
+                              TextButton.icon(
+                                onPressed: () => servicos.ranking.abrir(semana: true),
+                                icon: const Icon(Icons.date_range_rounded, size: 20),
+                                label: Text(t('Ranking da semana')),
+                              ),
+                              TextButton.icon(
+                                onPressed: servicos.ranking.abrir,
+                                icon: const Icon(Icons.leaderboard_rounded, size: 20),
+                                label: Text(t('Ranking mundial')),
+                              ),
+                            ],
                           ),
                         TextButton.icon(
                           onPressed: _codigoDeAmigo,

@@ -5,6 +5,18 @@ abstract final class Textos {
 }
 
 const _en = <String, String>{
+  'Ranking da semana': 'Weekly ranking',
+  'Cupcake': 'Cupcake',
+  'Peixinho': 'Little fish',
+  'Pinheiro': 'Pine tree',
+  'Floco de neve': 'Snowflake',
+  'Cacto': 'Cactus',
+  'Coração neon': 'Neon heart',
+  'Caveira': 'Skull',
+  'Robozinho': 'Little robot',
+  'Figura completa: {0}': 'Picture complete: {0}',
+  'Figura do mundo: {0} de {1} pedaços': 'World picture: {0} of {1} pieces',
+  'Figura completa! Você ganhou um baú.': 'Picture complete! You won a chest.',
   'Fundo do jogo': 'Game background',
   'Noite azul': 'Blue night',
   'Entardecer': 'Dusk',
@@ -712,6 +724,18 @@ const _en = <String, String>{
 };
 
 const _es = <String, String>{
+  'Ranking da semana': 'Ranking semanal',
+  'Cupcake': 'Cupcake',
+  'Peixinho': 'Pececito',
+  'Pinheiro': 'Pino',
+  'Floco de neve': 'Copo de nieve',
+  'Cacto': 'Cactus',
+  'Coração neon': 'Corazón neón',
+  'Caveira': 'Calavera',
+  'Robozinho': 'Robotito',
+  'Figura completa: {0}': 'Figura completa: {0}',
+  'Figura do mundo: {0} de {1} pedaços': 'Figura del mundo: {0} de {1} piezas',
+  'Figura completa! Você ganhou um baú.': '¡Figura completa! Ganaste un cofre.',
   'Fundo do jogo': 'Fondo del juego',
   'Noite azul': 'Noche azul',
   'Entardecer': 'Atardecer',
