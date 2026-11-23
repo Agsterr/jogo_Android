@@ -66,6 +66,8 @@ android {
 dependencies {
     // Block Store: guarda o progresso fora dos dados do app (sobrevive a reinstalar). Ver MainActivity.kt.
     implementation("com.google.android.gms:play-services-auth-blockstore:16.4.0")
+    // Play Games Services v2: entra sozinho com a conta Google e guarda o progresso como Jogo salvo (Saved Games).
+    implementation("com.google.android.gms:play-services-games-v2:21.0.0")
 }
 
 kotlin {

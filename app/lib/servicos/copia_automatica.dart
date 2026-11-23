@@ -63,6 +63,73 @@ class CopiaBlockStore implements CopiaAutomatica {
   }
 }
 
+/// Jogo salvo do Play Games Services, na conta Google (código nativo em `MainActivity.kt`).
+/// Entra sozinho com a conta; sem conta ou sem rede o canal devolve erro e o jogo segue sem a nuvem.
+class CopiaPlayGames implements CopiaAutomatica {
+  static const _canal = MethodChannel('encaixa/nuvem');
+
+  @override
+  Future<ResultadoCopia> salvar(Uint8List bytes) async {
+    try {
+      await _canal.invokeMapMethod<String, Object?>('salvar', {'bytes': bytes});
+      return const ResultadoCopia(ok: true, nuvem: true);
+    } on Object catch (e) {
+      debugPrint('Play Games (salvar): $e');
+      return const ResultadoCopia(ok: false);
+    }
+  }
+
+  @override
+  Future<Uint8List?> ler() async {
+    try {
+      return await _canal.invokeMethod<Uint8List>('ler');
+    } on Object catch (e) {
+      debugPrint('Play Games (ler): $e');
+      return null;
+    }
+  }
+}
+
+/// Grava em todas as cópias e, ao ler, fica com o progresso **mais avançado** (fase, depois estrelas, recorde e,
+/// por fim, o mais recente). Assim a conta Google e o Block Store se complementam.
+class CopiaDupla implements CopiaAutomatica {
+  const CopiaDupla(this._copias);
+
+  final List<CopiaAutomatica> _copias;
+
+  @override
+  Future<ResultadoCopia> salvar(Uint8List bytes) async {
+    final rs = await Future.wait(_copias.map((c) => c.salvar(bytes).catchError((Object _) => const ResultadoCopia(ok: false))));
+    return ResultadoCopia(ok: rs.any((r) => r.ok), nuvem: rs.any((r) => r.ok && r.nuvem));
+  }
+
+  @override
+  Future<Uint8List?> ler() async {
+    final lidos = await Future.wait(_copias.map((c) => c.ler().catchError((Object _) => null)));
+    Uint8List? melhor;
+    List<int>? melhorNota;
+    for (final bytes in lidos) {
+      if (bytes == null || bytes.isEmpty) continue;
+      final dados = CodigoProgresso.ler(utf8.decode(bytes, allowMalformed: true));
+      if (dados == null) continue;
+      final r = CodigoProgresso.resumo(dados);
+      final nota = [r.fase, r.estrelas, r.recorde, dados['salvoEm']! as int];
+      if (melhorNota == null || _maior(nota, melhorNota)) {
+        melhor = bytes;
+        melhorNota = nota;
+      }
+    }
+    return melhor;
+  }
+
+  static bool _maior(List<int> a, List<int> b) {
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return a[i] > b[i];
+    }
+    return false;
+  }
+}
+
 enum EstadoCopia { aindaNao, naNuvem, soNoCelular, indisponivel }
 
 /// Último resultado da cópia automática (a tela Salvar progresso mostra isto).

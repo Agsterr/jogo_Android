@@ -6,7 +6,7 @@ Fonte: <https://developer.android.com/games/pgs/console/setup>.
 
 ## Antes de começar
 - [ ] Conta de desenvolvedor do Google Play (taxa única de US$ 25).
-- [ ] App **Encaixa** criado no Play Console como **jogo**, pacote `com.agsterr.encaixa` (issue #2).
+- [ ] App **Encaixa** criado no Play Console como **jogo**, pacote `com.agsterr.encaixa2` (issue #2).
   Não precisa enviar versão antes; mas o acesso dos testadores por faixa de teste só existe com o app ligado ao jogo.
 
 ## Passo a passo no Play Console
@@ -16,7 +16,7 @@ Fonte: <https://developer.android.com/games/pgs/console/setup>.
    destaque (`docs/artes/destaque-1024x500.png`) precisam estar preenchidos antes de publicar.
 4. **Credentials:** configure a **tela de consentimento OAuth** (botão **Configure**). Escopos exigidos:
    `games`, `games_lite` e `drive.appdata`. O Google recomenda **publicar** a tela de consentimento já.
-5. **Add credential > Android > Create OAuth client.** No Google Cloud: tipo Android, pacote `com.agsterr.encaixa` e o
+5. **Add credential > Android > Create OAuth client.** No Google Cloud: tipo Android, pacote `com.agsterr.encaixa2` e o
    **SHA-1** no campo "Signing certificate fingerprint". Clique em **Create**, **Done**, escolha o client e **Save Changes**.
    O Google recomenda **duas credenciais com o mesmo pacote**:
    - **Chave do app na Play Store:** copie o SHA-1 da página de assinatura do app no Play Console (Play App Signing).
@@ -56,3 +56,13 @@ Passos do Android nativo, segundo a documentação do Google (a parte Flutter n�
 
 ## Como saber que deu certo
 Dois celulares (ou desinstalar e instalar) com a mesma conta Google mostram o mesmo progresso, sem copiar nada.
+
+## Estado (23/11/2026)
+Feito no Play Console e no Google Cloud (projeto `encaixa-515600`, **Project ID `41851413204`**): tela OAuth, escopos,
+duas credenciais Android para `com.agsterr.encaixa2` (SHA-1 da chave de envio e da chave de assinatura da Play),
+Jogos salvos ativados e projeto publicado.
+
+No código: `game_services.xml` + `meta-data` no manifesto, `play-services-games-v2`, canal `encaixa/nuvem` em
+`MainActivity.kt` (Jogo salvo `progresso`) e `CopiaDupla` (Play Games + Block Store; ao ler, vale o progresso mais
+avançado). **Ainda não testado em aparelho:** conferir com a mesma conta Google em dois celulares / reinstalando.
+Não feito: mostrar "Conectado como <nome>" na tela Salvar progresso.
