@@ -646,7 +646,12 @@ class _DialogoPresente extends StatelessWidget {
       final atual = hoje > 0 ? hoje : pego;
       return AlertDialog(
         backgroundColor: Cores.painel,
-        title: const Text('Presente do dia', textAlign: TextAlign.center),
+        // Com tela pequena e fonte grande o conteúdo rola em vez de o botão cobrir o último cartão.
+        scrollable: true,
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text('Presente do dia', textAlign: TextAlign.center),
+        ),
         content: Wrap(
           alignment: WrapAlignment.center,
           spacing: 8,

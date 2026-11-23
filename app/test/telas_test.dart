@@ -308,6 +308,23 @@ void main() {
     await capturar(tester, '20-inicio-fonte-grande');
   });
 
+  for (final (fonte, nome, tamanho) in [
+    (1.0, '21-presente-do-dia', const Size(360, 800)),
+    (1.5, '22-presente-do-dia-fonte-grande', const Size(360, 800)),
+    (1.5, '23-presente-do-dia-tela-pequena', const Size(320, 600)),
+  ]) {
+    testWidgets('presente do dia ao entrar ($nome)', (tester) async {
+      telaDeCelular(tester, tamanho: tamanho, fonte: fonte);
+      final s = await servicosDeTeste(presente: true);
+      await tester.pumpWidget(appDeTeste(s));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('Presente do dia'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await capturar(tester, nome);
+    });
+  }
+
   testWidgets('tela pequena com fonte grande não estoura', (tester) async {
     telaDeCelular(tester, tamanho: const Size(320, 600), fonte: 1.3);
     final s = await servicosDeTeste();

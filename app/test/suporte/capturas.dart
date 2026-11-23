@@ -38,6 +38,7 @@ Future<Servicos> servicosDeTeste({
   DateTime? hoje,
   bool dicas = false,
   bool roleta = false,
+  bool presente = false,
   CopiaAutomatica? copia,
   Lembrete lembrete = const SemLembrete(),
 }) async {
@@ -49,7 +50,7 @@ Future<Servicos> servicosDeTeste({
     anuncios: SemAnuncios(),
     compras: ComprasFicticias(progresso),
     hoje: agora,
-    mostrarPresenteAoAbrir: false,
+    mostrarPresenteAoAbrir: presente,
     mostrarDicas: dicas,
     roletaAposPartida: roleta,
     lembrete: lembrete,
