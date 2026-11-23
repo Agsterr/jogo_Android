@@ -699,7 +699,7 @@ class _JogoTelaState extends State<JogoTela> {
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               layoutBuilder: (atual, anteriores) =>
-                  Stack(alignment: Alignment.centerLeft, children: [...anteriores, if (atual != null) atual]),
+                  Stack(alignment: Alignment.centerLeft, children: [...anteriores, ?atual]),
               child: _fala == null
                   ? const SizedBox.shrink(key: ValueKey('sem-fala'))
                   : Container(
