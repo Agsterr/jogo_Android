@@ -299,6 +299,15 @@ void main() {
     await capturar(tester, '23-roda-premio');
   });
 
+  testWidgets('início com a fonte grande do sistema (Samsung 1,5x): banners sem texto cortado', (tester) async {
+    telaDeCelular(tester, tamanho: const Size(360, 800), fonte: 1.5);
+    final s = await servicosDeTeste(valores: {'faseLiberada': 53});
+    await tester.pumpWidget(appDeTeste(s));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
+    await capturar(tester, '20-inicio-fonte-grande');
+  });
+
   testWidgets('tela pequena com fonte grande não estoura', (tester) async {
     telaDeCelular(tester, tamanho: const Size(320, 600), fonte: 1.3);
     final s = await servicosDeTeste();

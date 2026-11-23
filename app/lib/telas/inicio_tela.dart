@@ -88,132 +88,136 @@ class _InicioTelaState extends State<InicioTela> {
                 listenable: p,
                 builder: (context, _) {
                   final fase = math.min(p.faseLiberada, Fase.total);
-                  return ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-                    children: [
-                      Row(
-                        children: [
-                          if (p.assinante) const _Selo('Encaixa+'),
-                          if (p.sequencia(dia) > 0) ...[const SizedBox(width: 8), _Sequencia(p.sequencia(dia))],
-                          const Spacer(),
-                          IconButton(
-                            tooltip: 'Como jogar',
-                            onPressed: () => _abrir(AjudaTela(servicos: servicos)),
-                            icon: const Icon(Icons.help_rounded),
-                          ),
-                          _BotaoPresente(disponivel: p.presenteDeHoje(dia) > 0, aoTocar: () => _abrirPresente(dia)),
-                          IconButton(
-                            tooltip: p.somLigado ? 'Desligar som' : 'Ligar som',
-                            onPressed: p.alternarSom,
-                            icon: Icon(p.somLigado ? Icons.volume_up_rounded : Icons.volume_off_rounded),
-                          ),
-                          GemasChip(
-                            gemas: p.gemas,
-                            aoTocar: () => _abrir(LojaTela(servicos: servicos)),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      const Logo(tamanho: 50),
-                      const SizedBox(height: 14),
-                      if (_BannerEvento.temAlgo(hoje)) ...[
-                        GestureDetector(
-                          onTap: () => mostrarDica(context, Dicas.eventos),
-                          child: _BannerEvento(progresso: p, agora: hoje),
+                  // Os cartões da tela inicial são de tamanho fixo: passar de 1,3x quebra o layout.
+                  return MediaQuery.withClampedTextScaling(
+                    maxScaleFactor: 1.3,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                      children: [
+                        Row(
+                          children: [
+                            if (p.assinante) const _Selo('Encaixa+'),
+                            if (p.sequencia(dia) > 0) ...[const SizedBox(width: 8), _Sequencia(p.sequencia(dia))],
+                            const Spacer(),
+                            IconButton(
+                              tooltip: 'Como jogar',
+                              onPressed: () => _abrir(AjudaTela(servicos: servicos)),
+                              icon: const Icon(Icons.help_rounded),
+                            ),
+                            _BotaoPresente(disponivel: p.presenteDeHoje(dia) > 0, aoTocar: () => _abrirPresente(dia)),
+                            IconButton(
+                              tooltip: p.somLigado ? 'Desligar som' : 'Ligar som',
+                              onPressed: p.alternarSom,
+                              icon: Icon(p.somLigado ? Icons.volume_up_rounded : Icons.volume_off_rounded),
+                            ),
+                            GemasChip(
+                              gemas: p.gemas,
+                              aoTocar: () => _abrir(LojaTela(servicos: servicos)),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 4),
+                        const Logo(tamanho: 50),
                         const SizedBox(height: 14),
-                      ],
-                      Row(
-                        children: [
-                          Expanded(
-                            child: BotaoDoce(
-                              texto: 'JOGAR',
-                              detalhe: 'Fase $fase',
-                              icone: Icons.play_arrow_rounded,
-                              cor: Cores.blocos[3],
-                              altura: 66,
-                              tamanhoTexto: 28,
-                              aoTocar: () => _abrir(JogoTela(servicos: servicos, fase: Fase.numero(fase))),
-                            ),
+                        if (_BannerEvento.temAlgo(hoje)) ...[
+                          GestureDetector(
+                            onTap: () => mostrarDica(context, Dicas.eventos),
+                            child: _BannerEvento(progresso: p, agora: hoje),
                           ),
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            width: 72,
-                            child: BotaoDoce(
-                              texto: '',
-                              icone: Icons.map_rounded,
-                              cor: Cores.blocos[4],
-                              altura: 66,
-                              tamanhoTexto: 24,
-                              aoTocar: () => MapaTela.abrir(context, servicos),
-                            ),
-                          ),
+                          const SizedBox(height: 14),
                         ],
-                      ),
-                      const SizedBox(height: 14),
-                      IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                        Row(
                           children: [
                             Expanded(
-                              child: _Ladrilho(
-                                icone: Icons.all_inclusive_rounded,
-                                titulo: 'Infinito',
-                                texto: p.temPartidaSalva('classico') ? 'Continuar partida' : 'Recorde ${p.recorde}',
-                                cores: [Cores.blocos[1], Cores.blocos[0]],
-                                aoTocar: () => _abrir(JogoTela(servicos: servicos)),
+                              child: BotaoDoce(
+                                texto: 'JOGAR',
+                                detalhe: 'Fase $fase',
+                                icone: Icons.play_arrow_rounded,
+                                cor: Cores.blocos[3],
+                                altura: 66,
+                                tamanhoTexto: 28,
+                                aoTocar: () => _abrir(JogoTela(servicos: servicos, fase: Fase.numero(fase))),
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _Ladrilho(
-                                icone: p.desafioFeito == dia ? Icons.check_circle_rounded : Icons.event_rounded,
-                                titulo: 'Desafio #${numeroDoDesafio(hoje)}',
-                                texto: p.desafioFeito == dia ? 'Feito: ${p.desafioPontos}' : '+5 gemas hoje',
-                                cores: [Cores.blocos[5], Cores.destaque],
-                                aoTocar: () => _abrir(JogoTela(servicos: servicos, diario: true)),
+                            const SizedBox(width: 10),
+                            SizedBox(
+                              width: 72,
+                              child: BotaoDoce(
+                                texto: '',
+                                icone: Icons.map_rounded,
+                                cor: Cores.blocos[4],
+                                altura: 66,
+                                tamanhoTexto: 24,
+                                aoTocar: () => MapaTela.abrir(context, servicos),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 14),
-                      _CartaoArena(
-                        melhor: p.arenaMelhor(Arena.semana(hoje)),
-                        premioDisponivel: Arena.trofeus.any(
-                          (t) =>
-                              p.arenaMelhor(Arena.semana(hoje)) >= t.pontos &&
-                              !p.premioArenaPego(Arena.semana(hoje), t.nome),
-                        ),
-                        termina: tempoRestante(hoje, Arena.fim(hoje)),
-                        aoTocar: () => _abrir(ArenaTela(servicos: servicos)),
-                      ),
-                      const SizedBox(height: 14),
-                      _CartaoRoda(
-                        giros: p.girosNoDia(dia),
-                        aoTocar: () => _abrir(RodaTela(servicos: servicos)),
-                      ),
-                      const SizedBox(height: 14),
-                      if (p.sequenciaPerdida(dia) > 0) ...[
-                        _RecuperarSequencia(servicos: servicos, dia: dia),
                         const SizedBox(height: 14),
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: _Ladrilho(
+                                  icone: Icons.all_inclusive_rounded,
+                                  titulo: 'Infinito',
+                                  texto: p.temPartidaSalva('classico') ? 'Continuar partida' : 'Recorde ${p.recorde}',
+                                  cores: [Cores.blocos[1], Cores.blocos[0]],
+                                  aoTocar: () => _abrir(JogoTela(servicos: servicos)),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _Ladrilho(
+                                  icone: p.desafioFeito == dia ? Icons.check_circle_rounded : Icons.event_rounded,
+                                  titulo: 'Desafio #${numeroDoDesafio(hoje)}',
+                                  texto: p.desafioFeito == dia ? 'Feito: ${p.desafioPontos}' : '+5 gemas hoje',
+                                  cores: [Cores.blocos[5], Cores.destaque],
+                                  aoTocar: () => _abrir(JogoTela(servicos: servicos, diario: true)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        _CartaoArena(
+                          melhor: p.arenaMelhor(Arena.semana(hoje)),
+                          premioDisponivel: Arena.trofeus.any(
+                            (t) =>
+                                p.arenaMelhor(Arena.semana(hoje)) >= t.pontos &&
+                                !p.premioArenaPego(Arena.semana(hoje), t.nome),
+                          ),
+                          termina: tempoRestante(hoje, Arena.fim(hoje)),
+                          aoTocar: () => _abrir(ArenaTela(servicos: servicos)),
+                        ),
+                        const SizedBox(height: 14),
+                        _CartaoRoda(
+                          giros: p.girosNoDia(dia),
+                          aoTocar: () => _abrir(RodaTela(servicos: servicos)),
+                        ),
+                        const SizedBox(height: 14),
+                        if (p.sequenciaPerdida(dia) > 0) ...[
+                          _RecuperarSequencia(servicos: servicos, dia: dia),
+                          const SizedBox(height: 14),
+                        ],
+                        _CartaoMissoes(progresso: p, dia: dia),
+                        const SizedBox(height: 14),
+                        BotaoDoce(
+                          texto: 'LOJA',
+                          icone: Icons.storefront_rounded,
+                          cor: Cores.blocos[5],
+                          altura: 50,
+                          tamanhoTexto: 20,
+                          aoTocar: () => _abrir(LojaTela(servicos: servicos)),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => _abrir(ProgressoTela(servicos: servicos)),
+                          icon: const Icon(Icons.save_rounded, size: 20),
+                          label: const Text('Salvar progresso'),
+                        ),
                       ],
-                      _CartaoMissoes(progresso: p, dia: dia),
-                      const SizedBox(height: 14),
-                      BotaoDoce(
-                        texto: 'LOJA',
-                        icone: Icons.storefront_rounded,
-                        cor: Cores.blocos[5],
-                        altura: 50,
-                        tamanhoTexto: 20,
-                        aoTocar: () => _abrir(LojaTela(servicos: servicos)),
-                      ),
-                      TextButton.icon(
-                        onPressed: () => _abrir(ProgressoTela(servicos: servicos)),
-                        icon: const Icon(Icons.save_rounded, size: 20),
-                        label: const Text('Salvar progresso'),
-                      ),
-                    ],
+                    ),
                   );
                 },
               ),
@@ -565,8 +569,6 @@ class _BannerEvento extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   'EVENTO · termina em ${evento == null ? 'domingo' : tempoRestante(agora, evento.fim)}',
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
                 ),
@@ -582,11 +584,12 @@ class _BannerEvento extends StatelessWidget {
                 ),
                 const Text(
                   'Gemas em dobro · toque e saiba mais',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, height: 1.15),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 8),
           if (podePegar)
             FilledButton(
               style: FilledButton.styleFrom(
@@ -825,19 +828,27 @@ class _CartaoArena extends StatelessWidget {
                           : (melhor == 0
                                 ? 'Ganhe troféus e gemas'
                                 : 'Melhor: $melhor · ${trofeu?.nome ?? 'sem troféu'}'),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.15),
                     ),
                   ],
                 ),
               ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('termina em', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                  Text(termina, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                ],
+              const SizedBox(width: 8),
+              // Com a fonte do sistema grande, encolhe em vez de empurrar/sobrepor o texto ao lado.
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 96),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('termina em', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                      Text(termina, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
