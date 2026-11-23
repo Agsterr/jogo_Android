@@ -48,9 +48,31 @@ class MainActivity : FlutterActivity() {
             when (chamada.method) {
                 "salvar" -> nuvem(resultado) { salvarNaNuvem(chamada.argument<ByteArray>("bytes"), resultado) }
                 "ler" -> nuvem(resultado) { lerDaNuvem(resultado) }
+                "jogador" -> nuvem(resultado) { nomeDoJogador(resultado) }
+                "conectar" -> conectarAoPlayGames(resultado)
                 else -> resultado.notImplemented()
             }
         }
+    }
+
+    /** Abre o login do Play Games (o jogador escolhe a conta). Devolve `true` se ficou conectado. */
+    private fun conectarAoPlayGames(resultado: MethodChannel.Result) {
+        try {
+            PlayGames.getGamesSignInClient(this).signIn()
+                .addOnCompleteListener { tarefa ->
+                    resultado.success(tarefa.isSuccessful && tarefa.result.isAuthenticated)
+                }
+        } catch (erro: Exception) {
+            Log.w(TAG_NUVEM, "não deu para conectar", erro)
+            resultado.error("indisponivel", erro.message, null)
+        }
+    }
+
+    /** Nome do jogador conectado ao Play Games (mostrado na tela Salvar progresso). */
+    private fun nomeDoJogador(resultado: MethodChannel.Result) {
+        PlayGames.getPlayersClient(this).currentPlayer
+            .addOnSuccessListener { jogador -> resultado.success(jogador.displayName) }
+            .addOnFailureListener { erro -> resultado.error("falha", erro.message, null) }
     }
 
     /** Só segue se o jogador estiver conectado ao Play Games; senão devolve `desconectado` (o Dart ignora). */
