@@ -99,7 +99,9 @@ class CopiaDupla implements CopiaAutomatica {
 
   @override
   Future<ResultadoCopia> salvar(Uint8List bytes) async {
-    final rs = await Future.wait(_copias.map((c) => c.salvar(bytes).catchError((Object _) => const ResultadoCopia(ok: false))));
+    final rs = await Future.wait(
+      _copias.map((c) => c.salvar(bytes).catchError((Object _) => const ResultadoCopia(ok: false))),
+    );
     return ResultadoCopia(ok: rs.any((r) => r.ok), nuvem: rs.any((r) => r.ok && r.nuvem));
   }
 

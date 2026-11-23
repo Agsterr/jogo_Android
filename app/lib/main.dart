@@ -18,7 +18,10 @@ Future<void> main() async {
   final progresso = await Progresso.carregar();
   final android = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
   // Reinstalou? Recupera o progresso antes de mostrar a primeira tela (no máximo 3 s de espera).
-  final automatico = SalvamentoAutomatico(progresso, android ? CopiaDupla([CopiaPlayGames(), CopiaBlockStore()]) : const SemCopia());
+  final automatico = SalvamentoAutomatico(
+    progresso,
+    android ? CopiaDupla([CopiaPlayGames(), CopiaBlockStore()]) : const SemCopia(),
+  );
   await automatico.recuperarSeVazio().timeout(const Duration(seconds: 3), onTimeout: () => false);
   automatico.iniciar();
   final servicos = Servicos(

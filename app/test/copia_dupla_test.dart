@@ -71,7 +71,10 @@ void main() {
 
   test('ignora cópia vazia ou lixo e devolve null se nada servir', () async {
     final bom = _codigo({'faseLiberada': 2}, 1000);
-    expect(await CopiaDupla([_Falsa(guardado: Uint8List.fromList(utf8.encode('lixo'))), _Falsa(guardado: bom)]).ler(), bom);
+    expect(
+      await CopiaDupla([_Falsa(guardado: Uint8List.fromList(utf8.encode('lixo'))), _Falsa(guardado: bom)]).ler(),
+      bom,
+    );
     expect(await CopiaDupla([_Falsa(), _Falsa(guardado: Uint8List(0))]).ler(), isNull);
   });
 }
