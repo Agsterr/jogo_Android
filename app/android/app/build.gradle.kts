@@ -22,6 +22,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // Exigido pelas notificações agendadas (flutter_local_notifications).
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
@@ -64,6 +66,7 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     // Block Store: guarda o progresso fora dos dados do app (sobrevive a reinstalar). Ver MainActivity.kt.
     implementation("com.google.android.gms:play-services-auth-blockstore:16.4.0")
     // Play Games Services v2: entra sozinho com a conta Google e guarda o progresso como Jogo salvo (Saved Games).

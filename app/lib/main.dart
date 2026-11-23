@@ -7,6 +7,7 @@ import 'jogo/sorteio.dart';
 import 'servicos/anuncios.dart';
 import 'servicos/compras.dart';
 import 'servicos/copia_automatica.dart';
+import 'servicos/lembrete.dart';
 import 'servicos/progresso.dart';
 import 'servicos/servicos.dart';
 import 'servicos/sons.dart';
@@ -30,6 +31,7 @@ Future<void> main() async {
     compras: android ? ComprasPlay(progresso) : ComprasFicticias(progresso),
     sons: SonsDoJogo(progresso),
     copia: automatico,
+    lembrete: android ? LembreteLocal() : const SemLembrete(),
   );
   runApp(EncaixaApp(servicos: servicos));
 
@@ -38,4 +40,5 @@ Future<void> main() async {
   await servicos.compras.iniciar();
   await progresso.darBonusDoAssinante(Sorteio.sementeDoDia(DateTime.now()));
   await servicos.anuncios.iniciar();
+  await servicos.reagendarLembrete();
 }

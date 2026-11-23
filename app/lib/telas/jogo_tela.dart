@@ -430,6 +430,7 @@ class _JogoTelaState extends State<JogoTela> {
     final recorde = await _s.progresso.fimDePartida(pontos);
     await _s.progresso.contarMissoes(_dia, {TipoMissao.partidas: 1, TipoMissao.pontos: pontos});
     final gemasDesafio = widget.diario ? await _s.progresso.concluirDesafio(_dia, pontos) : 0;
+    if (widget.diario) _s.reagendarLembrete(); // hoje já jogou: o próximo lembrete passa para amanhã
     if (widget.arena) {
       await _s.progresso.registrarArena(_semana, pontos);
       await _s.progresso.contarMissao(_dia, TipoMissao.arena, 1);

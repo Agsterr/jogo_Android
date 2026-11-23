@@ -5,6 +5,7 @@ import 'package:encaixa/app.dart';
 import 'package:encaixa/servicos/anuncios.dart';
 import 'package:encaixa/servicos/compras.dart';
 import 'package:encaixa/servicos/copia_automatica.dart';
+import 'package:encaixa/servicos/lembrete.dart';
 import 'package:encaixa/servicos/progresso.dart';
 import 'package:encaixa/servicos/servicos.dart';
 import 'package:flutter/rendering.dart';
@@ -38,6 +39,7 @@ Future<Servicos> servicosDeTeste({
   bool dicas = false,
   bool roleta = false,
   CopiaAutomatica? copia,
+  Lembrete lembrete = const SemLembrete(),
 }) async {
   SharedPreferences.setMockInitialValues(valores);
   final progresso = await Progresso.carregar();
@@ -50,6 +52,7 @@ Future<Servicos> servicosDeTeste({
     mostrarPresenteAoAbrir: false,
     mostrarDicas: dicas,
     roletaAposPartida: roleta,
+    lembrete: lembrete,
     copia: copia == null
         ? null
         : SalvamentoAutomatico(progresso, copia, pausa: const Duration(milliseconds: 50), relogio: agora),

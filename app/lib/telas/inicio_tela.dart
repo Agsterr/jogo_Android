@@ -98,7 +98,7 @@ class _InicioTelaState extends State<InicioTela> {
                           const Spacer(),
                           IconButton(
                             tooltip: 'Como jogar',
-                            onPressed: () => _abrir(const AjudaTela()),
+                            onPressed: () => _abrir(AjudaTela(servicos: servicos)),
                             icon: const Icon(Icons.help_rounded),
                           ),
                           _BotaoPresente(disponivel: p.presenteDeHoje(dia) > 0, aoTocar: () => _abrirPresente(dia)),

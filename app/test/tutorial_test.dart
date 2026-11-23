@@ -64,7 +64,7 @@ void main() {
   testWidgets('tela Como jogar', (tester) async {
     telaDeCelular(tester);
     final s = await servicosDeTeste();
-    await tester.pumpWidget(appDeTeste(s, tela: const AjudaTela()));
+    await tester.pumpWidget(appDeTeste(s, tela: AjudaTela(servicos: s)));
     await tester.pump();
     expect(find.text('Como jogar'), findsWidgets);
     await capturar(tester, '18-como-jogar');

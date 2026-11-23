@@ -1,6 +1,7 @@
 import 'anuncios.dart';
 import 'compras.dart';
 import 'copia_automatica.dart';
+import 'lembrete.dart';
 import 'progresso.dart';
 import 'sons.dart';
 
@@ -16,6 +17,7 @@ class Servicos {
     this.mostrarDicas = true,
     this.roletaAposPartida = true,
     this.copia,
+    this.lembrete = const SemLembrete(),
   });
 
   final Progresso progresso;
@@ -25,6 +27,19 @@ class Servicos {
 
   /// Cópia automática do progresso (recupera sozinho depois de reinstalar). `null` nos testes de tela.
   final SalvamentoAutomatico? copia;
+
+  /// Lembrete diário do Desafio (notificação às 19h).
+  final Lembrete lembrete;
+
+  /// Agenda o próximo lembrete conforme o estado de agora (ligado? Desafio de hoje já feito?).
+  Future<void> reagendarLembrete() {
+    final agora = hoje();
+    return lembrete.reagendar(
+      ligado: progresso.lembreteLigado,
+      desafioFeitoHoje: progresso.desafioFeito == agora.year * 10000 + agora.month * 100 + agora.day,
+      agora: agora,
+    );
+  }
 
   /// Relógio injetável: os testes fixam o dia do desafio.
   final DateTime Function() hoje;

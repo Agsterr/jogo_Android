@@ -5,3 +5,7 @@
 -keep class androidx.work.impl.WorkDatabase_Impl { *; }
 -keep class androidx.work.** { *; }
 -dontwarn androidx.work.**
+
+# Notificações agendadas: o plugin guarda os lembretes em JSON/Gson por reflexão.
+-keep class com.dexterous.flutterlocalnotifications.** { *; }
+-dontwarn com.dexterous.flutterlocalnotifications.**

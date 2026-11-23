@@ -38,6 +38,14 @@ class Progresso extends ChangeNotifier {
     await _prefs.setStringList('dicas', [...?_prefs.getStringList('dicas'), id]);
   }
 
+  /// Lembrete diário do Desafio às 19h (desligado até o jogador ligar e aceitar a permissão).
+  bool get lembreteLigado => _prefs.getBool('lembrete') ?? false;
+
+  Future<void> definirLembrete(bool ligado) async {
+    await _prefs.setBool('lembrete', ligado);
+    notifyListeners();
+  }
+
   bool get somLigado => _prefs.getBool('som') ?? true;
 
   Future<void> alternarSom() async {

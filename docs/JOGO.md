@@ -110,3 +110,9 @@ versão do app. Número do desafio = dias desde 1º/11/2026. Pode repetir; vale 
 
 ## Ideias para depois (não fazer antes de medir)
 Veja as issues com a etiqueta `ideia`. Prioridade é o que os números (retenção D1/D7, tempo de sessão) pedirem.
+
+## Lembrete do Desafio (19h)
+Desligado por padrão. Em **Como jogar** há o interruptor "Lembrete do Desafio": ao ligar, o app pede a permissão de
+notificação (Android 13+) e agenda **uma** notificação local para as 19h (horário do celular). Ela é reagendada a cada
+abertura do jogo e ao concluir o Desafio: se hoje já foi jogado ou já passou das 19h, vai para amanhã. Alarme inexato
+(pode variar alguns minutos), sem servidor. **Ainda não testado em celular real** (issue #14).
