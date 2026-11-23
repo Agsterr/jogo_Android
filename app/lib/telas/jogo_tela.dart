@@ -24,6 +24,7 @@ import '../servicos/sons.dart';
 import '../tema.dart';
 import '../widgets/dicas.dart';
 import '../widgets/doce.dart';
+import '../widgets/mascote.dart';
 import '../widgets/peca_widget.dart';
 import '../widgets/tabuleiro_widget.dart';
 import 'loja_tela.dart';
@@ -337,6 +338,12 @@ class _JogoTelaState extends State<JogoTela> {
     _avancarTutorial(jogada);
     _salvar();
     setState(() {});
+    // Primeira vez que aparece um bloco especial na mão: explica o que ele faz.
+    if (_partida.mao.any((p) => p != null && p.especial > 0) && _fim == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) mostrarDicaUmaVez(context, _s, Dicas.especiais);
+      });
+    }
     if (widget.fase case final fase?) {
       _conferirFase(fase);
       return;
@@ -1101,10 +1108,27 @@ class _JogoTelaState extends State<JogoTela> {
   }
 
   List<Widget> _resultado() => [
-    Icon(
-      _novoRecorde ? Icons.emoji_events_rounded : Icons.flag_rounded,
-      size: 48,
-      color: _novoRecorde ? Cores.ouro : Cores.textoFraco,
+    Center(
+      child: Mascote(
+        humor: humorDoFim(
+          novoRecorde: _novoRecorde,
+          pontos: _partida.pontos,
+          recorde: widget.relampago ? _s.progresso.relampagoMelhor : _s.progresso.recorde,
+        ),
+        tamanho: 74,
+      ),
+    ),
+    Padding(
+      padding: const EdgeInsets.fromLTRB(8, 2, 8, 6),
+      child: Text(
+        fraseDoMascote(
+          novoRecorde: _novoRecorde,
+          pontos: _partida.pontos,
+          recorde: widget.relampago ? _s.progresso.relampagoMelhor : _s.progresso.recorde,
+        ),
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: Cores.textoFraco),
+      ),
     ),
     Text(
       _novoRecorde ? 'Novo recorde!' : 'Fim de jogo',

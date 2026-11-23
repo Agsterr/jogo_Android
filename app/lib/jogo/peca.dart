@@ -59,10 +59,14 @@ const int totalCores = 6;
 
 /// Peça na mão do jogador: formato + cor.
 class Peca {
-  const Peca(this.formato, this.cor);
+  const Peca(this.formato, this.cor, {this.especial = 0, this.celulaEspecial = 0});
 
   final Formato formato;
   final int cor;
+
+  /// Bloco especial (só no Infinito): 0 nenhum, 1 bomba, 2 joia. Fica na célula [celulaEspecial] do formato.
+  final int especial;
+  final int celulaEspecial;
 
   /// Chance de sair no sorteio. No [nivel] 0 é o `peso` do formato (nada muda); a cada nível as peças grandes
   /// (5 blocos ou mais) saem mais e as pequenas (1 ou 2 blocos) menos.
@@ -80,9 +84,18 @@ class Peca {
     var alvo = sorteio.proximo(pesoTotal);
     for (final f in Formato.todos) {
       final peso = _peso(f, nivel);
-      if (alvo < peso) return Peca(f, sorteio.proximo(cores));
+      if (alvo < peso) return _comEspecial(Peca(f, sorteio.proximo(cores)), sorteio, nivel);
       alvo -= peso;
     }
     throw StateError('inalcançável');
+  }
+
+  /// A partir do nível 1 do Infinito, algumas peças trazem um bloco especial (bomba ou joia). No nível 0 não
+  /// sorteia nada a mais, então o sorteio das fases, do Desafio e da Arena continua exatamente o mesmo.
+  static Peca _comEspecial(Peca p, Sorteio sorteio, int nivel) {
+    if (nivel < 1) return p;
+    final r = sorteio.proximo(100);
+    if (r >= 12) return p;
+    return Peca(p.formato, p.cor, especial: r < 7 ? 1 : 2, celulaEspecial: sorteio.proximo(p.formato.celulas.length));
   }
 }

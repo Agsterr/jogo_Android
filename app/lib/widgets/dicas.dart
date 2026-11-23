@@ -122,6 +122,13 @@ abstract final class Dicas {
     'No mês seguinte a trilha recomeça do zero: resgate os prêmios antes!',
   ]);
 
+  static const especiais = Dica('especiais', 'Blocos especiais', Icons.auto_awesome_rounded, Color(0xFFFFB800), [
+    'No Infinito, depois da primeira meta, algumas peças trazem um bloco especial.',
+    'Bomba (bola escura): quando a linha dela some, leva junto a área 3x3 em volta (menos pedras).',
+    'Joia (losango brilhante): quando a linha dela some, dá +1 gema e +30 pontos.',
+    'Só aparecem no Infinito: Desafio, Arena e fases continuam com as mesmas peças para todos.',
+  ]);
+
   static const album = Dica('album', 'Álbum de figurinhas', Icons.collections_bookmark_rounded, Color(0xFF00D084), [
     'Concluir o Desafio do dia dá uma figurinha nova.',
     'Abrir o baú das missões do dia também dá uma.',
@@ -166,6 +173,7 @@ abstract final class Dicas {
     reforcos,
     album,
     passe,
+    especiais,
     relampago,
     roda,
     progresso,

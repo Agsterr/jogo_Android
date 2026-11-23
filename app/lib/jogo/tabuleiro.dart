@@ -10,6 +10,17 @@ class Tabuleiro {
   /// Bloco de pedra das fases: não vem da mão, some quando a linha dele é limpa.
   static const int pedra = totalCores;
 
+  /// Blocos especiais do Infinito: o código é `tipo * 10 + cor`. Bomba (10 a 15) explode a área 3x3 quando a linha
+  /// dela é limpa; joia (20 a 25) dá gema e pontos extras.
+  static const int bomba = 1;
+  static const int joia = 2;
+
+  static bool ehBomba(int codigo) => codigo ~/ 10 == bomba;
+  static bool ehJoia(int codigo) => codigo ~/ 10 == joia;
+
+  /// A cor (0 a 5) de uma casa, também nas casas especiais. A pedra continua sendo [pedra].
+  static int base(int codigo) => codigo >= 10 ? codigo % 10 : codigo;
+
   final List<int?> _casas;
 
   Tabuleiro copia() => Tabuleiro._(List.of(_casas));

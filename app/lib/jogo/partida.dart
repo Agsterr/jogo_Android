@@ -17,6 +17,8 @@ class Jogada {
     required this.removidos,
     this.pedrasQuebradas = 0,
     this.marcos = const [],
+    this.joias = 0,
+    this.bombas = 0,
   });
 
   final int pontos;
@@ -30,7 +32,10 @@ class Jogada {
   /// Metas de pontos alcançadas nesta jogada (só no Infinito).
   final List<Marco> marcos;
 
-  int get gemas => linhasDeUmaCor + (tabuleiroLimpo ? 3 : 0);
+  /// Blocos especiais que saíram nesta jogada.
+  final int joias, bombas;
+
+  int get gemas => linhasDeUmaCor + (tabuleiroLimpo ? 3 : 0) + joias;
 }
 
 /// Regras de uma partida. Sem Flutter: dá para testar tudo em Dart puro.
@@ -74,6 +79,7 @@ class Partida {
             ? null
             : {
                 'cor': p.cor,
+                if (p.especial > 0) ...{'esp': p.especial, 'ec': p.celulaEspecial},
                 'celulas': [
                   for (final c in p.formato.celulas) ...[c.linha, c.coluna],
                 ],
@@ -106,7 +112,12 @@ class Partida {
       ..mao = [
         for (final m in j['mao']! as List)
           if (m case {'cor': final int cor, 'celulas': final List c})
-            Peca(Formato([for (var i = 0; i < c.length; i += 2) (linha: c[i] as int, coluna: c[i + 1] as int)]), cor)
+            Peca(
+              Formato([for (var i = 0; i < c.length; i += 2) (linha: c[i] as int, coluna: c[i + 1] as int)]),
+              cor,
+              especial: (m['esp'] as int?) ?? 0,
+              celulaEspecial: (m['ec'] as int?) ?? 0,
+            )
           else
             null,
       ]
@@ -163,8 +174,10 @@ class Partida {
     final peca = mao[indice]!;
     _anterior = _Estado(this);
 
-    for (final c in peca.formato.celulas) {
-      tabuleiro.definir(linha + c.linha, coluna + c.coluna, peca.cor);
+    for (var i = 0; i < peca.formato.celulas.length; i++) {
+      final c = peca.formato.celulas[i];
+      final codigo = peca.especial > 0 && i == peca.celulaEspecial ? peca.especial * 10 + peca.cor : peca.cor;
+      tabuleiro.definir(linha + c.linha, coluna + c.coluna, codigo);
     }
     final completas = tabuleiro.linhasCompletas();
     final casas = <(int, int)>{
@@ -173,12 +186,32 @@ class Partida {
       for (final k in completas.colunas)
         for (var l = 0; l < Tabuleiro.tamanho; l++) (l, k),
     };
-    final deUmaCor = [
-      for (final l in completas.linhas) List.generate(Tabuleiro.tamanho, (k) => tabuleiro.cor(l, k)),
-      for (final k in completas.colunas) List.generate(Tabuleiro.tamanho, (l) => tabuleiro.cor(l, k)),
-    ].where((cores) => cores.toSet().length == 1 && cores.first != Tabuleiro.pedra).length;
-    final removidos = [for (final (l, k) in casas) (linha: l, coluna: k, cor: tabuleiro.cor(l, k)!)];
+    final deUmaCor =
+        [
+          for (final l in completas.linhas) List.generate(Tabuleiro.tamanho, (k) => tabuleiro.cor(l, k)),
+          for (final k in completas.colunas) List.generate(Tabuleiro.tamanho, (l) => tabuleiro.cor(l, k)),
+        ].where((cores) {
+          final bases = cores.map((c) => Tabuleiro.base(c!)).toSet();
+          return bases.length == 1 && bases.first != Tabuleiro.pedra;
+        }).length;
+    // Bomba: ao sair com a linha, leva junto os blocos (menos pedras) da área 3x3 em volta dela.
+    final todas = {...casas};
+    var bombas = 0;
     for (final (l, k) in casas) {
+      if (!Tabuleiro.ehBomba(tabuleiro.cor(l, k)!)) continue;
+      bombas++;
+      for (var dl = -1; dl <= 1; dl++) {
+        for (var dk = -1; dk <= 1; dk++) {
+          final vl = l + dl, vk = k + dk;
+          if (vl < 0 || vk < 0 || vl >= Tabuleiro.tamanho || vk >= Tabuleiro.tamanho) continue;
+          final c = tabuleiro.cor(vl, vk);
+          if (c != null && c != Tabuleiro.pedra) todas.add((vl, vk));
+        }
+      }
+    }
+    final removidos = [for (final (l, k) in todas) (linha: l, coluna: k, cor: tabuleiro.cor(l, k)!)];
+    final joias = removidos.where((b) => Tabuleiro.ehJoia(b.cor)).length;
+    for (final (l, k) in todas) {
       tabuleiro.definir(l, k, null);
     }
 
@@ -188,7 +221,7 @@ class Partida {
     if (linhas > 0) {
       combo++;
       _semLimpar = 0;
-      ganho += 10 * linhas * linhas * combo + 20 * deUmaCor + (limpo ? 300 : 0);
+      ganho += 10 * linhas * linhas * combo + 20 * deUmaCor + (limpo ? 300 : 0) + 30 * joias + 15 * bombas;
     } else if (++_semLimpar >= folgaCombo) {
       combo = 0;
     }
@@ -212,6 +245,8 @@ class Partida {
       removidos: removidos,
       pedrasQuebradas: removidos.where((b) => b.cor == Tabuleiro.pedra).length,
       marcos: novosMarcos,
+      joias: joias,
+      bombas: bombas,
     );
   }
 

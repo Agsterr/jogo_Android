@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'jogo/tabuleiro.dart';
 import 'jogo/temas.dart';
 
 /// Cores e desenho dos blocos. A arte do jogo é toda vetorial, feita aqui.
@@ -168,8 +169,62 @@ void _pintarSimbolo(Canvas canvas, Rect corpo, int indice, double opacidade) {
     ..drawPath(p, Paint()..color = Colors.white.withValues(alpha: 0.95 * opacidade));
 }
 
+/// Marcador dos blocos especiais: bomba (bola escura com pavio) e joia (losango brilhante).
+void pintarMarcador(Canvas canvas, Rect r, int tipo, {double opacidade = 1}) {
+  final c = Offset(r.center.dx, r.center.dy - r.height * 0.05);
+  final s = r.shortestSide;
+  double a(double v) => v * opacidade;
+  if (tipo == Tabuleiro.bomba) {
+    canvas
+      ..drawCircle(c.translate(0, s * 0.03), s * 0.27, Paint()..color = const Color(0xFF14102B).withValues(alpha: a(1)))
+      ..drawCircle(c.translate(-s * 0.09, -s * 0.07), s * 0.07, Paint()..color = Colors.white.withValues(alpha: a(0.7)))
+      ..drawLine(
+        c.translate(s * 0.14, -s * 0.22),
+        c.translate(s * 0.24, -s * 0.34),
+        Paint()
+          ..color = Colors.white.withValues(alpha: a(0.9))
+          ..strokeWidth = s * 0.05
+          ..strokeCap = StrokeCap.round,
+      )
+      ..drawCircle(
+        c.translate(s * 0.26, -s * 0.36),
+        s * 0.07,
+        Paint()..color = const Color(0xFFFFD000).withValues(alpha: a(1)),
+      );
+  } else {
+    final p = Path()
+      ..moveTo(c.dx, c.dy - s * 0.3)
+      ..lineTo(c.dx + s * 0.27, c.dy)
+      ..lineTo(c.dx, c.dy + s * 0.3)
+      ..lineTo(c.dx - s * 0.27, c.dy)
+      ..close();
+    canvas
+      ..drawPath(p, Paint()..color = const Color(0xFFBFFFF7).withValues(alpha: a(1)))
+      ..drawPath(
+        p,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = s * 0.05
+          ..color = const Color(0xFF0A8F86).withValues(alpha: a(1)),
+      )
+      ..drawLine(
+        c.translate(-s * 0.15, -s * 0.02),
+        c.translate(s * 0.15, -s * 0.02),
+        Paint()
+          ..color = Colors.white.withValues(alpha: a(0.9))
+          ..strokeWidth = s * 0.04,
+      );
+  }
+}
+
 /// Desenha a casa do tabuleiro: bloco colorido ou pedra (índice `Tabuleiro.pedra`).
 void pintarCasa(Canvas canvas, Rect r, int cor, {double opacidade = 1}) {
+  if (cor >= 10 && cor < 30) {
+    // Bloco especial (bomba ou joia): bloco da cor dele com o marcador por cima.
+    final base = Tabuleiro.base(cor) % Cores.pecas.length;
+    pintarBloco(canvas, r, Cores.pecas[base], opacidade: opacidade, indice: base);
+    return pintarMarcador(canvas, r, cor ~/ 10, opacidade: opacidade);
+  }
   if (cor < Cores.pecas.length) return pintarBloco(canvas, r, Cores.pecas[cor], opacidade: opacidade, indice: cor);
   pintarBloco(canvas, r, Cores.pedra, opacidade: opacidade);
   final risco = Paint()

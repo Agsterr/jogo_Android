@@ -33,13 +33,13 @@ class _Pintor extends CustomPainter {
     final c = size.width / peca.formato.colunas;
     final folga = c * 0.05;
     final cor = apagada ? const Color(0xFF6B6390) : Cores.pecas[peca.cor];
-    for (final cel in peca.formato.celulas) {
-      pintarBloco(
-        canvas,
-        Rect.fromLTWH(cel.coluna * c + folga, cel.linha * c + folga, c - 2 * folga, c - 2 * folga),
-        cor,
-        indice: apagada ? null : peca.cor,
-      );
+    for (var i = 0; i < peca.formato.celulas.length; i++) {
+      final cel = peca.formato.celulas[i];
+      final r = Rect.fromLTWH(cel.coluna * c + folga, cel.linha * c + folga, c - 2 * folga, c - 2 * folga);
+      pintarBloco(canvas, r, cor, indice: apagada ? null : peca.cor);
+      if (peca.especial > 0 && i == peca.celulaEspecial) {
+        pintarMarcador(canvas, r, peca.especial, opacidade: apagada ? 0.5 : 1);
+      }
     }
   }
 

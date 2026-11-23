@@ -153,3 +153,14 @@ Relâmpago é separado do recorde geral. Peças sorteadas a cada partida, sem me
 amigo +15, partida +5 (só as 10 primeiras do dia). Cada nível dá gemas (10; nos níveis 5, 10, 15 e 20, 30), **o dobro com
 o Encaixa+**, e o nível 20 libera o tema **Aurora** para sempre. A trilha recomeça no mês seguinte. Regras em
 `app/lib/jogo/passe.dart`.
+
+## Blocos especiais (só no Infinito)
+Depois da primeira meta (nível 1), cerca de 12% das peças trazem **um** bloco especial:
+**bomba** (bola escura, 7%): quando a linha dela some, limpa também a área 3x3 em volta (pedras ficam) e dá +15 pontos;
+**joia** (losango brilhante, 5%): quando a linha dela some, dá **+1 gema** e +30 pontos. No nível 0, e em todos os
+outros modos (fases, Desafio, Arena, Relâmpago), o sorteio não gasta nenhum número a mais: as peças continuam exatamente
+as mesmas. Regras em `app/lib/jogo/partida.dart` e `peca.dart`; testes em `test/especiais_test.dart`.
+
+## Quadrinho, o mascote
+Um bloco simpático desenhado em código (`app/lib/widgets/mascote.dart`, sem imagens) aparece no fim da partida e reage:
+festa no novo recorde, feliz na partida normal e tristinho se foi bem abaixo do recorde, com uma frase de incentivo.
