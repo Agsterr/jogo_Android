@@ -222,6 +222,40 @@ class Partida {
     _novaMao();
   }
 
+  /// Martelo: o bloco da casa pode ser tirado? Pedra não: ela só quebra completando a linha, senão o reforço
+  /// venceria a fase.
+  bool podeMartelar(int linha, int coluna) {
+    if (linha < 0 || coluna < 0 || linha >= Tabuleiro.tamanho || coluna >= Tabuleiro.tamanho) return false;
+    final cor = tabuleiro.cor(linha, coluna);
+    return cor != null && cor != Tabuleiro.pedra;
+  }
+
+  /// Casas com bloco (sem pedras) no quadrado 3x3 centrado em (linha, coluna).
+  List<({int linha, int coluna})> blocosDaBomba(int linha, int coluna) => [
+    for (var l = linha - 1; l <= linha + 1; l++)
+      for (var k = coluna - 1; k <= coluna + 1; k++)
+        if (podeMartelar(l, k)) (linha: l, coluna: k),
+  ];
+
+  /// Tira um bloco. Devolve o que saiu (para a animação) ou lista vazia se não dava. Não conta linha nem ponto.
+  List<BlocoRemovido> martelar(int linha, int coluna) =>
+      _tirar([(linha: linha, coluna: coluna)].where((c) => podeMartelar(c.linha, c.coluna)));
+
+  /// Bomba: tira os blocos do quadrado 3x3 em volta de (linha, coluna), menos as pedras.
+  List<BlocoRemovido> explodir(int linha, int coluna) => _tirar(blocosDaBomba(linha, coluna));
+
+  List<BlocoRemovido> _tirar(Iterable<({int linha, int coluna})> casas) {
+    final removidos = [
+      for (final c in casas) (linha: c.linha, coluna: c.coluna, cor: tabuleiro.cor(c.linha, c.coluna)!),
+    ];
+    if (removidos.isEmpty) return removidos;
+    for (final b in removidos) {
+      tabuleiro.definir(b.linha, b.coluna, null);
+    }
+    _anterior = null; // como o "Trocar": não dá para desfazer por cima de um reforço
+    return removidos;
+  }
+
   /// Segunda chance (uma por partida): limpa os blocos das 4 linhas do meio e dá mão nova.
   /// As pedras das fases ficam: só se quebram completando a linha, senão a ajuda venceria a fase.
   bool continuar() {

@@ -1,3 +1,4 @@
+import 'package:encaixa/jogo/tabuleiro.dart';
 import 'package:encaixa/jogo/partida.dart';
 import 'package:encaixa/jogo/peca.dart';
 import 'package:encaixa/jogo/temas.dart';
@@ -112,6 +113,42 @@ void main() {
     expect(partida.pontos, greaterThan(1240));
     expect(partida.tabuleiro.cor(6, 0), isNull, reason: 'a linha 6 sumiu');
     await capturar(tester, '3-jogo-combo');
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Martelo: escolher, tocar num bloco tira o bloco e gasta gemas; pedra não sai', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(valores: {'gemas': 42});
+    final partida = partidaDeExemplo();
+    await tester.pumpWidget(
+      appDeTeste(
+        s,
+        tela: JogoTela(servicos: s, partida: partida),
+      ),
+    );
+    await tester.pump();
+    final caixa = tester.renderObject<RenderBox>(find.byType(TabuleiroWidget));
+    final casa = caixa.size.width / Tabuleiro.tamanho;
+    Offset centro(int l, int c) => caixa.localToGlobal(Offset((c + 0.5) * casa, (l + 0.5) * casa));
+    ({int l, int c}) umBloco() {
+      for (var l = 0; l < 8; l++) {
+        for (var c = 0; c < 8; c++) {
+          if (partida.podeMartelar(l, c)) return (l: l, c: c);
+        }
+      }
+      throw StateError('sem bloco');
+    }
+
+    final alvo = umBloco();
+    await tester.tap(find.byTooltip('Martelo'));
+    await tester.pump();
+    expect(find.text('Toque no bloco que quer tirar'), findsOneWidget);
+    await capturar(tester, '9-martelo');
+    await tester.tapAt(centro(alvo.l, alvo.c));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(partida.tabuleiro.cor(alvo.l, alvo.c), isNull);
+    expect(s.progresso.gemas, 42 - 4);
+    expect(find.text('Toque no bloco que quer tirar'), findsNothing);
     await tester.pumpAndSettle();
   });
 

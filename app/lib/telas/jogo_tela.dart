@@ -14,6 +14,7 @@ import '../jogo/missoes.dart';
 import '../jogo/partida.dart';
 import '../jogo/peca.dart';
 import '../jogo/sorteio.dart';
+import '../jogo/tabuleiro.dart';
 import '../servicos/servicos.dart';
 import '../servicos/sons.dart';
 import '../tema.dart';
@@ -29,10 +30,15 @@ import 'roleta_partida.dart';
 abstract final class Custos {
   static const desfazer = 3;
   static const trocar = 5;
+  static const martelo = 4;
+  static const bomba = 8;
   static const continuar = 10;
 }
 
 enum _Fim { segundaChance, resultado, faseVencida, faseFalhou }
+
+/// Reforço de tabuleiro que espera o jogador tocar num alvo.
+enum _Reforco { martelo, bomba }
 
 class JogoTela extends StatefulWidget {
   const JogoTela({super.key, required this.servicos, this.diario = false, this.arena = false, this.fase, this.partida});
@@ -95,7 +101,7 @@ class _JogoTelaState extends State<JogoTela> {
   }
 
   /// Explica o modo na primeira vez que o jogador entra nele.
-  void _dicaDeEntrada() {
+  Future<void> _dicaDeEntrada() async {
     if (!mounted || _tutorial != null) return;
     final dica = switch (widget.fase?.objetivo) {
       Objetivo.pedras => Dicas.pedras,
@@ -105,7 +111,9 @@ class _JogoTelaState extends State<JogoTela> {
       Objetivo.linhas => null,
       null => widget.arena ? Dicas.arena : (widget.diario ? Dicas.desafio : Dicas.infinito),
     };
-    if (dica != null) mostrarDicaUmaVez(context, _s, dica);
+    if (dica != null) await mostrarDicaUmaVez(context, _s, dica);
+    // Quem já conhece o modo vê, uma vez só, os reforços novos.
+    if (mounted && _tutorial == null) await mostrarDicaUmaVez(context, _s, Dicas.reforcos);
   }
 
   // ---------- tutorial da fase 1 ----------
@@ -334,6 +342,55 @@ class _JogoTelaState extends State<JogoTela> {
   }
 
   // ---------- reforços e fim ----------
+
+  _Reforco? _reforcoAtivo;
+
+  /// Martelo e Bomba: toque no botão, escolha o alvo no tabuleiro. Tocar no botão de novo cancela.
+  void _alternarReforco(_Reforco reforco, int custo) {
+    if (_fim != null) return;
+    if (_reforcoAtivo == reforco) {
+      setState(() => _reforcoAtivo = null);
+      return;
+    }
+    if (_s.progresso.gemas < custo) {
+      _abrirLoja();
+      return;
+    }
+    setState(() => _reforcoAtivo = reforco);
+  }
+
+  void _avisarNoTabuleiro(String texto) => ScaffoldMessenger.of(context)
+    ..clearSnackBars()
+    ..showSnackBar(SnackBar(content: Text(texto), duration: const Duration(seconds: 2)));
+
+  Future<void> _tocouNoTabuleiro(TapUpDetails toque) async {
+    final reforco = _reforcoAtivo;
+    final caixa = _chaveTabuleiro.currentContext?.findRenderObject() as RenderBox?;
+    if (reforco == null || caixa == null || _fim != null) return;
+    final local = caixa.globalToLocal(toque.globalPosition);
+    final linha = (local.dy / _casa).floor(), coluna = (local.dx / _casa).floor();
+    final martelo = reforco == _Reforco.martelo;
+    if (martelo ? !_partida.podeMartelar(linha, coluna) : _partida.blocosDaBomba(linha, coluna).isEmpty) {
+      _avisarNoTabuleiro(
+        _partida.tabuleiro.cor(linha, coluna) == Tabuleiro.pedra
+            ? 'Pedra só quebra completando a linha ou a coluna dela.'
+            : (martelo ? 'Toque num bloco colorido.' : 'Não tem bloco colorido nessa área.'),
+      );
+      return;
+    }
+    if (!await _s.progresso.gastarGemas(martelo ? Custos.martelo : Custos.bomba)) {
+      setState(() => _reforcoAtivo = null);
+      _abrirLoja();
+      return;
+    }
+    final removidos = martelo ? _partida.martelar(linha, coluna) : _partida.explodir(linha, coluna);
+    HapticFeedback.mediumImpact();
+    _s.sons.tocar(Som.linha);
+    _removidos = removidos;
+    _geracao++;
+    _salvar();
+    if (mounted) setState(() => _reforcoAtivo = null);
+  }
 
   Future<void> _usarReforco(int custo, bool Function() acao) async {
     if (!await _s.progresso.gastarGemas(custo)) {
@@ -621,15 +678,19 @@ class _JogoTelaState extends State<JogoTela> {
 
   Widget _tabuleiro(double lado) => Stack(
     alignment: Alignment.center,
+    clipBehavior: Clip.none,
     children: [
       Container(
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Cores.brilhoRosa, Color(0xFF8B5CFF), Cores.brilhoCiano],
+            // Com Martelo ou Bomba escolhido a borda fica dourada: dá para ver que ele espera o toque.
+            colors: _reforcoAtivo != null
+                ? const [Cores.ouro, Color(0xFFFF8A00), Cores.ouro]
+                : const [Cores.brilhoRosa, Color(0xFF8B5CFF), Cores.brilhoCiano],
           ),
           boxShadow: [
             BoxShadow(color: Cores.brilhoRosa.withValues(alpha: 0.35), blurRadius: 28, offset: const Offset(-6, -4)),
@@ -641,16 +702,40 @@ class _JogoTelaState extends State<JogoTela> {
           decoration: BoxDecoration(color: Cores.painel, borderRadius: BorderRadius.circular(19)),
           child: SizedBox.square(
             dimension: lado,
-            child: TabuleiroWidget(
-              key: _chaveTabuleiro,
-              tabuleiro: _partida.tabuleiro,
-              previa: _previa,
-              removidos: _removidos,
-              geracao: _geracao,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapUp: _reforcoAtivo == null ? null : _tocouNoTabuleiro,
+              child: TabuleiroWidget(
+                key: _chaveTabuleiro,
+                tabuleiro: _partida.tabuleiro,
+                previa: _previa,
+                removidos: _removidos,
+                geracao: _geracao,
+              ),
             ),
           ),
         ),
       ),
+      if (_reforcoAtivo != null && _fim == null)
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: -44,
+          child: IgnorePointer(
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(color: Cores.ouro, borderRadius: BorderRadius.circular(16)),
+                child: Text(
+                  _reforcoAtivo == _Reforco.martelo
+                      ? 'Toque no bloco que quer tirar'
+                      : 'Toque no centro da área 3x3 que quer limpar',
+                  style: const TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF3A2400)),
+                ),
+              ),
+            ),
+          ),
+        ),
       if (_aviso case final aviso?)
         IgnorePointer(
           child: _Aviso(key: ValueKey(aviso.id), aviso: aviso),
@@ -692,31 +777,50 @@ class _JogoTelaState extends State<JogoTela> {
 
   Widget _reforcos() => ListenableBuilder(
     listenable: _s.progresso,
-    builder: (context, _) => FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Row(
-        children: [
-          _BotaoReforco(
-            icone: Icons.undo_rounded,
-            texto: 'Desfazer',
-            custo: Custos.desfazer,
-            aoTocar: _partida.podeDesfazer && _fim == null
-                ? () => _usarReforco(Custos.desfazer, _partida.desfazer)
-                : null,
-          ),
-          const SizedBox(width: 12),
-          _BotaoReforco(
-            icone: Icons.shuffle_rounded,
-            texto: 'Trocar',
-            custo: Custos.trocar,
-            aoTocar: _fim == null
-                ? () => _usarReforco(Custos.trocar, () {
-                    _partida.trocarMao();
-                    return true;
-                  })
-                : null,
-          ),
-        ],
+    builder: (context, _) => Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          children: [
+            _BotaoReforco(
+              icone: Icons.undo_rounded,
+              texto: 'Desfazer',
+              custo: Custos.desfazer,
+              aoTocar: _partida.podeDesfazer && _fim == null
+                  ? () => _usarReforco(Custos.desfazer, _partida.desfazer)
+                  : null,
+            ),
+            const SizedBox(width: 8),
+            _BotaoReforco(
+              icone: Icons.shuffle_rounded,
+              texto: 'Trocar',
+              custo: Custos.trocar,
+              aoTocar: _fim == null
+                  ? () => _usarReforco(Custos.trocar, () {
+                      _partida.trocarMao();
+                      return true;
+                    })
+                  : null,
+            ),
+            const SizedBox(width: 8),
+            _BotaoReforco(
+              icone: Icons.hardware_rounded,
+              nome: 'Martelo',
+              custo: Custos.martelo,
+              ativo: _reforcoAtivo == _Reforco.martelo,
+              aoTocar: _fim == null ? () => _alternarReforco(_Reforco.martelo, Custos.martelo) : null,
+            ),
+            const SizedBox(width: 8),
+            _BotaoReforco(
+              icone: Icons.flare_rounded,
+              nome: 'Bomba',
+              custo: Custos.bomba,
+              ativo: _reforcoAtivo == _Reforco.bomba,
+              aoTocar: _fim == null ? () => _alternarReforco(_Reforco.bomba, Custos.bomba) : null,
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -928,37 +1032,53 @@ class _JogoTelaState extends State<JogoTela> {
 }
 
 class _BotaoReforco extends StatelessWidget {
-  const _BotaoReforco({required this.icone, required this.texto, required this.custo, this.aoTocar});
+  const _BotaoReforco({
+    required this.icone,
+    required this.custo,
+    this.texto,
+    this.nome,
+    this.ativo = false,
+    this.aoTocar,
+  });
 
   final IconData icone;
-  final String texto;
   final int custo;
+
+  /// Com [texto] o botão mostra o nome; sem ele fica só o ícone (e o [nome] vira dica ao segurar).
+  final String? texto;
+  final String? nome;
+  final bool ativo;
   final VoidCallback? aoTocar;
 
   @override
   Widget build(BuildContext context) => Opacity(
     opacity: aoTocar == null ? 0.4 : 1,
-    child: Material(
-      color: Cores.painel.withValues(alpha: 0.8),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
+    child: Tooltip(
+      message: nome ?? texto ?? '',
+      child: Material(
+        color: ativo ? Cores.ouro : Cores.painel.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(16),
-        onTap: aoTocar,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icone, size: 22),
-              const SizedBox(width: 6),
-              Text(texto, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              const SizedBox(width: 8),
-              const IconeGema(tamanho: 14),
-              Text(
-                ' $custo',
-                style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
-              ),
-            ],
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: aoTocar,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: texto == null ? 10 : 14, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icone, size: 22, color: ativo ? const Color(0xFF3A2400) : null),
+                if (texto != null) ...[
+                  const SizedBox(width: 6),
+                  Text(texto!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                ],
+                const SizedBox(width: 6),
+                const IconeGema(tamanho: 14),
+                Text(
+                  ' $custo',
+                  style: TextStyle(color: ativo ? const Color(0xFF3A2400) : Cores.gema, fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
           ),
         ),
       ),

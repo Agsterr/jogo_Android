@@ -107,9 +107,17 @@ abstract final class Dicas {
     'Todo fim de semana (sexta 18h a domingo) também tem gemas em dobro.',
   ]);
 
+  static const reforcos = Dica('reforcos', 'Martelo e Bomba', Icons.hardware_rounded, Color(0xFFFFCC33), [
+    'Martelo (4 gemas): toque nele e depois num bloco colorido para tirá-lo.',
+    'Bomba (8 gemas): toque nela e depois no centro de uma área 3x3 para limpar os blocos dali.',
+    'Pedras das fases não saem com eles: só quebram completando a linha ou a coluna.',
+    'Tocou no reforço sem querer? Toque nele de novo para cancelar. As gemas só saem quando você usa.',
+  ]);
+
   static const gemas = Dica('gemas', 'Gemas e reforços', Icons.diamond_rounded, Color(0xFF3FE0D0), [
     'Desfazer (3 gemas): volta a última jogada.',
     'Trocar (5 gemas): troca as 3 peças da mão.',
+    'Martelo (4 gemas): tira um bloco. Bomba (8 gemas): limpa uma área 3x3. Pedras não saem.',
     'Continuar (10 gemas): segunda chance quando acaba o espaço.',
     'Gemas vêm de linhas de uma cor, missões, fases, presentes, eventos e da loja.',
   ]);
@@ -133,6 +141,7 @@ abstract final class Dicas {
     arena,
     missoes,
     presente,
+    reforcos,
     roda,
     progresso,
     eventos,
