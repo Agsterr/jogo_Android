@@ -107,6 +107,13 @@ abstract final class Dicas {
     'Todo fim de semana (sexta 18h a domingo) também tem gemas em dobro.',
   ]);
 
+  static const album = Dica('album', 'Álbum de figurinhas', Icons.collections_bookmark_rounded, Color(0xFF00D084), [
+    'Concluir o Desafio do dia dá uma figurinha nova.',
+    'Abrir o baú das missões do dia também dá uma.',
+    'Nunca vem repetida: cada uma que chega é uma que faltava.',
+    'Completou o álbum? Ganha gemas e libera o próximo.',
+  ]);
+
   static const reforcos = Dica('reforcos', 'Martelo e Bomba', Icons.hardware_rounded, Color(0xFFFFCC33), [
     'Martelo (4 gemas): toque nele e depois num bloco colorido para tirá-lo.',
     'Bomba (8 gemas): toque nela e depois no centro de uma área 3x3 para limpar os blocos dali.',
@@ -142,6 +149,7 @@ abstract final class Dicas {
     missoes,
     presente,
     reforcos,
+    album,
     roda,
     progresso,
     eventos,

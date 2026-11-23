@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../jogo/album.dart';
 import '../jogo/arena.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
@@ -131,6 +132,7 @@ class Progresso extends ChangeNotifier {
       await _prefs.setInt('sequencia', dias);
       gemasGanhas = 5 + premioDaSequencia(dias);
       await contarMissao(dia, TipoMissao.desafio, 1);
+      await ganharFigurinha(dia * 31 + 2);
       // Prêmio de 30 dias: tema exclusivo, guardado para sempre.
       for (final t in TemaDeBlocos.todos) {
         if (t.marcoDias != null && dias >= t.marcoDias!) await guardarTema(t);
@@ -326,10 +328,36 @@ class Progresso extends ChangeNotifier {
     return true;
   }
 
+  // ---------- álbum de figurinhas ----------
+
+  Set<String> get figurinhas => {...?_prefs.getStringList('figurinhas')};
+
+  /// Ganhou agora (só em memória): a tela mostra "Figurinha nova!" e depois limpa com [pegarFigurinhaRecente].
+  ({Album album, Figurinha figurinha, bool completou})? _figurinhaRecente;
+
+  ({Album album, Figurinha figurinha, bool completou})? pegarFigurinhaRecente() {
+    final f = _figurinhaRecente;
+    _figurinhaRecente = null;
+    return f;
+  }
+
+  /// Sorteia e guarda uma figurinha nova. Completar um álbum paga as gemas dele. `null` se já tem todas.
+  Future<({Album album, Figurinha figurinha, bool completou})?> ganharFigurinha(int semente) async {
+    final tenho = figurinhas;
+    final sorteada = Album.sortear(tenho, semente + tenho.length * 7919);
+    if (sorteada == null) return null;
+    await _prefs.setStringList('figurinhas', [...?_prefs.getStringList('figurinhas'), sorteada.figurinha.id]);
+    final completou = sorteada.album.completo(figurinhas);
+    if (completou) await ganharGemas(sorteada.album.premioGemas);
+    notifyListeners();
+    return _figurinhaRecente = (album: sorteada.album, figurinha: sorteada.figurinha, completou: completou);
+  }
+
   Future<bool> abrirBau(int dia) async {
     if (bauAberto(dia) || !List.generate(missoesPorDia, (i) => missaoPega(dia, i)).every((p) => p)) return false;
     await _prefs.setBool('bauAberto', true);
     await ganharGemas(gemasDoBau);
+    await ganharFigurinha(dia * 31 + 1);
     return true;
   }
 

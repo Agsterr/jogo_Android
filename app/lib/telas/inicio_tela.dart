@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
+import '../jogo/album.dart';
 import '../jogo/arena.dart';
 import '../jogo/eventos.dart';
 import '../jogo/fases.dart';
@@ -17,6 +18,7 @@ import '../widgets/dicas.dart';
 import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
 import 'ajuda_tela.dart';
+import 'album_tela.dart';
 import 'arena_tela.dart';
 import 'jogo_tela.dart';
 import 'loja_tela.dart';
@@ -213,6 +215,12 @@ class _InicioTelaState extends State<InicioTela> {
                           _RecuperarSequencia(servicos: servicos, dia: dia),
                           const SizedBox(height: 14),
                         ],
+                        _CartaoAlbum(
+                          quantas: p.figurinhas.length,
+                          total: Album.todos.fold(0, (soma, a) => soma + a.figurinhas.length),
+                          aoTocar: () => _abrir(AlbumTela(servicos: servicos)),
+                        ),
+                        const SizedBox(height: 14),
                         _CartaoMissoes(progresso: p, dia: dia),
                         const SizedBox(height: 14),
                         BotaoDoce(
@@ -537,7 +545,15 @@ class _CartaoMissoes extends StatelessWidget {
                 onPressed: () => mostrarDica(context, Dicas.missoes),
                 icon: const Icon(Icons.info_outline_rounded, size: 22),
               ),
-              _Bau(aberto: aberto, pronto: todasPegas && !aberto, aoTocar: () => progresso.abrirBau(dia)),
+              _Bau(
+                aberto: aberto,
+                pronto: todasPegas && !aberto,
+                aoTocar: () async {
+                  await progresso.abrirBau(dia);
+                  final nova = progresso.pegarFigurinhaRecente();
+                  if (nova != null && context.mounted) await mostrarFigurinhaNova(context, nova);
+                },
+              ),
             ],
           ),
           for (var i = 0; i < missoes.length; i++)
@@ -959,6 +975,73 @@ class _CartaoArena extends StatelessWidget {
                   ),
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Atalho do Álbum de figurinhas.
+class _CartaoAlbum extends StatelessWidget {
+  const _CartaoAlbum({required this.quantas, required this.total, required this.aoTocar});
+
+  final int quantas, total;
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) {
+    const cores = [Color(0xFF00D084), Color(0xFF008F9B)];
+    return Semantics(
+      button: true,
+      label: 'Álbum de figurinhas',
+      child: GestureDetector(
+        onTap: aoTocar,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            gradient: const LinearGradient(colors: cores),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 1.5),
+            boxShadow: [
+              BoxShadow(color: Color.lerp(cores.last, Colors.black, 0.45)!, offset: const Offset(0, 5)),
+              BoxShadow(color: cores.first.withValues(alpha: 0.4), blurRadius: 18),
+            ],
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.collections_bookmark_rounded,
+                size: 40,
+                color: Colors.white,
+                shadows: [Shadow(color: Color(0xFF00424A), offset: Offset(0, 3))],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: TextoContornado(
+                        'Álbum de figurinhas',
+                        tamanho: 21,
+                        alinhamento: TextAlign.start,
+                        contorno: Color(0xFF00424A),
+                      ),
+                    ),
+                    Text(
+                      '$quantas de $total · uma por dia no Desafio',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.15),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, size: 28),
             ],
           ),
         ),

@@ -121,3 +121,9 @@ abertura do jogo e ao concluir o Desafio: se hoje já foi jogado ou já passou d
 Tocar na chama (canto da tela inicial) abre os marcos: 3 dias (+5 gemas), 7 (+15), 14 (+30) e 30 (+60 e o tema **Chama**,
 que fica para sempre na Loja). O marco aparece no resultado do Desafio. Pulou um dia: dá para recuperar a sequência uma
 vez por semana (anúncio ou gemas).
+
+## Álbum de figurinhas
+Uma figurinha nova ao **concluir o Desafio do dia** (uma por dia) e outra ao **abrir o baú das missões**. Nunca repete:
+sai sempre uma que faltava, do primeiro álbum incompleto. Álbuns de 12 figurinhas: **Tesouros** e **Natureza** (este só
+aparece com o primeiro completo). Completar um álbum paga **+100 gemas**. As figurinhas vão no código de progresso e na
+cópia automática. Regras em `app/lib/jogo/album.dart`; tela em `app/lib/telas/album_tela.dart`.

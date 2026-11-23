@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../app.dart';
+import '../jogo/album.dart';
 import '../jogo/arena.dart';
 import '../jogo/eventos.dart';
 import '../jogo/elogios.dart';
@@ -79,6 +80,7 @@ class _JogoTelaState extends State<JogoTela> {
   _Fim? _fim;
   bool _novoRecorde = false;
   int _gemasDesafio = 0;
+  ({Album album, Figurinha figurinha, bool completou})? _figurinhaNova;
 
   /// Fases: peças extras ganhas na ajuda (uma ajuda por tentativa).
   int _extras = 0;
@@ -430,6 +432,7 @@ class _JogoTelaState extends State<JogoTela> {
     final recorde = await _s.progresso.fimDePartida(pontos);
     await _s.progresso.contarMissoes(_dia, {TipoMissao.partidas: 1, TipoMissao.pontos: pontos});
     final gemasDesafio = widget.diario ? await _s.progresso.concluirDesafio(_dia, pontos) : 0;
+    if (widget.diario) _figurinhaNova = _s.progresso.pegarFigurinhaRecente();
     if (widget.diario) _s.reagendarLembrete(); // hoje já jogou: o próximo lembrete passa para amanhã
     if (widget.arena) {
       await _s.progresso.registrarArena(_semana, pontos);
@@ -1003,6 +1006,10 @@ class _JogoTelaState extends State<JogoTela> {
             if (premioDaSequencia(_s.progresso.sequencia(_dia)) > 0 && _gemasDesafio > 0)
               'Marco de ${_s.progresso.sequencia(_dia)} dias! 🎉',
             if (_s.progresso.sequencia(_dia) == 30 && _gemasDesafio > 0) 'Tema Chama liberado na Loja!',
+            if (_figurinhaNova case final f?)
+              f.completou
+                  ? 'Figurinha ${f.figurinha.nome}: álbum ${f.album.nome} completo! +${f.album.premioGemas} gemas'
+                  : 'Figurinha nova: ${f.figurinha.nome}',
             '🔥 ${_s.progresso.sequencia(_dia)} ${_s.progresso.sequencia(_dia) == 1 ? 'dia' : 'dias seguidos'}',
           ].join('\n'),
           textAlign: TextAlign.center,
