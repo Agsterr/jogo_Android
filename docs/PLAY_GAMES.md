@@ -20,8 +20,10 @@ Fonte: <https://developer.android.com/games/pgs/console/setup>.
    **SHA-1** no campo "Signing certificate fingerprint". Clique em **Create**, **Done**, escolha o client e **Save Changes**.
    O Google recomenda **duas credenciais com o mesmo pacote**:
    - **Chave do app na Play Store:** copie o SHA-1 da página de assinatura do app no Play Console (Play App Signing).
-   - **Chave de teste (APK do GitHub):** o SHA-1 aparece no resumo de cada execução do CI, no passo
-     "SHA-1 da chave de assinatura (para o Play Games)" (aba *Summary* da execução em Actions).
+   - **Chave dos APKs do GitHub** (a chave de produção dos segredos do GitHub, issue #3; com o Play App Signing ela é a
+     "chave de envio"): SHA-1 `03:8F:5D:C9:C2:8F:5D:74:47:DB:47:90:65:4E:BA:26:E5:CA:FF:77` (lido na execução #36 do CI).
+     É a impressão digital pública do certificado, não é segredo. Se os segredos mudarem, o valor novo aparece no resumo de
+     cada execução, no passo "SHA-1 da chave de assinatura (para o Play Games)" (aba *Summary* em Actions).
    O pacote e o SHA-1 precisam ser **exatamente** os do app, senão o login falha.
 6. **Ative os Jogos salvos (Saved Games).** O Google tem a página "enable features" para isso; o caminho exato do menu
    não foi confirmado: procure **Saved games** nas configurações do Play Games Services e ative.
