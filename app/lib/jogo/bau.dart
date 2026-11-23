@@ -48,6 +48,9 @@ class ItemDeBau {
 /// Repetir um item o sobe de nível, até aqui. No máximo, vira gemas.
 const nivelMaximoDoItem = 5;
 
+/// Baús de anúncio por dia (um anúncio com recompensa abre um baú só de itens Comuns). Quem tem o Encaixa+ não vê o anúncio.
+const bausDeAnuncioPorDia = 3;
+
 /// Garantias: a cada [garantiaRaro] baús, pelo menos um raro ou melhor; a cada [garantiaLendario], um lendário.
 const garantiaRaro = 10;
 const garantiaLendario = 60;
@@ -118,6 +121,12 @@ class ResultadoDoSorteio {
 
   /// Este baú estava na garantia (raro ou melhor, ou lendário, de qualquer forma).
   final bool garantido;
+}
+
+/// Baú de anúncio: só itens Comuns. Não mexe na garantia dos baús normais (ela só conta os baús normais).
+ResultadoDoSorteio sortearBauComum(Sorteio sorteio, EstadoDoBau estado) {
+  final grupo = ItensDeBau.da(Raridade.comum);
+  return ResultadoDoSorteio(grupo[sorteio.proximo(grupo.length)], estado, garantido: false);
 }
 
 /// Sorteia um item. Chances: [Raridade.chance]; a garantia vale no baú de número [garantiaRaro] e [garantiaLendario].

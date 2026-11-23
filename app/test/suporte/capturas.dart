@@ -43,13 +43,14 @@ Future<Servicos> servicosDeTeste({
   CopiaAutomatica? copia,
   Lembrete lembrete = const SemLembrete(),
   Ranking ranking = const SemRanking(),
+  Anuncios? anuncios,
 }) async {
   SharedPreferences.setMockInitialValues(valores);
   final progresso = await Progresso.carregar();
   DateTime agora() => hoje ?? DateTime(2026, 11, 12, 9);
   return Servicos(
     progresso: progresso,
-    anuncios: SemAnuncios(),
+    anuncios: anuncios ?? SemAnuncios(),
     compras: ComprasFicticias(progresso),
     hoje: agora,
     mostrarPresenteAoAbrir: presente,

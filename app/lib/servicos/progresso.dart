@@ -425,19 +425,41 @@ class Progresso extends ChangeNotifier {
   EstadoDoBau get estadoDoBau =>
       EstadoDoBau(semRaro: _prefs.getInt('bauSemRaro') ?? 0, semLendario: _prefs.getInt('bauSemLendario') ?? 0);
 
+  /// Baús de anúncio já abertos hoje (limite: [bausDeAnuncioPorDia]).
+  int bausDeAnuncioNoDia(int dia) => _prefs.getInt('bauAnuncioDia') == dia ? (_prefs.getInt('bauAnuncioQtd') ?? 0) : 0;
+
+  bool podeAbrirBauDeAnuncio(int dia) => bausDeAnuncioNoDia(dia) < bausDeAnuncioPorDia;
+
+  /// Abre um baú de anúncio (só itens Comuns). O chamador já mostrou o anúncio (quem tem Encaixa+ não vê).
+  /// `null` se já abriu todos de hoje.
+  Future<({ItemDeBau item, int nivelAntes, int nivelDepois, int gemas, bool garantido})?> abrirBauDeAnuncio(
+    int dia, {
+    int? semente,
+  }) async {
+    if (!podeAbrirBauDeAnuncio(dia)) return null;
+    await _prefs.setInt('bauAnuncioDia', dia);
+    await _prefs.setInt('bauAnuncioQtd', bausDeAnuncioNoDia(dia) + 1);
+    return _abrir(sortearBauComum(Sorteio(semente ?? DateTime.now().microsecondsSinceEpoch), estadoDoBau));
+  }
+
   /// Abre um baú: sorteia, guarda o item (ou sobe o nível; no máximo vira gemas) e conta a garantia.
   /// `null` se não há baú. [semente] só serve para os testes.
   Future<({ItemDeBau item, int nivelAntes, int nivelDepois, int gemas, bool garantido})?> abrirBauDeItens({
     int? semente,
   }) async {
     if (baus <= 0) return null;
-    final r = sortearBau(Sorteio(semente ?? DateTime.now().microsecondsSinceEpoch), estadoDoBau);
+    await _prefs.setInt('baus', baus - 1);
+    return _abrir(sortearBau(Sorteio(semente ?? DateTime.now().microsecondsSinceEpoch), estadoDoBau));
+  }
+
+  Future<({ItemDeBau item, int nivelAntes, int nivelDepois, int gemas, bool garantido})> _abrir(
+    ResultadoDoSorteio r,
+  ) async {
     final antes = nivelDoItem(r.item.id);
     final depois = antes >= nivelMaximoDoItem ? antes : antes + 1;
     final gemas = antes >= nivelMaximoDoItem ? r.item.raridade.gemasDeRepetido : 0;
     final itens = itensDeBau..[r.item.id] = depois;
     await _prefs.setStringList('bauItens', [for (final e in itens.entries) '${e.key}:${e.value}']);
-    await _prefs.setInt('baus', baus - 1);
     await _prefs.setInt('bauAbertos', bausAbertos + 1);
     await _prefs.setInt('bauSemRaro', r.estado.semRaro);
     await _prefs.setInt('bauSemLendario', r.estado.semLendario);

@@ -5,6 +5,13 @@ abstract final class Textos {
 }
 
 const _en = <String, String>{
+  'Baú comum grátis (Encaixa+) · {0} hoje': 'Free common chest (Encaixa+) · {0} today',
+  'Ver anúncio: baú comum · {0} hoje': 'Watch an ad: common chest · {0} today',
+  'Volte amanhã para mais baús comuns': 'Come back tomorrow for more common chests',
+  'Baú de anúncio: só itens Comuns, e não conta na garantia.':
+      'Ad chest: Common items only, and it does not count toward the guarantee.',
+  'Também dá para abrir até 3 baús COMUNS por dia vendo um anúncio (com Encaixa+ é sem anúncio).':
+      'You can also open up to 3 COMMON chests a day by watching an ad (no ad with Encaixa+).',
   // Baús e coleção
   'Baús e coleção': 'Chests and collection',
   'Nenhum baú agora': 'No chests right now',
@@ -664,6 +671,13 @@ const _en = <String, String>{
 };
 
 const _es = <String, String>{
+  'Baú comum grátis (Encaixa+) · {0} hoje': 'Cofre común gratis (Encaixa+) · {0} hoy',
+  'Ver anúncio: baú comum · {0} hoje': 'Ver un anuncio: cofre común · {0} hoy',
+  'Volte amanhã para mais baús comuns': 'Vuelve mañana para más cofres comunes',
+  'Baú de anúncio: só itens Comuns, e não conta na garantia.':
+      'Cofre de anuncio: solo artículos Comunes, y no cuenta para la garantía.',
+  'Também dá para abrir até 3 baús COMUNS por dia vendo um anúncio (com Encaixa+ é sem anúncio).':
+      'También puedes abrir hasta 3 cofres COMUNES al día viendo un anuncio (con Encaixa+ es sin anuncio).',
   // Baús e coleção
   'Baús e coleção': 'Cofres y colección',
   'Nenhum baú agora': 'Ningún cofre ahora',

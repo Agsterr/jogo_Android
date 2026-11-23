@@ -2,6 +2,7 @@ import 'package:encaixa/idioma.dart';
 import 'package:encaixa/jogo/bau.dart';
 import 'package:encaixa/jogo/sorteio.dart';
 import 'package:encaixa/jogo/temas.dart';
+import 'package:encaixa/servicos/anuncios.dart';
 import 'package:encaixa/servicos/codigo_progresso.dart';
 import 'package:encaixa/telas/baus_tela.dart';
 import 'package:encaixa/tema.dart';
@@ -203,6 +204,85 @@ void main() {
     });
   });
 
+  group('baú de anúncio', () {
+    test('só sai item Comum, não gasta baú guardado e não mexe na garantia', () async {
+      final s = await servicosDeTeste(valores: {'baus': 2, 'bauSemRaro': 6, 'bauSemLendario': 30});
+      final p = s.progresso;
+      for (var i = 0; i < bausDeAnuncioPorDia; i++) {
+        final r = (await p.abrirBauDeAnuncio(20261112, semente: 100 + i))!;
+        expect(r.item.raridade, Raridade.comum);
+      }
+      expect(p.baus, 2, reason: 'os baús guardados continuam lá');
+      expect(p.estadoDoBau.semRaro, 6, reason: 'não conta na garantia');
+      expect(p.estadoDoBau.semLendario, 30);
+      expect(p.bausAbertos, bausDeAnuncioPorDia);
+    });
+
+    test('limite diário e volta no dia seguinte', () async {
+      final s = await servicosDeTeste();
+      final p = s.progresso;
+      for (var i = 0; i < bausDeAnuncioPorDia; i++) {
+        expect(p.podeAbrirBauDeAnuncio(20261112), isTrue);
+        await p.abrirBauDeAnuncio(20261112, semente: i);
+      }
+      expect(p.podeAbrirBauDeAnuncio(20261112), isFalse);
+      expect(await p.abrirBauDeAnuncio(20261112), isNull);
+      expect(p.podeAbrirBauDeAnuncio(20261113), isTrue);
+    });
+
+    test('comum repetido no nível máximo vira 5 gemas', () async {
+      final comuns = ItensDeBau.da(Raridade.comum);
+      final s = await servicosDeTeste(
+        valores: {
+          'gemas': 0,
+          'bauItens': [for (final i in comuns) '${i.id}:$nivelMaximoDoItem'],
+        },
+      );
+      final r = (await s.progresso.abrirBauDeAnuncio(20261112, semente: 3))!;
+      expect(r.gemas, Raridade.comum.gemasDeRepetido);
+      expect(s.progresso.gemas, Raridade.comum.gemasDeRepetido);
+    });
+
+    testWidgets('na tela: vê o anúncio e abre; anúncio indisponível não abre; Encaixa+ abre sem anúncio', (
+      tester,
+    ) async {
+      telaDeCelular(tester, tamanho: const Size(360, 900));
+      final anuncios = _AnunciosFalsos();
+      final s = await servicosDeTeste(anuncios: anuncios);
+      await tester.pumpWidget(appDeTeste(s, tela: BausTela(servicos: s)));
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.textContaining('Ver anúncio: baú comum'), findsOneWidget);
+      anuncios.disponivel = false;
+      await tester.tap(find.textContaining('Ver anúncio: baú comum'));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(s.progresso.bausAbertos, 0, reason: 'sem anúncio, sem baú');
+      expect(find.text('Anúncio indisponível agora. Tente de novo.'), findsOneWidget);
+      anuncios.disponivel = true;
+      await tester.pump(const Duration(seconds: 5));
+      await tester.tap(find.textContaining('Ver anúncio: baú comum'));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(anuncios.vistos, 1);
+      expect(s.progresso.bausAbertos, 1);
+      await capturar(tester, '44-bau-de-anuncio');
+      await tester.tap(find.text('Legal!'));
+      await tester.pumpAndSettle();
+
+      await s.progresso.definirAssinante(true);
+      await tester.pump();
+      expect(find.textContaining('Baú comum grátis (Encaixa+)'), findsOneWidget);
+      await tester.tap(find.textContaining('Baú comum grátis (Encaixa+)'));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(anuncios.vistos, 1, reason: 'assinante não vê anúncio');
+      expect(s.progresso.bausAbertos, 2);
+      await tester.tap(find.text('Legal!'));
+      await tester.pumpAndSettle();
+    });
+  });
+
   testWidgets('tela dos baús e a abertura (visual, em português e inglês)', (tester) async {
     for (final (idioma, nome) in [('pt', '40-baus'), ('en', '41-baus-en')]) {
       Idioma.atual = idioma;
@@ -243,3 +323,20 @@ void main() {
 }
 
 const niveisDoPasseParaTeste = 20;
+
+class _AnunciosFalsos implements Anuncios {
+  bool disponivel = true;
+  int vistos = 0;
+
+  @override
+  Future<void> iniciar() async {}
+
+  @override
+  Future<bool> mostrarPremiado() async {
+    if (disponivel) vistos++;
+    return disponivel;
+  }
+
+  @override
+  Future<void> talvezIntersticial({required int partidasJogadas}) async {}
+}

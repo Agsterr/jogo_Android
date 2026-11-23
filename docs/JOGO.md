@@ -190,5 +190,9 @@ menos um Raro (ou melhor) e a cada 60 um Lendário. **Repetido:** sobe de nível
 (5, 15, 40 ou 100 conforme a raridade). 18 itens: 6 temas, 6 molduras e 6 cores do mascote; "Padrão" volta ao visual
 original. Regras em `app/lib/jogo/bau.dart`; tela em `app/lib/telas/baus_tela.dart`.
 
+**Baú de anúncio:** até **3 por dia**, o jogador escolhe ver um anúncio com recompensa e abre na hora um baú **só de itens
+Comuns** (quem tem o Encaixa+ abre sem ver o anúncio). Ele não gasta baú guardado e **não conta na garantia**. Comum repetido
+no nível máximo vira 5 gemas.
+
 **Fora de propósito:** venda de baús por dinheiro, habilidades que mudam o jogo e itens "únicos no mundo". Motivos e
 decisões em aberto: issue "Baús com itens raros" (loot box tem regra legal e a Play exige mostrar as chances).

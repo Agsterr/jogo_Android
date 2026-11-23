@@ -136,6 +136,7 @@ abstract final class Dicas {
 
   static const baus = Dica('baus', 'Baús e coleção', Icons.inventory_2_rounded, Color(0xFFFFC62E), [
     'Você ganha baús jogando: Desafio do dia, níveis 5, 10, 15 e 20 do Passe, álbum completo e 14 e 30 dias de sequência.',
+    'Também dá para abrir até 3 baús COMUNS por dia vendo um anúncio (com Encaixa+ é sem anúncio).',
     'Cada baú traz um item de APARÊNCIA: tema de blocos, moldura do tabuleiro ou cor do Quadrinho. Nada muda a pontuação.',
     'As chances de cada raridade ficam sempre na tela do baú, com garantia de Raro e de Lendário.',
     'Item repetido sobe de nível (até 5 estrelas) e, no máximo, vira gemas.',

@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
 import '../idioma.dart';
+import '../jogo/sorteio.dart';
 import '../jogo/bau.dart';
 import '../servicos/servicos.dart';
 import '../tema.dart';
@@ -35,10 +36,35 @@ class _BausTelaState extends State<BausTela> {
     });
   }
 
+  int get _dia => Sorteio.sementeDoDia(_s.hoje());
+
+  Future<void> _abrirDeAnuncio() async {
+    final p = _s.progresso;
+    if (_abrindo || !p.podeAbrirBauDeAnuncio(_dia)) return;
+    setState(() => _abrindo = true);
+    // Quem tem o Encaixa+ abre sem ver o anúncio.
+    if (!p.assinante && !await _s.anuncios.mostrarPremiado()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(t('Anúncio indisponível agora. Tente de novo.'))));
+        setState(() => _abrindo = false);
+      }
+      return;
+    }
+    final resultado = await p.abrirBauDeAnuncio(_dia);
+    await _mostrar(resultado);
+  }
+
   Future<void> _abrir() async {
     if (_abrindo || _s.progresso.baus <= 0) return;
     setState(() => _abrindo = true);
-    final resultado = await _s.progresso.abrirBauDeItens();
+    await _mostrar(await _s.progresso.abrirBauDeItens());
+  }
+
+  Future<void> _mostrar(
+    ({ItemDeBau item, int nivelAntes, int nivelDepois, int gemas, bool garantido})? resultado,
+  ) async {
     if (!mounted) return;
     if (resultado != null) {
       HapticFeedback.mediumImpact();
@@ -108,6 +134,24 @@ class _BausTelaState extends State<BausTela> {
                           tamanhoTexto: 20,
                           aoTocar: p.baus > 0 && !_abrindo ? _abrir : null,
                         ),
+                        const SizedBox(height: 10),
+                        OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(minimumSize: const Size(64, 50)),
+                          onPressed: p.podeAbrirBauDeAnuncio(_dia) && !_abrindo ? _abrirDeAnuncio : null,
+                          icon: Icon(p.assinante ? Icons.workspace_premium_rounded : Icons.smart_display_rounded),
+                          label: Text(
+                            p.podeAbrirBauDeAnuncio(_dia)
+                                ? (p.assinante
+                                      ? t('Baú comum grátis (Encaixa+) · {0} hoje', [
+                                          bausDeAnuncioPorDia - p.bausDeAnuncioNoDia(_dia),
+                                        ])
+                                      : t('Ver anúncio: baú comum · {0} hoje', [
+                                          bausDeAnuncioPorDia - p.bausDeAnuncioNoDia(_dia),
+                                        ]))
+                                : t('Volte amanhã para mais baús comuns'),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -162,6 +206,10 @@ class _Chances extends StatelessWidget {
           ),
         ),
       const SizedBox(height: 8),
+      Text(
+        t('Baú de anúncio: só itens Comuns, e não conta na garantia.'),
+        style: const TextStyle(fontSize: 13, height: 1.3, color: Cores.textoFraco),
+      ),
       Text(
         t('Garantia: a cada {0} baús sai pelo menos um Raro, e a cada {1} um Lendário.', [
           garantiaRaro,
