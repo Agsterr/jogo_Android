@@ -64,10 +64,10 @@ Só no modo Infinito (Desafio, Arena e fases têm as mesmas peças para todos e 
 | Trocar | 5 | sorteia uma mão nova |
 | Martelo | 4 | toque nele e depois num bloco colorido: o bloco some (sem pontos e sem completar linha) |
 | Bomba | 8 | toque nela e depois no centro de uma área 3x3: some tudo que for colorido ali |
+| Segunda chance | 10 gemas **ou** anúncio premiado (grátis no Encaixa+) | limpa as 4 linhas do meio; uma vez por partida |
 
 Martelo e Bomba nunca tiram **pedras** (só quebram completando a linha ou a coluna). Usar um deles desliga o Desfazer.
 Tocar de novo no botão do reforço cancela; as gemas só saem quando o alvo é válido.
-| Segunda chance | 10 gemas **ou** anúncio premiado (grátis no Encaixa+) | limpa as 4 linhas do meio; uma vez por partida |
 
 ## Desafio do dia
 Semente = data (`aaaammdd`) num sorteador próprio (mulberry32), para todo mundo receber a mesma sequência em qualquer
