@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Project ID do Play Games Services (Play Console > Configuração). Não é segredo. -->
+    <string translatable="false" name="game_services_project_id">41851413204</string>
+</resources>
