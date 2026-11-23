@@ -1,5 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'progresso.dart';
 
@@ -9,6 +9,9 @@ enum Som { encaixe, linha, combo, incrivel, fantastico, fim }
 abstract class Sons {
   Future<void> iniciar();
   void tocar(Som som);
+
+  /// Liga ou desliga a música de fundo conforme as configurações do jogador (som e música).
+  void atualizarMusica();
 }
 
 /// Para testes: não toca nada.
@@ -18,13 +21,38 @@ class SemSons implements Sons {
   Future<void> iniciar() async {}
   @override
   void tocar(Som som) {}
+  @override
+  void atualizarMusica() {}
 }
 
-class SonsDoJogo implements Sons {
-  SonsDoJogo(this._progresso);
+class SonsDoJogo with WidgetsBindingObserver implements Sons {
+  SonsDoJogo(this._progresso) {
+    _progresso.addListener(atualizarMusica);
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   final Progresso _progresso;
   final _players = {for (final s in Som.values) s: AudioPlayer()};
+  final _musica = AudioPlayer();
+  bool _musicaPronta = false;
+  bool _tocandoMusica = false;
+  bool _emPrimeiroPlano = true;
+
+  /// A música só toca com o jogo na tela (sai quando o jogador troca de app ou bloqueia o celular).
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState estado) {
+    _emPrimeiroPlano = estado == AppLifecycleState.resumed;
+    atualizarMusica();
+  }
+
+  @override
+  void atualizarMusica() {
+    if (!_musicaPronta) return;
+    final deveTocar = _progresso.somLigado && _progresso.musicaLigada && _emPrimeiroPlano;
+    if (deveTocar == _tocandoMusica) return;
+    _tocandoMusica = deveTocar;
+    (deveTocar ? _musica.resume() : _musica.pause()).catchError((Object e) => debugPrint('música: $e'));
+  }
 
   @override
   Future<void> iniciar() async {
@@ -34,6 +62,15 @@ class SonsDoJogo implements Sons {
       await player.setPlayerMode(PlayerMode.lowLatency);
       await player.setReleaseMode(ReleaseMode.stop);
       await player.setSource(AssetSource('sons/${som.name}.wav'));
+    }
+    try {
+      await _musica.setReleaseMode(ReleaseMode.loop);
+      await _musica.setVolume(0.35);
+      await _musica.setSource(AssetSource('sons/musica.wav'));
+      _musicaPronta = true;
+      atualizarMusica();
+    } on Object catch (e) {
+      debugPrint('música indisponível: $e');
     }
   }
 

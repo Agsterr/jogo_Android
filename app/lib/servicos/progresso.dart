@@ -74,6 +74,14 @@ class Progresso extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Música de fundo (separada dos efeitos). Começa desligada: muita gente joga ouvindo a própria música.
+  bool get musicaLigada => _prefs.getBool('musica') ?? false;
+
+  Future<void> alternarMusica() async {
+    await _prefs.setBool('musica', !musicaLigada);
+    notifyListeners();
+  }
+
   bool get somLigado => _prefs.getBool('som') ?? true;
 
   Future<void> alternarSom() async {

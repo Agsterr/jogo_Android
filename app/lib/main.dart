@@ -41,6 +41,7 @@ Future<void> main() async {
 
   // Depois do primeiro quadro, para o jogo abrir rápido.
   await servicos.sons.iniciar();
+  servicos.sons.atualizarMusica();
   await servicos.compras.iniciar();
   await progresso.darBonusDoAssinante(Sorteio.sementeDoDia(DateTime.now()));
   await servicos.anuncios.iniciar();

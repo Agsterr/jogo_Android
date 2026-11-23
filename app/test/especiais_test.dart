@@ -56,10 +56,10 @@ void main() {
         if (p.especial == 2) joias++;
       }
     }
-    expect(especiais, inInclusiveRange(240, 410), reason: 'cerca de 16%');
+    expect(especiais, inInclusiveRange(300, 460), reason: 'cerca de 19%');
     expect(bombas, greaterThan(joias));
     expect(joias, greaterThan(40));
-    expect(tipos, {1, 2, 3, 5}, reason: 'bomba, joia, gelo e curinga');
+    expect(tipos, {1, 2, 3, 5, 6}, reason: 'bomba, joia, gelo, curinga e raio');
   });
 
   test('só o Infinito usa especiais: Desafio, Arena e fases (rampa desligada) ficam sem', () {
@@ -140,6 +140,29 @@ void main() {
     expect(comum.colocar(0, 7, 3)!.gemas, lessThan(j2.gemas + 1));
   });
 
+  test('raio: ao completar a linha dele, limpa também a coluna inteira (menos pedras)', () {
+    final formato = Formato.desenho(['#']);
+    final p = _quaseLinha();
+    for (var l = 1; l < 7; l++) {
+      p.tabuleiro.definir(l, 3, 2); // a coluna 3 tem blocos acima da linha 7, mas a casa (0, 3) fica vazia
+    }
+    p.tabuleiro.definir(2, 3, Tabuleiro.pedra);
+    p.tabuleiro.definir(5, 6, 4); // fora da cruz: fica
+    p.mao = [Peca(formato, 1, especial: Tabuleiro.raio), null, null];
+    final j = p.colocar(0, 7, 3)!;
+    expect(j.raios, 1);
+    for (var l = 0; l < 8; l++) {
+      expect(p.tabuleiro.cor(l, 3), l == 2 ? Tabuleiro.pedra : isNull, reason: 'coluna 3, linha $l');
+    }
+    expect(p.tabuleiro.cor(5, 6), 4);
+    final sem = _quaseLinha()
+      ..tabuleiro.definir(5, 6, 4) // sobra um bloco, para não ganhar o bônus de tabuleiro limpo
+      ..mao = [Peca(formato, 1), null, null];
+    final base = sem.colocar(0, 7, 3)!;
+    expect(j.removidos.length, greaterThan(base.removidos.length));
+    expect(j.pontos, greaterThan(base.pontos));
+  });
+
   test('curinga vale por qualquer cor na linha de uma cor só', () {
     final formato = Formato.desenho(['#']);
     // linha com cores 0 e um curinga de cor 4 no meio: continua sendo "uma cor"
@@ -174,7 +197,8 @@ void main() {
       ..definir(3, 6, 14)
       ..definir(4, 3, 33)
       ..definir(4, 4, 43)
-      ..definir(2, 2, 52);
+      ..definir(2, 2, 52)
+      ..definir(1, 4, 60);
     partida.mao = [
       Peca(Formato.desenho(['###']), 4, especial: 1, celulaEspecial: 1),
       Peca(Formato.desenho(['##', '##']), 2, especial: 2, celulaEspecial: 3),

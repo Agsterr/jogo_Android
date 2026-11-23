@@ -21,6 +21,10 @@ class Tabuleiro {
   static const int rachado = 4;
   static const int curinga = 5;
 
+  /// Raio (60 a 65): quando a linha dele some, limpa também a outra linha ou coluna inteira que passa por ele.
+  static const int raio = 6;
+
+  static bool ehRaio(int codigo) => codigo ~/ 10 == raio;
   static bool ehGelo(int codigo) => codigo ~/ 10 == gelo;
   static bool ehRachado(int codigo) => codigo ~/ 10 == rachado;
   static bool ehCuringa(int codigo) => codigo ~/ 10 == curinga;

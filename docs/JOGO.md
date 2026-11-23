@@ -155,11 +155,12 @@ o Encaixa+**, e o nível 20 libera o tema **Aurora** para sempre. A trilha recom
 `app/lib/jogo/passe.dart`.
 
 ## Blocos especiais (só no Infinito)
-Depois da primeira meta (nível 1), cerca de 16% das peças trazem **um** bloco especial:
-**bomba** (bola escura, 6%): quando a linha dela some, limpa também a área 3x3 em volta (pedras ficam) e dá +15 pontos;
+Depois da primeira meta (nível 1), cerca de 19% das peças trazem **um** bloco especial:
+**bomba** (bola escura, 5%): quando a linha dela some, limpa também a área 3x3 em volta (pedras ficam) e dá +15 pontos;
 **joia** (losango brilhante, 4%): quando a linha dela some, dá **+1 gema** e +30 pontos;
 **gelo** (bloco esbranquiçado, 3%): precisa de **duas** linhas: a primeira só racha (ele fica, com rachaduras), a segunda tira
-e dá +1 gema e +20 pontos; **curinga** (anel colorido, 3%): vale por qualquer cor na linha de uma cor só. No nível 0, e em todos os
+e dá +1 gema e +20 pontos; **curinga** (anel colorido, 3%): vale por qualquer cor na linha de uma cor só; **raio** (relâmpago amarelo, 4%): quando a linha
+dele some, limpa também a outra linha ou coluna inteira que passa por ele (pedras ficam) e dá +15 pontos. No nível 0, e em todos os
 outros modos (fases, Desafio, Arena, Relâmpago), o sorteio não gasta nenhum número a mais: as peças continuam exatamente
 as mesmas. Regras em `app/lib/jogo/partida.dart` e `peca.dart`; testes em `test/especiais_test.dart`.
 
@@ -196,3 +197,9 @@ no nível máximo vira 5 gemas.
 
 **Fora de propósito:** venda de baús por dinheiro, habilidades que mudam o jogo e itens "únicos no mundo". Motivos e
 decisões em aberto: issue "Baús com itens raros" (loot box tem regra legal e a Play exige mostrar as chances).
+
+## Sensação de jogo (confete, tremor e música)
+Ao limpar linhas, pedacinhos de cada bloco voam e caem (confete); nas jogadas muito fortes (Incrível, Fantástico, combo x4)
+o tabuleiro treme de leve. Quem pediu **menos animação** no Android não vê nenhum dos dois. A **música de fundo**
+(`app/assets/sons/musica.wav`, gerada por `ferramentas/gerar_sons.py`, 24 s em loop) **começa desligada** (muita gente joga
+ouvindo a própria música): liga em *Como jogar > Música de fundo*, só toca com o som ligado e para quando o jogo sai da tela.

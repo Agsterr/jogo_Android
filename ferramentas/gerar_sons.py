@@ -45,6 +45,44 @@ def salvar(nome, amostras):
         w.writeframes(b"".join(struct.pack("<h", int(v * escala * 32767)) for v in amostras))
 
 
+def musica():
+    """Música de fundo (loop de 24 s, mono 22 kHz): pad suave em Lá menor, Fá, Dó, Sol e um arpejo leve por cima.
+
+    Cada acorde sobe e desce devagar, então o fim do arquivo encosta no começo sem estalo (dá para repetir sem emenda).
+    """
+    taxa = 22050
+    acordes = [  # (notas do acorde em Hz, notas do arpejo em Hz)
+        ((220.0, 261.63, 329.63), (440.0, 523.25, 659.25, 523.25)),  # Lá menor
+        ((174.61, 220.0, 261.63), (349.23, 440.0, 523.25, 440.0)),  # Fá
+        ((196.0, 261.63, 329.63), (392.0, 523.25, 659.25, 523.25)),  # Dó
+        ((196.0, 246.94, 293.66), (392.0, 493.88, 587.33, 493.88)),  # Sol
+    ]
+    dur = 6.0  # segundos por acorde
+    n = int(taxa * dur * len(acordes))
+    out = [0.0] * n
+    for k, (pad, arp) in enumerate(acordes):
+        ini = int(k * dur * taxa)
+        for i in range(int(dur * taxa)):
+            t = i / taxa
+            # sobe e desce suave; no último acorde o fim volta a zero, como o começo do primeiro
+            env = math.sin(math.pi * min(1.0, t / dur)) ** 0.7
+            v = sum(math.sin(2 * math.pi * f * t) + 0.35 * math.sin(2 * math.pi * f * 2 * t) for f in pad)
+            v *= 0.12 * env * (0.85 + 0.15 * math.sin(2 * math.pi * 0.25 * t))  # leve ondulação
+            out[(ini + i) % n] += v
+        for j in range(12):  # arpejo: uma nota a cada 0,5 s
+            f = arp[j % len(arp)]
+            ini_nota = ini + int(j * 0.5 * taxa)
+            for i in range(int(0.9 * taxa)):
+                t = i / taxa
+                out[(ini_nota + i) % n] += 0.07 * math.exp(-4.5 * t) * min(1.0, i / (taxa * 0.01)) * math.sin(2 * math.pi * f * t)
+    pico = max(1e-9, max(abs(v) for v in out))
+    with wave.open(str(PASTA / "musica.wav"), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(taxa)
+        w.writeframes(b"".join(struct.pack("<h", int(v / pico * 0.8 * 32767)) for v in out))
+
+
 def main():
     PASTA.mkdir(parents=True, exist_ok=True)
     random.seed(1)
@@ -67,6 +105,7 @@ def main():
     salvar("fantastico.wav", [(brilho[i] if i < len(brilho) else 0) + (base[i] if i < len(base) else 0) for i in range(len(brilho))])
     # Fim de jogo: duas notas descendo.
     salvar("fim.wav", juntar(nota(523.25, 0.5, 0.5, 5), nota(392, 0.7, 0.5, 4), atraso=0.22))
+    musica()
 
 
 if __name__ == "__main__":

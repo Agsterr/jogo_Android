@@ -86,7 +86,10 @@ class JogoTela extends StatefulWidget {
   State<JogoTela> createState() => _JogoTelaState();
 }
 
-class _JogoTelaState extends State<JogoTela> {
+class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin {
+  /// Tremor curto do tabuleiro nas jogadas muito fortes (Incrível, Fantástico, combo x4).
+  late final _tremor = AnimationController(vsync: this, duration: const Duration(milliseconds: 380));
+
   final _chaveTabuleiro = GlobalKey();
   final _chavePalco = GlobalKey();
   late Partida _partida;
@@ -132,6 +135,7 @@ class _JogoTelaState extends State<JogoTela> {
   void dispose() {
     _relogio?.cancel();
     _falaTimer?.cancel();
+    _tremor.dispose();
     super.dispose();
   }
 
@@ -365,6 +369,9 @@ class _JogoTelaState extends State<JogoTela> {
       );
     }
     _iniciarRelogio();
+    if (((elogio?.nivel ?? 0) >= 3 || jogada.combo >= 4) && !MediaQuery.of(context).disableAnimations) {
+      _tremor.forward(from: 0);
+    }
     if (_tutorial == null && widget.fase == null) {
       final fala = falaAposJogada(
         elogioNivel: elogio?.nivel ?? 0,
@@ -913,7 +920,19 @@ class _JogoTelaState extends State<JogoTela> {
     );
   }
 
-  Widget _tabuleiro(double lado) => Stack(
+  Widget _tabuleiro(double lado) => AnimatedBuilder(
+    animation: _tremor,
+    builder: (context, filho) {
+      final v = 1 - _tremor.value;
+      final tremor = _tremor.isAnimating
+          ? Offset(math.sin(_tremor.value * math.pi * 9) * 4 * v, math.cos(_tremor.value * math.pi * 7) * 3 * v)
+          : Offset.zero;
+      return Transform.translate(offset: tremor, child: filho);
+    },
+    child: _tabuleiroSemTremor(lado),
+  );
+
+  Widget _tabuleiroSemTremor(double lado) => Stack(
     alignment: Alignment.center,
     clipBehavior: Clip.none,
     children: [

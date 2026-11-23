@@ -45,6 +45,7 @@ abstract final class CodigoProgresso {
       chave == 'molduraAtiva' ||
       chave == 'mascoteAtivo' ||
       chave == 'som' ||
+      chave == 'musica' ||
       chave == 'simbolos' ||
       _ehEstrela(chave);
 
@@ -55,7 +56,7 @@ abstract final class CodigoProgresso {
     if (_inteiros.contains(chave)) return v is int && v >= 0 && v <= 2000000000;
     if (_listas.contains(chave)) return v is List && v.length <= 400 && v.every((e) => e is String && e.length <= 40);
     if (chave == 'tema' || chave == 'molduraAtiva' || chave == 'mascoteAtivo') return v is String && v.length <= 30;
-    if (chave == 'som' || chave == 'simbolos') return v is bool;
+    if (chave == 'som' || chave == 'musica' || chave == 'simbolos') return v is bool;
     return false;
   }
 

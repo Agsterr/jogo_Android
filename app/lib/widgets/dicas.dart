@@ -131,6 +131,7 @@ abstract final class Dicas {
     'Joia (losango brilhante): quando a linha dela some, dá +1 gema e +30 pontos.',
     'Gelo (bloco esbranquiçado): precisa de DUAS linhas. A primeira só racha; a segunda tira e dá +1 gema e +20 pontos.',
     'Curinga (anel colorido): vale por qualquer cor na linha de uma cor só.',
+    'Raio (relâmpago amarelo): quando a linha dele some, limpa também a outra linha ou coluna inteira que passa por ele.',
     'Só aparecem no Infinito: Desafio, Arena e fases continuam com as mesmas peças para todos.',
   ]);
 

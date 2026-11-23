@@ -5,6 +5,11 @@ abstract final class Textos {
 }
 
 const _en = <String, String>{
+  'Música de fundo': 'Background music',
+  'Uma música calma durante o jogo. Só toca com o som ligado.':
+      'A calm tune while you play. It only plays with sound on.',
+  'Raio (relâmpago amarelo): quando a linha dele some, limpa também a outra linha ou coluna inteira que passa por ele.':
+      'Lightning (yellow bolt): when its line clears, it also clears the other whole row or column through it.',
   'Baú comum grátis (Encaixa+) · {0} hoje': 'Free common chest (Encaixa+) · {0} today',
   'Ver anúncio: baú comum · {0} hoje': 'Watch an ad: common chest · {0} today',
   'Volte amanhã para mais baús comuns': 'Come back tomorrow for more common chests',
@@ -671,6 +676,10 @@ const _en = <String, String>{
 };
 
 const _es = <String, String>{
+  'Música de fundo': 'Música de fondo',
+  'Uma música calma durante o jogo. Só toca com o som ligado.':
+      'Una música tranquila mientras juegas. Solo suena con el sonido activado.',
+  'Raio (relâmpago amarelo): quando a linha dele some, limpa também a outra linha ou coluna inteira que passa por ele.': 'Rayo (relámpago amarillo): cuando su línea desaparece, limpia también la otra fila o columna entera que pasa por él.',
   'Baú comum grátis (Encaixa+) · {0} hoje': 'Cofre común gratis (Encaixa+) · {0} hoy',
   'Ver anúncio: baú comum · {0} hoje': 'Ver un anuncio: cofre común · {0} hoy',
   'Volte amanhã para mais baús comuns': 'Vuelve mañana para más cofres comunes',

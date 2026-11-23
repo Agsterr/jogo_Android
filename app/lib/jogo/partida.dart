@@ -21,6 +21,7 @@ class Jogada {
     this.bombas = 0,
     this.rachados = 0,
     this.descongelados = 0,
+    this.raios = 0,
   });
 
   final int pontos;
@@ -36,7 +37,7 @@ class Jogada {
 
   /// Blocos especiais que saíram nesta jogada.
   /// [rachados]: gelo já descongelado que saiu agora (dá gema); [descongelados]: gelo que só rachou nesta jogada.
-  final int joias, bombas, rachados, descongelados;
+  final int joias, bombas, rachados, descongelados, raios;
 
   int get gemas => linhasDeUmaCor + (tabuleiroLimpo ? 3 : 0) + joias + rachados;
 }
@@ -216,6 +217,18 @@ class Partida {
         }
       }
     }
+    // Raio: leva junto a outra linha ou coluna inteira que passa por ele (menos pedras).
+    var raios = 0;
+    for (final (l, k) in casas) {
+      if (!Tabuleiro.ehRaio(tabuleiro.cor(l, k)!)) continue;
+      raios++;
+      for (var i = 0; i < Tabuleiro.tamanho; i++) {
+        for (final (vl, vk) in [(l, i), (i, k)]) {
+          final c = tabuleiro.cor(vl, vk);
+          if (c != null && c != Tabuleiro.pedra) todas.add((vl, vk));
+        }
+      }
+    }
     // Gelo: a primeira linha só descongela o bloco (vira "rachado" e fica); a segunda tira de verdade.
     final congelados = todas.where((c) => Tabuleiro.ehGelo(tabuleiro.cor(c.$1, c.$2)!)).toList();
     for (final (l, k) in congelados) {
@@ -238,7 +251,13 @@ class Partida {
       combo++;
       _semLimpar = 0;
       ganho +=
-          10 * linhas * linhas * combo + 20 * deUmaCor + (limpo ? 300 : 0) + 30 * joias + 15 * bombas + 20 * rachados;
+          10 * linhas * linhas * combo +
+          20 * deUmaCor +
+          (limpo ? 300 : 0) +
+          30 * joias +
+          15 * bombas +
+          15 * raios +
+          20 * rachados;
     } else if (++_semLimpar >= folgaCombo) {
       combo = 0;
     }
@@ -266,6 +285,7 @@ class Partida {
       bombas: bombas,
       rachados: rachados,
       descongelados: congelados.length,
+      raios: raios,
     );
   }
 

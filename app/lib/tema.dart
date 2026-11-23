@@ -220,6 +220,26 @@ void pintarMarcador(Canvas canvas, Rect r, int tipo, {double opacidade = 1}) {
         ..drawLine(c.translate(s * 0.05, -s * 0.06), c.translate(-s * 0.08, s * 0.1), traco)
         ..drawLine(c.translate(-s * 0.08, s * 0.1), c.translate(s * 0.06, s * 0.3), traco);
     }
+  } else if (tipo == Tabuleiro.raio) {
+    // Raio: relâmpago amarelo com contorno escuro.
+    final raio = Path()
+      ..moveTo(c.dx + s * 0.06, c.dy - s * 0.32)
+      ..lineTo(c.dx - s * 0.2, c.dy + s * 0.04)
+      ..lineTo(c.dx - s * 0.02, c.dy + s * 0.04)
+      ..lineTo(c.dx - s * 0.08, c.dy + s * 0.32)
+      ..lineTo(c.dx + s * 0.2, c.dy - s * 0.06)
+      ..lineTo(c.dx + s * 0.02, c.dy - s * 0.06)
+      ..close();
+    canvas
+      ..drawPath(
+        raio,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = s * 0.07
+          ..strokeJoin = StrokeJoin.round
+          ..color = const Color(0xFF3A2400).withValues(alpha: a(0.9)),
+      )
+      ..drawPath(raio, Paint()..color = const Color(0xFFFFF27A).withValues(alpha: a(1)));
   } else if (tipo == Tabuleiro.curinga) {
     // Curinga: anel de arco-íris.
     const cores = [Color(0xFFFF3D6E), Color(0xFFFFD000), Color(0xFF00E08A), Color(0xFF00B4FF), Color(0xFFA64DFF)];

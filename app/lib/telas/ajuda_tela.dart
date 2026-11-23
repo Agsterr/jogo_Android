@@ -132,6 +132,36 @@ class _AjudaTelaState extends State<AjudaTela> {
                       child: CartaoVidro(
                         child: Row(
                           children: [
+                            const Icon(Icons.music_note_rounded, size: 28),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    t('Música de fundo'),
+                                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                                  ),
+                                  Text(
+                                    t('Uma música calma durante o jogo. Só toca com o som ligado.'),
+                                    style: const TextStyle(fontSize: 14, height: 1.3),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Switch(value: _s.progresso.musicaLigada, onChanged: (_) => _s.progresso.alternarMusica()),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  ListenableBuilder(
+                    listenable: _s.progresso,
+                    builder: (context, _) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: CartaoVidro(
+                        child: Row(
+                          children: [
                             const Icon(Icons.visibility_rounded, size: 28),
                             const SizedBox(width: 12),
                             Expanded(
