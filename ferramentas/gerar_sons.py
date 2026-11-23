@@ -56,6 +56,15 @@ def main():
     salvar("linha.wav", juntar(nota(880, 0.35), nota(1318.5, 0.35, 0.35), atraso=0.03))
     # Combo: arpejo subindo (dó-mi-sol-dó).
     salvar("combo.wav", juntar(*(nota(f, 0.3, 0.45, 10) for f in (1046.5, 1318.5, 1568, 2093)), atraso=0.06))
+    # Incrível: arpejo rápido de cinco notas, uma oitava acima do combo (mais brilhante).
+    salvar(
+        "incrivel.wav",
+        juntar(*(nota(f, 0.32, 0.45, 9) for f in (1318.5, 1568, 1975.5, 2349.3, 2637)), atraso=0.05),
+    )
+    # Fantástico: acorde cheio com brilho subindo (escala de dó maior até o agudo) e uma nota grave no começo.
+    brilho = juntar(*(nota(f, 0.28, 0.35, 11) for f in (1046.5, 1318.5, 1568, 1975.5, 2093, 2637, 3136)), atraso=0.045)
+    base = nota(523.25, 0.7, 0.4, 5)
+    salvar("fantastico.wav", [(brilho[i] if i < len(brilho) else 0) + (base[i] if i < len(base) else 0) for i in range(len(brilho))])
     # Fim de jogo: duas notas descendo.
     salvar("fim.wav", juntar(nota(523.25, 0.5, 0.5, 5), nota(392, 0.7, 0.5, 4), atraso=0.22))
 

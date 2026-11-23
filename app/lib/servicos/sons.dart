@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'progresso.dart';
 
 /// Efeitos do jogo. Os arquivos saem de `ferramentas/gerar_sons.py`.
-enum Som { encaixe, linha, combo, fim }
+enum Som { encaixe, linha, combo, incrivel, fantastico, fim }
 
 abstract class Sons {
   Future<void> iniciar();

@@ -7,7 +7,9 @@ import 'package:share_plus/share_plus.dart';
 import '../app.dart';
 import '../jogo/arena.dart';
 import '../jogo/eventos.dart';
+import '../jogo/elogios.dart';
 import '../jogo/fases.dart';
+import '../jogo/marcos.dart';
 import '../jogo/missoes.dart';
 import '../jogo/partida.dart';
 import '../jogo/peca.dart';
@@ -66,7 +68,7 @@ class _JogoTelaState extends State<JogoTela> {
 
   List<BlocoRemovido> _removidos = const [];
   int _geracao = 0;
-  (String, int)? _aviso;
+  _AvisoDeJogada? _aviso;
 
   _Fim? _fim;
   bool _novoRecorde = false;
@@ -140,7 +142,7 @@ class _JogoTelaState extends State<JogoTela> {
     if (json == null || (widget.diario && json['dia'] != _dia)) return null;
     if (widget.arena && json['semana'] != _semana) return null;
     try {
-      return Partida.deJson(json);
+      return Partida.deJson(json)..rampa = _infinito;
     } on Object {
       return null; // formato antigo ou corrompido: começa de novo
     }
@@ -150,13 +152,17 @@ class _JogoTelaState extends State<JogoTela> {
       ? null
       : _s.progresso.salvarPartida(_chave, {..._partida.paraJson(), 'dia': _dia, 'semana': _semana});
 
+  /// Infinito: o único modo com metas de pontos e peças que ficam maiores (os outros têm peças iguais para todos).
+  bool get _infinito => widget.fase == null && !widget.diario && !widget.arena;
+
   Partida _novaPartida() =>
-      widget.fase?.novaPartida() ??
-      Partida(
-        semente: widget.arena
-            ? Arena.semente(_s.hoje())
-            : (widget.diario ? _dia : DateTime.now().microsecondsSinceEpoch),
-      );
+      (widget.fase?.novaPartida() ??
+            Partida(
+              semente: widget.arena
+                  ? Arena.semente(_s.hoje())
+                  : (widget.diario ? _dia : DateTime.now().microsecondsSinceEpoch),
+            ))
+        ..rampa = _infinito;
 
   // ---------- arrastar e soltar ----------
 
@@ -208,17 +214,42 @@ class _JogoTelaState extends State<JogoTela> {
   }
 
   void _aposJogada(Jogada jogada) {
-    if (jogada.linhasLimpas > 0) {
-      HapticFeedback.mediumImpact();
-      _s.sons.tocar(jogada.combo >= 2 || jogada.linhasLimpas >= 2 ? Som.combo : Som.linha);
+    final elogio = elogioDaJogada(jogada);
+    if (elogio != null) {
+      elogio.nivel >= 3 ? HapticFeedback.heavyImpact() : HapticFeedback.mediumImpact();
+      _s.sons.tocar(switch (elogio.nivel) {
+        1 => Som.linha,
+        2 => Som.combo,
+        3 => Som.incrivel,
+        _ => Som.fantastico,
+      });
       _removidos = jogada.removidos;
-      _geracao++;
-      _aviso = (_textoDoAviso(jogada), _geracao);
     } else {
       HapticFeedback.lightImpact();
       _s.sons.tocar(Som.encaixe);
     }
-    _s.progresso.ganharGemas(jogada.gemas * multiplicadorDeGemas(_s.hoje()));
+    final gemasDaJogada = jogada.gemas * multiplicadorDeGemas(_s.hoje());
+    final gemasDasMetas = jogada.marcos.fold(0, (soma, m) => soma + m.gemas);
+    if (jogada.marcos.isNotEmpty && elogio == null) _s.sons.tocar(Som.combo);
+    if (elogio != null || jogada.marcos.isNotEmpty) {
+      _geracao++;
+      _aviso = _AvisoDeJogada(
+        id: _geracao,
+        titulo: elogio?.texto ?? 'Meta ${Marcos.formatar(jogada.marcos.last.pontos)}!',
+        nivel: elogio?.nivel ?? 2,
+        detalhes: [
+          if (elogio != null && jogada.combo >= 2) 'Combo x${jogada.combo}',
+          if (elogio != null) '+${jogada.pontos}',
+          if (gemasDaJogada > 0) _textoGemas(gemasDaJogada),
+          for (final m in jogada.marcos)
+            if (elogio != null) 'Meta ${Marcos.formatar(m.pontos)}! ${_textoGemas(m.gemas)}' else _textoGemas(m.gemas),
+          // Só avisa "peças maiores" enquanto o nível ainda sobe.
+          if (jogada.marcos.isNotEmpty && _partida.marcosPagos <= Marcos.nivelMaximoDasPecas)
+            'Nível ${_partida.marcosPagos + 1}: peças maiores',
+        ],
+      );
+    }
+    _s.progresso.ganharGemas(gemasDaJogada + gemasDasMetas);
     _s.progresso.contarMissoes(_dia, contagemDaJogada(jogada));
     _avancarTutorial(jogada);
     _salvar();
@@ -238,22 +269,6 @@ class _JogoTelaState extends State<JogoTela> {
   }
 
   String _textoGemas(int n) => '+$n ${n == 1 ? 'gema' : 'gemas'}';
-
-  String _textoDoAviso(Jogada j) {
-    final partes = <String>[
-      if (j.tabuleiroLimpo)
-        'Tabuleiro limpo!'
-      else if (j.combo >= 2)
-        'Combo x${j.combo}'
-      else if (j.linhasLimpas >= 2)
-        '${j.linhasLimpas} linhas!'
-      else
-        'Boa!',
-      '+${j.pontos}',
-      if (j.gemas > 0) _textoGemas(j.gemas * multiplicadorDeGemas(_s.hoje())),
-    ];
-    return partes.join('\n');
-  }
 
   // ---------- fases ----------
 
@@ -418,7 +433,7 @@ class _JogoTelaState extends State<JogoTela> {
         child: LayoutBuilder(
           builder: (context, c) {
             // Reserva espaço para topo, placar, mão (2,5 casas) e reforços.
-            final lado = math.min(c.maxWidth - 24, (c.maxHeight - 250) / 1.33);
+            final lado = math.min(c.maxWidth - 24, (c.maxHeight - (_partida.rampa ? 282 : 250)) / 1.33);
             _casa = lado / 8;
             return Stack(
               key: _chavePalco,
@@ -561,8 +576,48 @@ class _JogoTelaState extends State<JogoTela> {
           ],
         ],
       ),
+      if (_partida.rampa) _barraDaMeta(),
     ],
   );
+
+  /// Infinito: nível das peças, progresso até a próxima meta de pontos e o que ela dá.
+  Widget _barraDaMeta() {
+    final pagos = _partida.marcosPagos;
+    final proxima = Marcos.proximo(pagos);
+    final anterior = pagos == 0 ? 0 : Marcos.todos[pagos - 1].pontos;
+    final progresso = proxima == null
+        ? 1.0
+        : ((_partida.pontos - anterior) / (proxima.pontos - anterior)).clamp(0.0, 1.0);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 6, 24, 0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+            decoration: BoxDecoration(color: Cores.painel, borderRadius: BorderRadius.circular(12)),
+            child: Text('Nível ${pagos + 1}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: LinearProgressIndicator(
+                value: progresso,
+                minHeight: 9,
+                backgroundColor: Cores.casa,
+                color: Cores.blocos[1],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            proxima == null ? 'Máximo!' : 'Meta ${Marcos.formatar(proxima.pontos)} · +${proxima.gemas}',
+            style: const TextStyle(fontSize: 13, color: Cores.textoFraco, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _tabuleiro(double lado) => Stack(
     alignment: Alignment.center,
@@ -596,9 +651,9 @@ class _JogoTelaState extends State<JogoTela> {
           ),
         ),
       ),
-      if (_aviso case (final texto, final id))
+      if (_aviso case final aviso?)
         IgnorePointer(
-          child: _Aviso(key: ValueKey(id), texto: texto),
+          child: _Aviso(key: ValueKey(aviso.id), aviso: aviso),
         ),
     ],
   );
@@ -912,28 +967,61 @@ class _BotaoReforco extends StatelessWidget {
 }
 
 /// Texto que pula no meio do tabuleiro ("Combo x3 +120") e some.
-class _Aviso extends StatelessWidget {
-  const _Aviso({super.key, required this.texto});
+/// O que mostrar no meio do tabuleiro depois de uma jogada: elogio (ou meta) e os detalhes.
+class _AvisoDeJogada {
+  const _AvisoDeJogada({required this.id, required this.titulo, required this.nivel, required this.detalhes});
 
-  final String texto;
+  final int id;
+  final String titulo;
+
+  /// 1 a 5: define o tamanho e a cor do título.
+  final int nivel;
+  final List<String> detalhes;
+}
+
+/// Texto que pula no meio do tabuleiro ("Incrível! +120") e some. Quanto maior o nível, maior e mais quente a cor.
+class _Aviso extends StatelessWidget {
+  const _Aviso({super.key, required this.aviso});
+
+  final _AvisoDeJogada aviso;
+
+  static const _tamanhos = [30.0, 36.0, 42.0, 48.0, 54.0];
+  static const _cores = [Color(0xFFFFFFFF), Color(0xFFFFF27A), Color(0xFFFFB347), Color(0xFFFF6EC7), Color(0xFF7DF9FF)];
+  static const _contornos = [
+    Color(0xFF3B1E8A),
+    Color(0xFFB0186A),
+    Color(0xFF8A2E00),
+    Color(0xFF6A0DAD),
+    Color(0xFF00508A),
+  ];
 
   @override
-  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
-    tween: Tween(begin: 0, end: 1),
-    duration: const Duration(milliseconds: 1100),
-    builder: (context, t, child) {
-      final escala = t < 0.2 ? Curves.easeOutBack.transform(t / 0.2) : 1.0;
-      final opacidade = t < 0.7 ? 1.0 : 1 - (t - 0.7) / 0.3;
-      return Opacity(
-        opacity: opacidade.clamp(0, 1),
-        child: Transform.translate(
-          offset: Offset(0, -30 * t),
-          child: Transform.scale(scale: escala, child: child),
-        ),
-      );
-    },
-    child: TextoContornado(texto, tamanho: 36, cor: const Color(0xFFFFF27A), contorno: const Color(0xFFB0186A)),
-  );
+  Widget build(BuildContext context) {
+    final n = (aviso.nivel - 1).clamp(0, 4);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 1000 + n * 150),
+      builder: (context, t, child) {
+        // Quanto maior o nível, mais "elástica" a entrada.
+        final escala = t < 0.2 ? Curves.easeOutBack.transform(t / 0.2) * (1 + n * 0.04) : 1.0 + n * 0.04;
+        final opacidade = t < 0.7 ? 1.0 : 1 - (t - 0.7) / 0.3;
+        return Opacity(
+          opacity: opacidade.clamp(0, 1),
+          child: Transform.translate(
+            offset: Offset(0, -30 * t),
+            child: Transform.scale(scale: escala, child: child),
+          ),
+        );
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextoContornado(aviso.titulo, tamanho: _tamanhos[n], cor: _cores[n], contorno: _contornos[n]),
+          for (final d in aviso.detalhes) TextoContornado(d, tamanho: 20, cor: Colors.white, contorno: _contornos[n]),
+        ],
+      ),
+    );
+  }
 }
 
 /// Balão do tutorial. Não bloqueia o arraste (só o botão ENTENDI recebe toque).

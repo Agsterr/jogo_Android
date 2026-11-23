@@ -26,3 +26,5 @@ O ícone adaptativo (Android 8+) usa essa frente sobre o degradê de `res/drawab
 
 ## Sons (`app/assets/sons/`)
 Efeitos sintetizados por `ferramentas/gerar_sons.py` (sem licença de terceiros): `python3 ferramentas/gerar_sons.py`.
+Arquivos: `encaixe`, `linha`, `combo`, `incrivel`, `fantastico` e `fim`. Todo valor de `Som` precisa de um `.wav` com o mesmo
+nome (um teste confere).

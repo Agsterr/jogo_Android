@@ -64,13 +64,24 @@ class Peca {
   final Formato formato;
   final int cor;
 
+  /// Chance de sair no sorteio. No [nivel] 0 é o `peso` do formato (nada muda); a cada nível as peças grandes
+  /// (5 blocos ou mais) saem mais e as pequenas (1 ou 2 blocos) menos.
+  static int _peso(Formato f, int nivel) {
+    final n = f.celulas.length;
+    if (n >= 5) return f.peso * (1 + nivel);
+    if (n <= 2) return f.peso > nivel ~/ 2 ? f.peso - nivel ~/ 2 : 1;
+    return f.peso;
+  }
+
   /// Sorteia uma peça usando só as [cores] primeiras cores (fases de "uma cor" usam menos).
-  static Peca sortear(Sorteio sorteio, [int cores = totalCores]) {
-    final pesoTotal = Formato.todos.fold(0, (s, f) => s + f.peso);
+  /// [nivel] sobe a dificuldade do modo Infinito; com 0 o sorteio é igual ao de sempre (fases, Desafio, Arena).
+  static Peca sortear(Sorteio sorteio, [int cores = totalCores, int nivel = 0]) {
+    final pesoTotal = Formato.todos.fold(0, (s, f) => s + _peso(f, nivel));
     var alvo = sorteio.proximo(pesoTotal);
     for (final f in Formato.todos) {
-      if (alvo < f.peso) return Peca(f, sorteio.proximo(cores));
-      alvo -= f.peso;
+      final peso = _peso(f, nivel);
+      if (alvo < peso) return Peca(f, sorteio.proximo(cores));
+      alvo -= peso;
     }
     throw StateError('inalcançável');
   }

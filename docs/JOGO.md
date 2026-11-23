@@ -35,6 +35,28 @@ bônus** e **Desafio do dia compartilhável** (mesmas peças para todo mundo, co
 
 **Combo:** sobe 1 a cada jogada que limpa; só zera depois de 3 jogadas seguidas sem limpar.
 
+## Elogios (`app/lib/jogo/elogios.dart`)
+Depois de limpar linhas, o texto no meio do tabuleiro cresce com a força da jogada. **Força = linhas limpas + combo acima
+do primeiro.** O tamanho, a cor, a vibração e o som acompanham o nível.
+
+| Elogio | Quando | Som |
+|---|---|---|
+| Boa! | 1 linha (força 1) | `linha` |
+| Ótimo! | força 2 ou 3 (2 linhas; 1 linha no combo x2 ou x3) | `combo` |
+| Incrível! | força 4 ou 5 (4 linhas; 2 linhas no combo x3) | `incrivel` |
+| Fantástico! | força 6 ou mais | `fantastico` |
+| Perfeito! | tabuleiro vazio | `fantastico` |
+
+## Infinito: metas de pontos e níveis (`app/lib/jogo/marcos.dart`)
+Só no modo Infinito (Desafio, Arena e fases têm as mesmas peças para todos e não mudam).
+- **Metas:** 1.000 (+3 gemas), 2.500 (+5), 5.000 (+10), 10.000 (+20), 20.000 (+40) e 40.000 (+80). A barra sob o placar
+  mostra o nível, o progresso e a próxima meta.
+- **Nível = metas pagas + 1.** A cada meta as peças grandes (5 blocos ou mais) saem mais e as pequenas (1 ou 2 blocos)
+  menos, até o nível 5 (4 metas). A mão nova continua sempre com pelo menos uma peça que cabe.
+- A meta é paga **uma vez só**: desfazer e jogar de novo não paga de novo. Partidas salvas antes das metas existirem não
+  recebem as metas que já tinham passado.
+- No nível 0 o sorteio é idêntico ao de antes (conferido nas 300 fases e em partidas de teste).
+
 ## Reforços (gastam gemas)
 | Reforço | Custo | Efeito |
 |---|---|---|

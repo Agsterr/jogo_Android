@@ -1,3 +1,4 @@
+import 'marcos.dart';
 import 'peca.dart';
 import 'sorteio.dart';
 import 'tabuleiro.dart';
@@ -15,6 +16,7 @@ class Jogada {
     required this.tabuleiroLimpo,
     required this.removidos,
     this.pedrasQuebradas = 0,
+    this.marcos = const [],
   });
 
   final int pontos;
@@ -24,6 +26,9 @@ class Jogada {
   final bool tabuleiroLimpo;
   final List<BlocoRemovido> removidos;
   final int pedrasQuebradas;
+
+  /// Metas de pontos alcançadas nesta jogada (só no Infinito).
+  final List<Marco> marcos;
 
   int get gemas => linhasDeUmaCor + (tabuleiroLimpo ? 3 : 0);
 }
@@ -41,6 +46,16 @@ class Partida {
 
   /// Quantas cores as peças podem ter.
   final int cores;
+
+  /// Modo Infinito: tem metas de pontos e as peças ficam maiores a cada meta. Fases, Desafio e Arena (mesmas peças para
+  /// todos) deixam desligado.
+  bool rampa = false;
+
+  /// Metas já pagas. Fora do "Desfazer" de propósito: desfazer e jogar de novo não paga a meta duas vezes.
+  int marcosPagos = 0;
+
+  /// Nível das peças: sobe a cada meta paga, até [Marcos.nivelMaximoDasPecas].
+  int get nivel => rampa ? (marcosPagos < Marcos.nivelMaximoDasPecas ? marcosPagos : Marcos.nivelMaximoDasPecas) : 0;
 
   /// Para salvar no aparelho (o "Desfazer" não é salvo).
   Map<String, Object?> paraJson() => {
@@ -66,6 +81,8 @@ class Partida {
     'continuou': continuou,
     'jogadas': jogadas,
     'linhas': linhas,
+    'rampa': rampa,
+    'marcosPagos': marcosPagos,
     'cores': cores,
     'linhasDeUmaCor': linhasDeUmaCor,
     'maiorCombo': maiorCombo,
@@ -90,9 +107,12 @@ class Partida {
       .._semLimpar = j['semLimpar']! as int
       ..continuou = j['continuou']! as bool
       ..jogadas = (j['jogadas'] as int?) ?? 0
+      ..rampa = (j['rampa'] as bool?) ?? false
       ..linhas = (j['linhas'] as int?) ?? 0
       ..linhasDeUmaCor = (j['linhasDeUmaCor'] as int?) ?? 0
       ..maiorCombo = (j['maiorCombo'] as int?) ?? 0;
+    // Partida salva antes das metas existirem: não paga retroativamente as que já passou.
+    p.marcosPagos = (j['marcosPagos'] as int?) ?? Marcos.novas(p.pontos, 0).length;
     return p;
   }
 
@@ -169,6 +189,8 @@ class Partida {
     this.linhas += linhas;
     linhasDeUmaCor += deUmaCor;
     if (combo > maiorCombo) maiorCombo = combo;
+    final novosMarcos = rampa ? Marcos.novas(pontos, marcosPagos) : const <Marco>[];
+    marcosPagos += novosMarcos.length;
 
     mao = [...mao]..[indice] = null;
     if (mao.every((p) => p == null)) _novaMao();
@@ -181,6 +203,7 @@ class Partida {
       tabuleiroLimpo: limpo,
       removidos: removidos,
       pedrasQuebradas: removidos.where((b) => b.cor == Tabuleiro.pedra).length,
+      marcos: novosMarcos,
     );
   }
 
@@ -217,7 +240,7 @@ class Partida {
   /// Sorteia 3 peças; tenta algumas vezes para que pelo menos uma caiba.
   void _novaMao() {
     for (var tentativa = 0; tentativa < 30; tentativa++) {
-      final nova = List<Peca?>.generate(tamanhoMao, (_) => Peca.sortear(_sorteio, cores));
+      final nova = List<Peca?>.generate(tamanhoMao, (_) => Peca.sortear(_sorteio, cores, nivel));
       mao = nova;
       if (nova.any((p) => tabuleiro.cabeEmAlgumLugar(p!.formato))) return;
     }

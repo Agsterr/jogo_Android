@@ -60,9 +60,10 @@ abstract final class Dicas {
   ]);
 
   static const infinito = Dica('infinito', 'Modo Infinito', Icons.all_inclusive_rounded, Color(0xFFFF8A00), [
-    'Jogue até não caber mais nenhuma peça.',
-    'Tente bater o seu recorde.',
-    'A partida fica salva: pode sair e continuar depois.',
+    'Jogue até não caber mais nenhuma peça: não tem limite de pontos.',
+    'Cada meta de pontos (1.000, 2.500, 5.000...) dá gemas e sobe o nível: as peças ficam maiores.',
+    'Elogios maiores (Ótimo, Incrível, Fantástico) vêm de várias linhas de uma vez e de combos.',
+    'Tente bater o seu recorde. A partida fica salva: pode sair e continuar depois.',
   ]);
 
   static const desafio = Dica('desafio', 'Desafio do dia', Icons.event_rounded, Color(0xFFFF2E7E), [
