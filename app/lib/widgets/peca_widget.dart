@@ -22,10 +22,11 @@ class PecaWidget extends StatelessWidget {
 }
 
 class _Pintor extends CustomPainter {
-  _Pintor(this.peca, this.apagada);
+  _Pintor(this.peca, this.apagada) : simbolos = Cores.simbolos;
 
   final Peca peca;
   final bool apagada;
+  final bool simbolos;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -37,12 +38,13 @@ class _Pintor extends CustomPainter {
         canvas,
         Rect.fromLTWH(cel.coluna * c + folga, cel.linha * c + folga, c - 2 * folga, c - 2 * folga),
         cor,
+        indice: apagada ? null : peca.cor,
       );
     }
   }
 
   @override
-  bool shouldRepaint(_Pintor antigo) => antigo.peca != peca || antigo.apagada != apagada;
+  bool shouldRepaint(_Pintor antigo) => antigo.peca != peca || antigo.apagada != apagada || antigo.simbolos != simbolos;
 }
 
 /// Contador de gemas (usado no topo das telas).

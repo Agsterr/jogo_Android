@@ -46,18 +46,18 @@ void main() {
     await capturar(tester, '19-lembrete');
 
     falso.permissao = false;
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(Switch).first);
     await tester.pump();
     expect(s.progresso.lembreteLigado, isFalse);
     expect(find.textContaining('Sem permissão'), findsOneWidget);
 
     falso.permissao = true;
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(Switch).first);
     await tester.pump();
     expect(s.progresso.lembreteLigado, isTrue);
     expect(falso.ultimo, (ligado: true, feito: false));
 
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(Switch).first);
     await tester.pump();
     expect(s.progresso.lembreteLigado, isFalse);
     expect(falso.ultimo, (ligado: false, feito: false));

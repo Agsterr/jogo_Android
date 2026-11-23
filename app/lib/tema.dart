@@ -30,6 +30,9 @@ abstract final class Cores {
   /// Cores das peças: mudam com o tema escolhido na loja (`Progresso.usarTema`).
   static List<Color> pecas = TemaDeBlocos.classico.cores;
 
+  /// Desenha um símbolo em cada cor de bloco (modo para daltônicos; `Progresso.alternarSimbolos`).
+  static bool simbolos = false;
+
   static const fundo = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -59,7 +62,7 @@ ThemeData temaDoJogo() {
 }
 
 /// Desenha um bloco "bala de goma": base 3D, degradê vivo, borda de luz e brilho.
-void pintarBloco(Canvas canvas, Rect r, Color cor, {double opacidade = 1}) {
+void pintarBloco(Canvas canvas, Rect r, Color cor, {double opacidade = 1, int? indice}) {
   final raio = Radius.circular(r.width * 0.22);
   final escura = Color.lerp(cor, Colors.black, 0.4)!;
   final clara = Color.lerp(cor, Colors.white, 0.45)!;
@@ -99,11 +102,75 @@ void pintarBloco(Canvas canvas, Rect r, Color cor, {double opacidade = 1}) {
     r.width * 0.06,
     Paint()..color = o(Colors.white, 0.7),
   );
+  if (Cores.simbolos && indice != null) _pintarSimbolo(canvas, corpo, indice, opacidade);
+}
+
+/// Um símbolo diferente para cada uma das 6 cores: círculo, triângulo, losango, estrela, cruz e quadrado.
+void _pintarSimbolo(Canvas canvas, Rect corpo, int indice, double opacidade) {
+  final c = corpo.center;
+  final s = corpo.shortestSide * 0.24;
+  final Path p;
+  switch (indice % 6) {
+    case 0:
+      p = Path()..addOval(Rect.fromCircle(center: c, radius: s));
+    case 1:
+      p = Path()
+        ..moveTo(c.dx, c.dy - s * 1.1)
+        ..lineTo(c.dx + s * 1.1, c.dy + s * 0.9)
+        ..lineTo(c.dx - s * 1.1, c.dy + s * 0.9)
+        ..close();
+    case 2:
+      p = Path()
+        ..moveTo(c.dx, c.dy - s * 1.2)
+        ..lineTo(c.dx + s * 1.2, c.dy)
+        ..lineTo(c.dx, c.dy + s * 1.2)
+        ..lineTo(c.dx - s * 1.2, c.dy)
+        ..close();
+    case 3:
+      p = Path()
+        ..moveTo(c.dx, c.dy - s * 1.4)
+        ..lineTo(c.dx + s * 0.4, c.dy - s * 0.4)
+        ..lineTo(c.dx + s * 1.4, c.dy)
+        ..lineTo(c.dx + s * 0.4, c.dy + s * 0.4)
+        ..lineTo(c.dx, c.dy + s * 1.4)
+        ..lineTo(c.dx - s * 0.4, c.dy + s * 0.4)
+        ..lineTo(c.dx - s * 1.4, c.dy)
+        ..lineTo(c.dx - s * 0.4, c.dy - s * 0.4)
+        ..close();
+    case 4:
+      final e = s * 0.42;
+      p = Path()
+        ..moveTo(c.dx - e, c.dy - s * 1.2)
+        ..lineTo(c.dx + e, c.dy - s * 1.2)
+        ..lineTo(c.dx + e, c.dy - e)
+        ..lineTo(c.dx + s * 1.2, c.dy - e)
+        ..lineTo(c.dx + s * 1.2, c.dy + e)
+        ..lineTo(c.dx + e, c.dy + e)
+        ..lineTo(c.dx + e, c.dy + s * 1.2)
+        ..lineTo(c.dx - e, c.dy + s * 1.2)
+        ..lineTo(c.dx - e, c.dy + e)
+        ..lineTo(c.dx - s * 1.2, c.dy + e)
+        ..lineTo(c.dx - s * 1.2, c.dy - e)
+        ..lineTo(c.dx - e, c.dy - e)
+        ..close();
+    default:
+      p = Path()..addRect(Rect.fromCenter(center: c, width: s * 1.8, height: s * 1.8));
+  }
+  canvas
+    ..drawPath(
+      p,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = corpo.width * 0.07
+        ..strokeJoin = StrokeJoin.round
+        ..color = Colors.black.withValues(alpha: 0.45 * opacidade),
+    )
+    ..drawPath(p, Paint()..color = Colors.white.withValues(alpha: 0.95 * opacidade));
 }
 
 /// Desenha a casa do tabuleiro: bloco colorido ou pedra (índice `Tabuleiro.pedra`).
 void pintarCasa(Canvas canvas, Rect r, int cor, {double opacidade = 1}) {
-  if (cor < Cores.pecas.length) return pintarBloco(canvas, r, Cores.pecas[cor], opacidade: opacidade);
+  if (cor < Cores.pecas.length) return pintarBloco(canvas, r, Cores.pecas[cor], opacidade: opacidade, indice: cor);
   pintarBloco(canvas, r, Cores.pedra, opacidade: opacidade);
   final risco = Paint()
     ..color = Colors.black.withValues(alpha: 0.35 * opacidade)

@@ -85,6 +85,36 @@ class _AjudaTelaState extends State<AjudaTela> {
                       ),
                     ),
                   ),
+                  ListenableBuilder(
+                    listenable: _s.progresso,
+                    builder: (context, _) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: CartaoVidro(
+                        child: Row(
+                          children: [
+                            const Icon(Icons.visibility_rounded, size: 28),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Símbolos nas peças',
+                                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                                  ),
+                                  Text(
+                                    'Um desenho em cada cor, para quem tem dificuldade de distinguir cores.',
+                                    style: TextStyle(fontSize: 14, height: 1.3),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Switch(value: _s.progresso.simbolos, onChanged: (_) => _s.progresso.alternarSimbolos()),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   for (final d in Dicas.todas)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),

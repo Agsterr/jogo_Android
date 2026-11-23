@@ -127,3 +127,18 @@ Uma figurinha nova ao **concluir o Desafio do dia** (uma por dia) e outra ao **a
 sai sempre uma que faltava, do primeiro álbum incompleto. Álbuns de 12 figurinhas: **Tesouros** e **Natureza** (este só
 aparece com o primeiro completo). Completar um álbum paga **+100 gemas**. As figurinhas vão no código de progresso e na
 cópia automática. Regras em `app/lib/jogo/album.dart`; tela em `app/lib/telas/album_tela.dart`.
+
+## Desafio de amigo
+Ao terminar uma partida, **Desafiar amigos** compartilha a mensagem com um código (`ENCAIXA-AMIGO-<semente>-<pontos>-<f|i>`).
+O amigo toca em **Código de amigo** na tela inicial, cola a mensagem inteira e joga **com as mesmas peças**, com a sua
+pontuação no topo (`AMIGO: 3000`). Vencer paga **+10 gemas**, uma vez por desafio (empate não vale). No Infinito (`i`) as
+peças crescem com o nível, como no jogo original. Sem servidor: o código carrega tudo. Regras em `app/lib/jogo/amigo.dart`.
+
+## Conquistas
+26 conquistas (partidas, linhas de uma vez, combo, pontos, fases, estrelas, Desafios, sequência, figurinhas, amigos).
+Cada uma paga gemas (5 a 150) e o jogador **toca para pegar** na tela Conquistas; o cartão da tela inicial mostra um selo
+com quantas estão prontas. Regras em `app/lib/jogo/conquistas.dart`.
+
+## Símbolos para daltônicos
+Em **Como jogar**, o interruptor "Símbolos nas peças" desenha um símbolo em cada cor (círculo, triângulo, losango, estrela,
+cruz e quadrado) nas peças da mão, no tabuleiro e na prévia. Desligado por padrão e vai no código de progresso.

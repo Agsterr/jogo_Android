@@ -105,6 +105,7 @@ class _Pintor extends CustomPainter {
           casa(l, k),
           p.valida ? Cores.pecas[p.peca.cor] : Colors.white,
           opacidade: p.valida ? 0.55 : 0.18,
+          indice: p.valida ? p.peca.cor : null,
         );
       }
     }

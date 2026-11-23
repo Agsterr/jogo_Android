@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../app.dart';
 import '../jogo/album.dart';
+import '../jogo/amigo.dart';
 import '../jogo/arena.dart';
 import '../jogo/eventos.dart';
 import '../jogo/elogios.dart';
@@ -42,7 +43,15 @@ enum _Fim { segundaChance, resultado, faseVencida, faseFalhou }
 enum _Reforco { martelo, bomba }
 
 class JogoTela extends StatefulWidget {
-  const JogoTela({super.key, required this.servicos, this.diario = false, this.arena = false, this.fase, this.partida});
+  const JogoTela({
+    super.key,
+    required this.servicos,
+    this.diario = false,
+    this.arena = false,
+    this.fase,
+    this.partida,
+    this.amigo,
+  });
 
   final Servicos servicos;
 
@@ -54,6 +63,9 @@ class JogoTela extends StatefulWidget {
 
   /// Modo Fases: objetivo e limite de peças.
   final Fase? fase;
+
+  /// Desafio de amigo: as mesmas peças dele, com a pontuação dele para bater.
+  final DesafioAmigo? amigo;
 
   /// Partida pronta (usada nos testes e nas capturas de tela).
   final Partida? partida;
@@ -80,6 +92,7 @@ class _JogoTelaState extends State<JogoTela> {
   _Fim? _fim;
   bool _novoRecorde = false;
   int _gemasDesafio = 0;
+  int _gemasAmigo = 0;
   ({Album album, Figurinha figurinha, bool completou})? _figurinhaNova;
 
   /// Fases: peças extras ganhas na ajuda (uma ajuda por tentativa).
@@ -142,12 +155,13 @@ class _JogoTelaState extends State<JogoTela> {
   }
 
   /// Clássico e Desafio têm partidas salvas separadas.
-  String get _chave => widget.arena ? 'arena' : (widget.diario ? 'desafio' : 'classico');
+  String get _chave =>
+      widget.arena ? 'arena' : (widget.diario ? 'desafio' : (widget.amigo != null ? 'amigo' : 'classico'));
 
   int get _semana => Arena.semana(_s.hoje());
 
   Partida? _partidaSalva() {
-    if (widget.fase != null) return null;
+    if (widget.fase != null || widget.amigo != null) return null; // desafio de amigo sempre começa do zero
     final json = _s.progresso.partidaSalva(_chave);
     if (json == null || (widget.diario && json['dia'] != _dia)) return null;
     if (widget.arena && json['semana'] != _semana) return null;
@@ -158,17 +172,20 @@ class _JogoTelaState extends State<JogoTela> {
     }
   }
 
-  void _salvar() => widget.fase != null
+  void _salvar() => widget.fase != null || widget.amigo != null
       ? null
       : _s.progresso.salvarPartida(_chave, {..._partida.paraJson(), 'dia': _dia, 'semana': _semana});
 
   /// Infinito: o único modo com metas de pontos e peças que ficam maiores (os outros têm peças iguais para todos).
-  bool get _infinito => widget.fase == null && !widget.diario && !widget.arena;
+  bool get _infinito =>
+      widget.fase == null && !widget.diario && !widget.arena && (widget.amigo == null || widget.amigo!.infinito);
 
   Partida _novaPartida() =>
       (widget.fase?.novaPartida() ??
             Partida(
-              semente: widget.arena
+              semente: widget.amigo != null
+                  ? widget.amigo!.semente
+                  : widget.arena
                   ? Arena.semente(_s.hoje())
                   : (widget.diario ? _dia : DateTime.now().microsecondsSinceEpoch),
             ))
@@ -259,6 +276,7 @@ class _JogoTelaState extends State<JogoTela> {
         ],
       );
     }
+    _s.progresso.registrarJogada(linhas: jogada.linhasLimpas, combo: jogada.combo);
     _s.progresso.ganharGemas(gemasDaJogada + gemasDasMetas);
     _s.progresso.contarMissoes(_dia, contagemDaJogada(jogada));
     _avancarTutorial(jogada);
@@ -432,6 +450,7 @@ class _JogoTelaState extends State<JogoTela> {
     final recorde = await _s.progresso.fimDePartida(pontos);
     await _s.progresso.contarMissoes(_dia, {TipoMissao.partidas: 1, TipoMissao.pontos: pontos});
     final gemasDesafio = widget.diario ? await _s.progresso.concluirDesafio(_dia, pontos) : 0;
+    final gemasAmigo = widget.amigo == null ? 0 : await _s.progresso.concluirDesafioDeAmigo(widget.amigo!, pontos);
     if (widget.diario) _figurinhaNova = _s.progresso.pegarFigurinhaRecente();
     if (widget.diario) _s.reagendarLembrete(); // hoje já jogou: o próximo lembrete passa para amanhã
     if (widget.arena) {
@@ -442,6 +461,7 @@ class _JogoTelaState extends State<JogoTela> {
     setState(() {
       _novoRecorde = recorde;
       _gemasDesafio = gemasDesafio;
+      _gemasAmigo = gemasAmigo;
       _fim = _Fim.resultado;
     });
     await mostrarRoletaDaPartida(context, _s);
@@ -482,7 +502,13 @@ class _JogoTelaState extends State<JogoTela> {
         ? 'Encaixa 🧩 Desafio #${numeroDoDesafio(_s.hoje())}\n⭐ ${_partida.pontos} pontos\n'
               'Mesmas peças para todo mundo. Consegue me passar?\n$linkDaLoja'
         : 'Fiz ${_partida.pontos} pontos no Encaixa 🧩 Consegue me passar?\n$linkDaLoja';
-    SharePlus.instance.share(ShareParams(text: texto));
+    final codigo = widget.fase != null || _partida.semente <= 0
+        ? null
+        : DesafioAmigo(semente: _partida.semente, pontos: _partida.pontos, infinito: _infinito).codigo;
+    final completo = codigo == null
+        ? texto
+        : '$texto\n\nQuer jogar com as mesmas peças que eu? No Encaixa, toque em "Código de amigo" e cole:\n$codigo';
+    SharePlus.instance.share(ShareParams(text: completo));
   }
 
   // ---------- tela ----------
@@ -554,6 +580,11 @@ class _JogoTelaState extends State<JogoTela> {
             const Text(
               'ARENA DA SEMANA',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
+            ),
+          if (widget.amigo case final amigo?)
+            Text(
+              'AMIGO: ${amigo.pontos}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
             ),
           if (widget.diario)
             Text(
@@ -1016,6 +1047,22 @@ class _JogoTelaState extends State<JogoTela> {
           style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
         ),
       ),
+    if (widget.amigo case final amigo?)
+      Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Text(
+          [
+            _partida.pontos > amigo.pontos
+                ? 'Você venceu seu amigo! ${_partida.pontos} x ${amigo.pontos}'
+                : (_partida.pontos == amigo.pontos
+                      ? 'Empate! ${_partida.pontos} x ${amigo.pontos}'
+                      : 'Quase! Faltaram ${amigo.pontos - _partida.pontos + 1} pontos para vencer'),
+            if (_gemasAmigo > 0) '+$_gemasAmigo gemas',
+          ].join('\n'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
+        ),
+      ),
     if (widget.arena)
       Padding(
         padding: const EdgeInsets.only(top: 8),
@@ -1030,7 +1077,11 @@ class _JogoTelaState extends State<JogoTela> {
         ),
       ),
     const SizedBox(height: 20),
-    _botao(widget.diario || widget.arena ? 'Tentar de novo' : 'Jogar de novo', Icons.replay_rounded, _jogarDeNovo),
+    _botao(
+      widget.diario || widget.arena || widget.amigo != null ? 'Tentar de novo' : 'Jogar de novo',
+      Icons.replay_rounded,
+      _jogarDeNovo,
+    ),
     const SizedBox(height: 10),
     OutlinedButton.icon(
       style: OutlinedButton.styleFrom(minimumSize: const Size(64, 48)),

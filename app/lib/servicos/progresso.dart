@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../jogo/album.dart';
+import '../jogo/amigo.dart';
+import '../jogo/conquistas.dart';
 import '../jogo/arena.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
@@ -16,6 +18,7 @@ import '../tema.dart';
 class Progresso extends ChangeNotifier {
   Progresso(this._prefs) {
     Cores.pecas = temaAtivo.cores;
+    Cores.simbolos = simbolos;
   }
 
   static Future<Progresso> carregar() async => Progresso(await SharedPreferences.getInstance());
@@ -44,6 +47,15 @@ class Progresso extends ChangeNotifier {
 
   Future<void> definirLembrete(bool ligado) async {
     await _prefs.setBool('lembrete', ligado);
+    notifyListeners();
+  }
+
+  /// Símbolo em cada cor de bloco (ajuda quem não distingue as cores).
+  bool get simbolos => _prefs.getBool('simbolos') ?? false;
+
+  Future<void> alternarSimbolos() async {
+    await _prefs.setBool('simbolos', !simbolos);
+    Cores.simbolos = simbolos;
     notifyListeners();
   }
 
@@ -130,6 +142,8 @@ class Progresso extends ChangeNotifier {
     if (primeiraVez) {
       final dias = sequencia(dia) + 1;
       await _prefs.setInt('sequencia', dias);
+      if (dias > (_prefs.getInt('sequenciaMax') ?? 0)) await _prefs.setInt('sequenciaMax', dias);
+      await _prefs.setInt('desafiosTotal', (_prefs.getInt('desafiosTotal') ?? 0) + 1);
       gemasGanhas = 5 + premioDaSequencia(dias);
       await contarMissao(dia, TipoMissao.desafio, 1);
       await ganharFigurinha(dia * 31 + 2);
@@ -185,6 +199,7 @@ class Progresso extends ChangeNotifier {
     }
     await _prefs.setInt('codigoEm', dados['salvoEm']! as int);
     Cores.pecas = temaAtivo.cores;
+    Cores.simbolos = simbolos;
     notifyListeners();
   }
 
@@ -326,6 +341,59 @@ class Progresso extends ChangeNotifier {
     await _prefs.setStringList('missoesPegas', [...?_prefs.getStringList('missoesPegas'), '$indice']);
     await ganharGemas(m.gemas);
     return true;
+  }
+
+  // ---------- desafio de amigo ----------
+
+  /// Terminou um desafio de amigo. Vencer paga gemas uma vez por desafio. Devolve as gemas ganhas.
+  Future<int> concluirDesafioDeAmigo(DesafioAmigo desafio, int pontos) async {
+    if (pontos <= desafio.pontos) return 0;
+    final feitos = _prefs.getStringList('amigosFeitos') ?? [];
+    if (feitos.contains(desafio.id)) return 0;
+    // Guarda só os últimos 200 para a lista não crescer sem limite.
+    final novos = [...feitos, desafio.id];
+    await _prefs.setStringList('amigosFeitos', novos.length > 200 ? novos.sublist(novos.length - 200) : novos);
+    await _prefs.setInt('amigosVencidos', (_prefs.getInt('amigosVencidos') ?? 0) + 1);
+    await ganharGemas(gemasPorVencerAmigo);
+    return gemasPorVencerAmigo;
+  }
+
+  // ---------- conquistas ----------
+
+  /// Registra o que a jogada fez (maior limpeza de linhas e maior combo).
+  Future<void> registrarJogada({required int linhas, required int combo}) async {
+    if (linhas > (_prefs.getInt('linhasMax') ?? 0)) await _prefs.setInt('linhasMax', linhas);
+    if (combo > (_prefs.getInt('comboMax') ?? 0)) await _prefs.setInt('comboMax', combo);
+  }
+
+  Estatisticas get estatisticas => Estatisticas(
+    partidas: partidas,
+    recorde: recorde,
+    linhasMax: _prefs.getInt('linhasMax') ?? 0,
+    comboMax: _prefs.getInt('comboMax') ?? 0,
+    fasesConcluidas: faseLiberada - 1,
+    estrelas: estrelasTotais,
+    sequenciaMax: _prefs.getInt('sequenciaMax') ?? 0,
+    desafios: _prefs.getInt('desafiosTotal') ?? 0,
+    figurinhas: figurinhas.length,
+    amigosVencidos: _prefs.getInt('amigosVencidos') ?? 0,
+  );
+
+  Set<String> get conquistasPegas => {...?_prefs.getStringList('conquistas')};
+
+  /// Conquistas já alcançadas e ainda não resgatadas.
+  int get conquistasProntas {
+    final e = estatisticas, pegas = conquistasPegas;
+    return Conquista.todas.where((c) => c.feita(e) && !pegas.contains(c.id)).length;
+  }
+
+  /// Resgata o prêmio de uma conquista alcançada. Devolve as gemas (0 se não dá).
+  Future<int> pegarConquista(String id) async {
+    final c = Conquista.todas.where((c) => c.id == id).firstOrNull;
+    if (c == null || !c.feita(estatisticas) || conquistasPegas.contains(id)) return 0;
+    await _prefs.setStringList('conquistas', [...?_prefs.getStringList('conquistas'), id]);
+    await ganharGemas(c.gemas);
+    return c.gemas;
   }
 
   // ---------- álbum de figurinhas ----------

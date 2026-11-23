@@ -1,9 +1,12 @@
 import 'dart:math' as math;
 
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
 import '../jogo/album.dart';
+import '../jogo/amigo.dart';
+import '../jogo/conquistas.dart';
 import '../jogo/arena.dart';
 import '../jogo/eventos.dart';
 import '../jogo/fases.dart';
@@ -19,6 +22,7 @@ import '../widgets/doce.dart';
 import '../widgets/peca_widget.dart';
 import 'ajuda_tela.dart';
 import 'album_tela.dart';
+import 'conquistas_tela.dart';
 import 'arena_tela.dart';
 import 'jogo_tela.dart';
 import 'loja_tela.dart';
@@ -66,6 +70,11 @@ class _InicioTelaState extends State<InicioTela> {
         mostrarDicaUmaVez(context, servicos, Dicas.progresso);
       }
     });
+  }
+
+  Future<void> _codigoDeAmigo() async {
+    final desafio = await showDialog<DesafioAmigo>(context: context, builder: (_) => const _DialogoCodigoAmigo());
+    if (desafio != null && mounted) _abrir(JogoTela(servicos: servicos, amigo: desafio));
   }
 
   void _abrir(Widget tela) => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => tela));
@@ -215,10 +224,37 @@ class _InicioTelaState extends State<InicioTela> {
                           _RecuperarSequencia(servicos: servicos, dia: dia),
                           const SizedBox(height: 14),
                         ],
-                        _CartaoAlbum(
-                          quantas: p.figurinhas.length,
-                          total: Album.todos.fold(0, (soma, a) => soma + a.figurinhas.length),
-                          aoTocar: () => _abrir(AlbumTela(servicos: servicos)),
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: _Atalho(
+                                  icone: Icons.collections_bookmark_rounded,
+                                  titulo: 'Álbum',
+                                  subtitulo:
+                                      '${p.figurinhas.length} de ${Album.todos.fold(0, (soma, a) => soma + a.figurinhas.length)} figurinhas',
+                                  cores: const [Color(0xFF00D084), Color(0xFF008F9B)],
+                                  contorno: const Color(0xFF00424A),
+                                  aoTocar: () => _abrir(AlbumTela(servicos: servicos)),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _Atalho(
+                                  icone: Icons.military_tech_rounded,
+                                  titulo: 'Conquistas',
+                                  subtitulo: p.conquistasProntas > 0
+                                      ? '${p.conquistasProntas} prêmio${p.conquistasProntas == 1 ? '' : 's'} para pegar!'
+                                      : '${Conquista.todas.where((c) => c.feita(p.estatisticas)).length} de ${Conquista.todas.length}',
+                                  cores: const [Color(0xFFFFB800), Color(0xFFFF3D6E)],
+                                  contorno: const Color(0xFF7A1033),
+                                  selo: p.conquistasProntas,
+                                  aoTocar: () => _abrir(ConquistasTela(servicos: servicos)),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 14),
                         _CartaoMissoes(progresso: p, dia: dia),
@@ -230,6 +266,11 @@ class _InicioTelaState extends State<InicioTela> {
                           altura: 50,
                           tamanhoTexto: 20,
                           aoTocar: () => _abrir(LojaTela(servicos: servicos)),
+                        ),
+                        TextButton.icon(
+                          onPressed: _codigoDeAmigo,
+                          icon: const Icon(Icons.group_add_rounded, size: 20),
+                          label: const Text('Código de amigo'),
                         ),
                         TextButton.icon(
                           onPressed: () => _abrir(ProgressoTela(servicos: servicos)),
@@ -983,71 +1024,160 @@ class _CartaoArena extends StatelessWidget {
   }
 }
 
-/// Atalho do Álbum de figurinhas.
-class _CartaoAlbum extends StatelessWidget {
-  const _CartaoAlbum({required this.quantas, required this.total, required this.aoTocar});
-
-  final int quantas, total;
-  final VoidCallback aoTocar;
+/// Cola o código que o amigo mandou e começa o desafio.
+class _DialogoCodigoAmigo extends StatefulWidget {
+  const _DialogoCodigoAmigo();
 
   @override
-  Widget build(BuildContext context) {
-    const cores = [Color(0xFF00D084), Color(0xFF008F9B)];
-    return Semantics(
-      button: true,
-      label: 'Álbum de figurinhas',
-      child: GestureDetector(
-        onTap: aoTocar,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(22),
-            gradient: const LinearGradient(colors: cores),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 1.5),
-            boxShadow: [
-              BoxShadow(color: Color.lerp(cores.last, Colors.black, 0.45)!, offset: const Offset(0, 5)),
-              BoxShadow(color: cores.first.withValues(alpha: 0.4), blurRadius: 18),
-            ],
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.collections_bookmark_rounded,
-                size: 40,
-                color: Colors.white,
-                shadows: [Shadow(color: Color(0xFF00424A), offset: Offset(0, 3))],
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: TextoContornado(
-                        'Álbum de figurinhas',
-                        tamanho: 21,
-                        alinhamento: TextAlign.start,
-                        contorno: Color(0xFF00424A),
-                      ),
-                    ),
-                    Text(
-                      '$quantas de $total · uma por dia no Desafio',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.15),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded, size: 28),
-            ],
+  State<_DialogoCodigoAmigo> createState() => _DialogoCodigoAmigoState();
+}
+
+class _DialogoCodigoAmigoState extends State<_DialogoCodigoAmigo> {
+  final _campo = TextEditingController();
+  String? _erro;
+
+  @override
+  void dispose() {
+    _campo.dispose();
+    super.dispose();
+  }
+
+  Future<void> _colar() async {
+    final dados = await Clipboard.getData(Clipboard.kTextPlain);
+    if (dados?.text == null) return;
+    setState(() {
+      _campo.text = dados!.text!;
+      _erro = null;
+    });
+  }
+
+  void _comecar() {
+    final desafio = DesafioAmigo.ler(_campo.text);
+    if (desafio == null) {
+      setState(() => _erro = 'Não achei um código. Cole a mensagem inteira que seu amigo mandou.');
+      return;
+    }
+    Navigator.of(context).pop(desafio);
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    backgroundColor: Cores.painel,
+    scrollable: true,
+    title: const FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text('Código de amigo', textAlign: TextAlign.center),
+    ),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          'Seu amigo mandou um código? Cole aqui e jogue com as mesmas peças dele. Vença a pontuação e ganhe gemas!',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14, height: 1.3),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _campo,
+          minLines: 2,
+          maxLines: 4,
+          style: const TextStyle(fontSize: 14),
+          onChanged: (_) => setState(() => _erro = null),
+          decoration: InputDecoration(
+            hintText: 'Cole aqui (ENCAIXA-AMIGO-...)',
+            filled: true,
+            fillColor: Cores.casa,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
           ),
         ),
+        if (_erro != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              _erro!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Cores.destaque, fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+          ),
+      ],
+    ),
+    actionsAlignment: MainAxisAlignment.center,
+    actionsOverflowAlignment: OverflowBarAlignment.center,
+    actions: [
+      TextButton(onPressed: _colar, child: const Text('Colar')),
+      TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
+      FilledButton(onPressed: _campo.text.trim().isEmpty ? null : _comecar, child: const Text('Jogar')),
+    ],
+  );
+}
+
+/// Atalho pequeno (metade da largura): Álbum e Conquistas. O selo avisa quando há prêmio para pegar.
+class _Atalho extends StatelessWidget {
+  const _Atalho({
+    required this.icone,
+    required this.titulo,
+    required this.subtitulo,
+    required this.cores,
+    required this.contorno,
+    required this.aoTocar,
+    this.selo = 0,
+  });
+
+  final IconData icone;
+  final String titulo, subtitulo;
+  final List<Color> cores;
+  final Color contorno;
+  final VoidCallback aoTocar;
+  final int selo;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: titulo,
+    child: GestureDetector(
+      onTap: aoTocar,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          gradient: LinearGradient(colors: cores),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 1.5),
+          boxShadow: [
+            BoxShadow(color: Color.lerp(cores.last, Colors.black, 0.45)!, offset: const Offset(0, 5)),
+            BoxShadow(color: cores.first.withValues(alpha: 0.4), blurRadius: 18),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Badge(
+              isLabelVisible: selo > 0,
+              label: Text('$selo'),
+              backgroundColor: Cores.destaque,
+              child: Icon(
+                icone,
+                size: 38,
+                color: Colors.white,
+                shadows: [Shadow(color: contorno, offset: const Offset(0, 3))],
+              ),
+            ),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: TextoContornado(titulo, tamanho: 20, alinhamento: TextAlign.start, contorno: contorno),
+            ),
+            Text(
+              subtitulo,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, height: 1.15),
+            ),
+          ],
+        ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 /// Atalho da Roda da sorte: destaca quando há giro grátis.

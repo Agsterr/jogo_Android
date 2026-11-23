@@ -36,13 +36,16 @@ class Jogada {
 /// Regras de uma partida. Sem Flutter: dá para testar tudo em Dart puro.
 class Partida {
   /// [inicial] é o tabuleiro de partida das fases (com pedras).
-  Partida({required int semente, Tabuleiro? inicial, this.cores = totalCores})
+  Partida({required this.semente, Tabuleiro? inicial, this.cores = totalCores})
     : _sorteio = Sorteio(semente),
       tabuleiro = inicial ?? Tabuleiro() {
     _novaMao();
   }
 
-  Partida._salva(this._sorteio, {this.cores = totalCores}) : tabuleiro = Tabuleiro();
+  Partida._salva(this._sorteio, {this.semente = 0, this.cores = totalCores}) : tabuleiro = Tabuleiro();
+
+  /// Semente do sorteio das peças desta partida (0 em partidas salvas antes de guardarmos a semente).
+  final int semente;
 
   /// Quantas cores as peças podem ter.
   final int cores;
@@ -60,6 +63,7 @@ class Partida {
   /// Para salvar no aparelho (o "Desfazer" não é salvo).
   Map<String, Object?> paraJson() => {
     'sorteio': _sorteio.estado,
+    'semente': semente,
     'casas': [
       for (var l = 0; l < Tabuleiro.tamanho; l++)
         for (var k = 0; k < Tabuleiro.tamanho; k++) tabuleiro.cor(l, k),
@@ -89,7 +93,11 @@ class Partida {
   };
 
   factory Partida.deJson(Map<String, Object?> j) {
-    final p = Partida._salva(Sorteio.doEstado(j['sorteio']! as int), cores: (j['cores'] as int?) ?? totalCores);
+    final p = Partida._salva(
+      Sorteio.doEstado(j['sorteio']! as int),
+      semente: (j['semente'] as int?) ?? 0,
+      cores: (j['cores'] as int?) ?? totalCores,
+    );
     final casas = (j['casas']! as List).cast<int?>();
     for (var i = 0; i < casas.length; i++) {
       p.tabuleiro.definir(i ~/ Tabuleiro.tamanho, i % Tabuleiro.tamanho, casas[i]);
