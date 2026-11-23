@@ -66,3 +66,13 @@ No código: `game_services.xml` + `meta-data` no manifesto, `play-services-games
 `MainActivity.kt` (Jogo salvo `progresso`) e `CopiaDupla` (Play Games + Block Store; ao ler, vale o progresso mais
 avançado). **Ainda não testado em aparelho:** conferir com a mesma conta Google em dois celulares / reinstalando.
 Não feito: mostrar "Conectado como <nome>" na tela Salvar progresso.
+
+## Ranking mundial (placar)
+O código já está no app (`lib/servicos/ranking.dart` e `MainActivity.kt`): ele manda a pontuação do **Infinito, do Desafio e da
+Arena** ao placar e mostra o botão **Ranking mundial** na tela inicial. **Fica escondido até você configurar o placar:**
+1. Play Console > Play Games Services > **Leaderboards** (Placares) > **Create leaderboard**: nome "Melhor pontuação",
+   formato numérico, ordem decrescente (maior é melhor).
+2. Copie o **ID do placar** (começa com `CgkI...`; não é segredo).
+3. Cole em `app/android/app/src/main/res/values/game_services.xml`, em `leaderboard_id`, e envie. (Ou me passe o ID.)
+4. Publique a configuração do Play Games. O Google guarda só a melhor pontuação de cada jogador.
+**Não testado em aparelho.** Sem login no Play Games o botão pede a conta e tenta de novo.

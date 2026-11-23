@@ -50,6 +50,9 @@ class MainActivity : FlutterActivity() {
                 "ler" -> nuvem(resultado) { lerDaNuvem(resultado) }
                 "jogador" -> nuvem(resultado) { nomeDoJogador(resultado) }
                 "conectar" -> conectarAoPlayGames(resultado)
+                "rankingDisponivel" -> resultado.success(getString(R.string.leaderboard_id).isNotBlank())
+                "enviarPontos" -> nuvem(resultado) { enviarPontos(chamada.argument<Number>("pontos"), resultado) }
+                "abrirRanking" -> nuvem(resultado) { abrirRanking(resultado) }
                 else -> resultado.notImplemented()
             }
         }
@@ -66,6 +69,32 @@ class MainActivity : FlutterActivity() {
             Log.w(TAG_NUVEM, "não deu para conectar", erro)
             resultado.error("indisponivel", erro.message, null)
         }
+    }
+
+    /** Manda a pontuação para o placar do Google (ele guarda só a melhor de cada jogador). */
+    private fun enviarPontos(pontos: Number?, resultado: MethodChannel.Result) {
+        val id = getString(R.string.leaderboard_id)
+        if (pontos == null || id.isBlank()) {
+            resultado.error("sem_placar", "placar não configurado", null)
+            return
+        }
+        PlayGames.getLeaderboardsClient(this).submitScore(id, pontos.toLong())
+        resultado.success(true)
+    }
+
+    /** Abre a tela do placar do Google. */
+    private fun abrirRanking(resultado: MethodChannel.Result) {
+        val id = getString(R.string.leaderboard_id)
+        if (id.isBlank()) {
+            resultado.error("sem_placar", "placar não configurado", null)
+            return
+        }
+        PlayGames.getLeaderboardsClient(this).getLeaderboardIntent(id)
+            .addOnSuccessListener { intent ->
+                startActivityForResult(intent, CODIGO_RANKING)
+                resultado.success(true)
+            }
+            .addOnFailureListener { erro -> resultado.error("falha", erro.message, null) }
     }
 
     /** Nome do jogador conectado ao Play Games (mostrado na tela Salvar progresso). */
@@ -195,5 +224,6 @@ class MainActivity : FlutterActivity() {
         private const val CANAL_NUVEM = "encaixa/nuvem"
         private const val NOME_JOGO_SALVO = "progresso"
         private const val TAG_NUVEM = "EncaixaNuvem"
+        private const val CODIGO_RANKING = 9004
     }
 }

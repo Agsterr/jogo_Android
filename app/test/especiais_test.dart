@@ -45,17 +45,21 @@ void main() {
     }
     final s = Sorteio(7);
     var especiais = 0, bombas = 0, joias = 0;
+    final tipos = <int>{};
     for (var i = 0; i < 2000; i++) {
       final p = Peca.sortear(s, totalCores, 1);
       if (p.especial > 0) {
         especiais++;
+        tipos.add(p.especial);
         expect(p.celulaEspecial, lessThan(p.formato.celulas.length));
-        p.especial == 1 ? bombas++ : joias++;
+        if (p.especial == 1) bombas++;
+        if (p.especial == 2) joias++;
       }
     }
-    expect(especiais, inInclusiveRange(150, 330), reason: 'cerca de 12%');
+    expect(especiais, inInclusiveRange(240, 410), reason: 'cerca de 16%');
     expect(bombas, greaterThan(joias));
     expect(joias, greaterThan(40));
+    expect(tipos, {1, 2, 3, 5}, reason: 'bomba, joia, gelo e curinga');
   });
 
   test('só o Infinito usa especiais: Desafio, Arena e fases (rampa desligada) ficam sem', () {
@@ -109,6 +113,43 @@ void main() {
     expect(p.colocar(0, 7, 3)!.linhasDeUmaCor, 1);
   });
 
+  test('gelo: a primeira linha só racha o bloco (a linha não some inteira); a segunda tira e dá gema', () {
+    final formato = Formato.desenho(['#']);
+    final p = _quaseLinha()..tabuleiro.definir(5, 6, 4);
+    p.mao = [Peca(formato, 0, especial: Tabuleiro.gelo), null, null];
+    final j = p.colocar(0, 7, 3)!;
+    expect(j.linhasLimpas, 1, reason: 'a linha conta como limpa');
+    expect(j.descongelados, 1);
+    expect(p.tabuleiro.cor(7, 3), Tabuleiro.rachado * 10, reason: 'ficou rachado, na mesma casa');
+    expect(p.tabuleiro.cor(7, 0), isNull, reason: 'o resto da linha saiu');
+    expect(j.removidos.length, Tabuleiro.tamanho - 1, reason: 'o bloco de gelo não saiu');
+    // Segunda linha por cima do rachado: agora sai de verdade, com gema e pontos.
+    for (var k = 0; k < Tabuleiro.tamanho; k++) {
+      if (k != 3) p.tabuleiro.definir(7, k, 0);
+    }
+    p.mao = [Peca(formato, 0), null, null];
+    expect(p.tabuleiro.cor(7, 3), isNotNull);
+    final j2 = p.colocar(0, 6, 0)!; // coloca em outro lugar: a linha 7 já está completa
+    expect(j2.linhasLimpas, 1);
+    expect(j2.rachados, 1);
+    expect(p.tabuleiro.cor(7, 3), isNull);
+    final comum = _quaseLinha()..tabuleiro.definir(5, 6, 4);
+    comum.mao = [Peca(formato, 0), null, null];
+    expect(j2.gemas, greaterThanOrEqualTo(1));
+    expect(j2.pontos - 20, lessThan(j2.pontos));
+    expect(comum.colocar(0, 7, 3)!.gemas, lessThan(j2.gemas + 1));
+  });
+
+  test('curinga vale por qualquer cor na linha de uma cor só', () {
+    final formato = Formato.desenho(['#']);
+    // linha com cores 0 e um curinga de cor 4 no meio: continua sendo "uma cor"
+    final com = _quaseLinha()..mao = [Peca(formato, 4, especial: Tabuleiro.curinga), null, null];
+    expect(com.colocar(0, 7, 3)!.linhasDeUmaCor, 1);
+    // sem curinga, a mesma peça (cor 4) quebra a linha de uma cor
+    final sem = _quaseLinha()..mao = [Peca(formato, 4), null, null];
+    expect(sem.colocar(0, 7, 3)!.linhasDeUmaCor, 0);
+  });
+
   test('a partida salva guarda o bloco especial da mão', () {
     final p = Partida(semente: 5);
     p.mao = [
@@ -130,11 +171,14 @@ void main() {
     partida.tabuleiro
       ..definir(6, 6, 12)
       ..definir(5, 1, 21)
-      ..definir(3, 6, 14);
+      ..definir(3, 6, 14)
+      ..definir(4, 3, 33)
+      ..definir(4, 4, 43)
+      ..definir(2, 2, 52);
     partida.mao = [
       Peca(Formato.desenho(['###']), 4, especial: 1, celulaEspecial: 1),
       Peca(Formato.desenho(['##', '##']), 2, especial: 2, celulaEspecial: 3),
-      Peca(Formato.desenho(['#', '#']), 0),
+      Peca(Formato.desenho(['#', '#']), 0, especial: Tabuleiro.gelo, celulaEspecial: 0),
     ];
     await tester.pumpWidget(appDeTeste(s, tela: _Jogo(s, partida)));
     await tester.pump(const Duration(seconds: 1));

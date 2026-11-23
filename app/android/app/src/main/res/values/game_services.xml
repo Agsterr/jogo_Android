@@ -2,4 +2,6 @@
 <resources>
     <!-- Project ID do Play Games Services (Play Console > Configuração). Não é segredo. -->
     <string translatable="false" name="game_services_project_id">41851413204</string>
+    <!-- ID do placar (Play Console > Placares). Vazio = o botão "Ranking mundial" não aparece. Não é segredo. -->
+    <string translatable="false" name="leaderboard_id"></string>
 </resources>

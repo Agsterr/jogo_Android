@@ -9,6 +9,7 @@ import 'servicos/compras.dart';
 import 'servicos/copia_automatica.dart';
 import 'servicos/lembrete.dart';
 import 'servicos/progresso.dart';
+import 'servicos/ranking.dart';
 import 'servicos/servicos.dart';
 import 'servicos/sons.dart';
 
@@ -32,6 +33,7 @@ Future<void> main() async {
     sons: SonsDoJogo(progresso),
     copia: automatico,
     lembrete: android ? LembreteLocal() : const SemLembrete(),
+    ranking: android ? RankingPlayGames() : const SemRanking(),
   );
   runApp(EncaixaApp(servicos: servicos));
 

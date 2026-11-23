@@ -19,6 +19,8 @@ class Jogada {
     this.marcos = const [],
     this.joias = 0,
     this.bombas = 0,
+    this.rachados = 0,
+    this.descongelados = 0,
   });
 
   final int pontos;
@@ -33,9 +35,10 @@ class Jogada {
   final List<Marco> marcos;
 
   /// Blocos especiais que saíram nesta jogada.
-  final int joias, bombas;
+  /// [rachados]: gelo já descongelado que saiu agora (dá gema); [descongelados]: gelo que só rachou nesta jogada.
+  final int joias, bombas, rachados, descongelados;
 
-  int get gemas => linhasDeUmaCor + (tabuleiroLimpo ? 3 : 0) + joias;
+  int get gemas => linhasDeUmaCor + (tabuleiroLimpo ? 3 : 0) + joias + rachados;
 }
 
 /// Regras de uma partida. Sem Flutter: dá para testar tudo em Dart puro.
@@ -156,6 +159,9 @@ class Partida {
   int pontos = 0;
   int combo = 0;
   int _semLimpar = 0;
+
+  /// Jogadas seguidas sem limpar linha (o mascote dá dica a cada 5).
+  int get semLimpar => _semLimpar;
   bool continuou = false;
   _Estado? _anterior;
 
@@ -191,7 +197,8 @@ class Partida {
           for (final l in completas.linhas) List.generate(Tabuleiro.tamanho, (k) => tabuleiro.cor(l, k)),
           for (final k in completas.colunas) List.generate(Tabuleiro.tamanho, (l) => tabuleiro.cor(l, k)),
         ].where((cores) {
-          final bases = cores.map((c) => Tabuleiro.base(c!)).toSet();
+          // O curinga vale por qualquer cor: fica de fora da comparação.
+          final bases = cores.where((c) => !Tabuleiro.ehCuringa(c!)).map((c) => Tabuleiro.base(c!)).toSet();
           return bases.length == 1 && bases.first != Tabuleiro.pedra;
         }).length;
     // Bomba: ao sair com a linha, leva junto os blocos (menos pedras) da área 3x3 em volta dela.
@@ -209,10 +216,19 @@ class Partida {
         }
       }
     }
+    // Gelo: a primeira linha só descongela o bloco (vira "rachado" e fica); a segunda tira de verdade.
+    final congelados = todas.where((c) => Tabuleiro.ehGelo(tabuleiro.cor(c.$1, c.$2)!)).toList();
+    for (final (l, k) in congelados) {
+      todas.remove((l, k));
+    }
     final removidos = [for (final (l, k) in todas) (linha: l, coluna: k, cor: tabuleiro.cor(l, k)!)];
     final joias = removidos.where((b) => Tabuleiro.ehJoia(b.cor)).length;
+    final rachados = removidos.where((b) => Tabuleiro.ehRachado(b.cor)).length;
     for (final (l, k) in todas) {
       tabuleiro.definir(l, k, null);
+    }
+    for (final (l, k) in congelados) {
+      tabuleiro.definir(l, k, Tabuleiro.rachado * 10 + Tabuleiro.base(tabuleiro.cor(l, k)!));
     }
 
     final linhas = completas.linhas.length + completas.colunas.length;
@@ -221,7 +237,8 @@ class Partida {
     if (linhas > 0) {
       combo++;
       _semLimpar = 0;
-      ganho += 10 * linhas * linhas * combo + 20 * deUmaCor + (limpo ? 300 : 0) + 30 * joias + 15 * bombas;
+      ganho +=
+          10 * linhas * linhas * combo + 20 * deUmaCor + (limpo ? 300 : 0) + 30 * joias + 15 * bombas + 20 * rachados;
     } else if (++_semLimpar >= folgaCombo) {
       combo = 0;
     }
@@ -247,6 +264,8 @@ class Partida {
       marcos: novosMarcos,
       joias: joias,
       bombas: bombas,
+      rachados: rachados,
+      descongelados: congelados.length,
     );
   }
 

@@ -64,7 +64,7 @@ class Peca {
   final Formato formato;
   final int cor;
 
-  /// Bloco especial (só no Infinito): 0 nenhum, 1 bomba, 2 joia. Fica na célula [celulaEspecial] do formato.
+  /// Bloco especial (só no Infinito): 0 nenhum, 1 bomba, 2 joia, 3 gelo, 5 curinga. Fica na célula [celulaEspecial] do formato.
   final int especial;
   final int celulaEspecial;
 
@@ -95,7 +95,9 @@ class Peca {
   static Peca _comEspecial(Peca p, Sorteio sorteio, int nivel) {
     if (nivel < 1) return p;
     final r = sorteio.proximo(100);
-    if (r >= 12) return p;
-    return Peca(p.formato, p.cor, especial: r < 7 ? 1 : 2, celulaEspecial: sorteio.proximo(p.formato.celulas.length));
+    if (r >= 16) return p;
+    // 6% bomba, 4% joia, 3% gelo, 3% curinga.
+    final tipo = r < 6 ? 1 : (r < 10 ? 2 : (r < 13 ? 3 : 5));
+    return Peca(p.formato, p.cor, especial: tipo, celulaEspecial: sorteio.proximo(p.formato.celulas.length));
   }
 }

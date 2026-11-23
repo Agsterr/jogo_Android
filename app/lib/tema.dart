@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 
 import 'jogo/tabuleiro.dart';
@@ -191,6 +193,45 @@ void pintarMarcador(Canvas canvas, Rect r, int tipo, {double opacidade = 1}) {
         s * 0.07,
         Paint()..color = const Color(0xFFFFD000).withValues(alpha: a(1)),
       );
+  } else if (tipo == Tabuleiro.gelo || tipo == Tabuleiro.rachado) {
+    // Gelo: véu azul-claro com flocos; rachado: o mesmo, mais fino, com rachaduras.
+    final veu = RRect.fromRectAndRadius(r.deflate(s * 0.02), Radius.circular(s * 0.2));
+    canvas.drawRRect(
+      veu,
+      Paint()..color = const Color(0xFFBFEFFF).withValues(alpha: a(tipo == Tabuleiro.gelo ? 0.62 : 0.3)),
+    );
+    final traco = Paint()
+      ..color = (tipo == Tabuleiro.gelo ? Colors.white : const Color(0xFF123B66)).withValues(alpha: a(0.9))
+      ..strokeWidth = s * 0.05
+      ..strokeCap = StrokeCap.round;
+    if (tipo == Tabuleiro.gelo) {
+      canvas
+        ..drawLine(c.translate(-s * 0.2, 0), c.translate(s * 0.2, 0), traco)
+        ..drawLine(c.translate(0, -s * 0.2), c.translate(0, s * 0.2), traco)
+        ..drawLine(c.translate(-s * 0.14, -s * 0.14), c.translate(s * 0.14, s * 0.14), traco)
+        ..drawLine(c.translate(-s * 0.14, s * 0.14), c.translate(s * 0.14, -s * 0.14), traco);
+    } else {
+      canvas
+        ..drawLine(c.translate(-s * 0.05, -s * 0.28), c.translate(s * 0.05, -s * 0.06), traco)
+        ..drawLine(c.translate(s * 0.05, -s * 0.06), c.translate(-s * 0.08, s * 0.1), traco)
+        ..drawLine(c.translate(-s * 0.08, s * 0.1), c.translate(s * 0.06, s * 0.3), traco);
+    }
+  } else if (tipo == Tabuleiro.curinga) {
+    // Curinga: anel de arco-íris.
+    const cores = [Color(0xFFFF3D6E), Color(0xFFFFD000), Color(0xFF00E08A), Color(0xFF00B4FF), Color(0xFFA64DFF)];
+    for (var i = 0; i < cores.length; i++) {
+      canvas.drawArc(
+        Rect.fromCircle(center: c, radius: s * 0.26),
+        -math.pi / 2 + i * 2 * math.pi / cores.length,
+        2 * math.pi / cores.length + 0.02,
+        false,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = s * 0.12
+          ..color = cores[i].withValues(alpha: a(1)),
+      );
+    }
+    canvas.drawCircle(c, s * 0.1, Paint()..color = Colors.white.withValues(alpha: a(0.95)));
   } else {
     final p = Path()
       ..moveTo(c.dx, c.dy - s * 0.3)
@@ -219,7 +260,7 @@ void pintarMarcador(Canvas canvas, Rect r, int tipo, {double opacidade = 1}) {
 
 /// Desenha a casa do tabuleiro: bloco colorido ou pedra (índice `Tabuleiro.pedra`).
 void pintarCasa(Canvas canvas, Rect r, int cor, {double opacidade = 1}) {
-  if (cor >= 10 && cor < 30) {
+  if (cor >= 10 && cor < 60) {
     // Bloco especial (bomba ou joia): bloco da cor dele com o marcador por cima.
     final base = Tabuleiro.base(cor) % Cores.pecas.length;
     pintarBloco(canvas, r, Cores.pecas[base], opacidade: opacidade, indice: base);

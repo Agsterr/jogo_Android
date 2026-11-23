@@ -47,6 +47,9 @@ class _InicioTelaState extends State<InicioTela> {
   @override
   void initState() {
     super.initState();
+    servicos.ranking.disponivel().then((ok) {
+      if (mounted && ok) setState(() => _rankingOk = true);
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final dia = Sorteio.sementeDoDia(servicos.hoje());
@@ -78,6 +81,8 @@ class _InicioTelaState extends State<InicioTela> {
     final desafio = await showDialog<DesafioAmigo>(context: context, builder: (_) => const _DialogoCodigoAmigo());
     if (desafio != null && mounted) _abrir(JogoTela(servicos: servicos, amigo: desafio));
   }
+
+  bool _rankingOk = false;
 
   void _abrir(Widget tela) => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => tela));
 
@@ -316,6 +321,12 @@ class _InicioTelaState extends State<InicioTela> {
                           tamanhoTexto: 20,
                           aoTocar: () => _abrir(LojaTela(servicos: servicos)),
                         ),
+                        if (_rankingOk)
+                          TextButton.icon(
+                            onPressed: servicos.ranking.abrir,
+                            icon: const Icon(Icons.leaderboard_rounded, size: 20),
+                            label: const Text('Ranking mundial'),
+                          ),
                         TextButton.icon(
                           onPressed: _codigoDeAmigo,
                           icon: const Icon(Icons.group_add_rounded, size: 20),

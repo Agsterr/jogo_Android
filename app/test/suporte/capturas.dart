@@ -7,6 +7,7 @@ import 'package:encaixa/servicos/compras.dart';
 import 'package:encaixa/servicos/copia_automatica.dart';
 import 'package:encaixa/servicos/lembrete.dart';
 import 'package:encaixa/servicos/progresso.dart';
+import 'package:encaixa/servicos/ranking.dart';
 import 'package:encaixa/servicos/servicos.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -41,6 +42,7 @@ Future<Servicos> servicosDeTeste({
   bool presente = false,
   CopiaAutomatica? copia,
   Lembrete lembrete = const SemLembrete(),
+  Ranking ranking = const SemRanking(),
 }) async {
   SharedPreferences.setMockInitialValues(valores);
   final progresso = await Progresso.carregar();
@@ -54,6 +56,7 @@ Future<Servicos> servicosDeTeste({
     mostrarDicas: dicas,
     roletaAposPartida: roleta,
     lembrete: lembrete,
+    ranking: ranking,
     copia: copia == null
         ? null
         : SalvamentoAutomatico(progresso, copia, pausa: const Duration(milliseconds: 50), relogio: agora),

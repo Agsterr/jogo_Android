@@ -15,6 +15,16 @@ class Tabuleiro {
   static const int bomba = 1;
   static const int joia = 2;
 
+  /// Gelo (30 a 35): a primeira linha que o atinge só descongela (vira "rachado"); curinga (50 a 55) vale por qualquer
+  /// cor na linha de uma cor só; rachado (40 a 45) é o gelo já descongelado e dá gema ao sair.
+  static const int gelo = 3;
+  static const int rachado = 4;
+  static const int curinga = 5;
+
+  static bool ehGelo(int codigo) => codigo ~/ 10 == gelo;
+  static bool ehRachado(int codigo) => codigo ~/ 10 == rachado;
+  static bool ehCuringa(int codigo) => codigo ~/ 10 == curinga;
+
   static bool ehBomba(int codigo) => codigo ~/ 10 == bomba;
   static bool ehJoia(int codigo) => codigo ~/ 10 == joia;
 

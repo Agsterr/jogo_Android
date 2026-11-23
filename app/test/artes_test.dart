@@ -1,5 +1,6 @@
 import 'package:encaixa/tema.dart';
 import 'package:encaixa/telas/inicio_tela.dart';
+import 'package:encaixa/widgets/mascote.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -24,6 +25,44 @@ void main() {
     await tester.pump();
     await capturar(tester, nome, pasta: '../docs/artes');
   }
+
+  // Arte do mascote Quadrinho, desenhada em código: uma folha com todos os humores e um PNG de cada.
+  testWidgets('mascote Quadrinho: folha e um PNG por humor', (tester) async {
+    await desenhar(
+      tester,
+      const Size(1024, 300),
+      DecoratedBox(
+        decoration: const BoxDecoration(gradient: Cores.fundo),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            for (final (humor, nome) in [
+              (Humor.feliz, 'Feliz'),
+              (Humor.festa, 'Festa'),
+              (Humor.uau, 'Uau'),
+              (Humor.triste, 'Triste'),
+            ])
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Mascote(humor: humor, tamanho: 180),
+                  Text(nome, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                ],
+              ),
+          ],
+        ),
+      ),
+      'mascote-folha',
+    );
+    for (final (humor, nome) in [
+      (Humor.feliz, 'feliz'),
+      (Humor.festa, 'festa'),
+      (Humor.uau, 'uau'),
+      (Humor.triste, 'triste'),
+    ]) {
+      await desenhar(tester, const Size(512, 512), Mascote(humor: humor, tamanho: 512), 'mascote-$nome');
+    }
+  });
 
   testWidgets('ícone 512', (tester) async {
     await desenhar(

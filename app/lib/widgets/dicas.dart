@@ -128,6 +128,8 @@ abstract final class Dicas {
     'No Infinito, depois da primeira meta, algumas peças trazem um bloco especial.',
     'Bomba (bola escura): quando a linha dela some, leva junto a área 3x3 em volta (menos pedras).',
     'Joia (losango brilhante): quando a linha dela some, dá +1 gema e +30 pontos.',
+    'Gelo (bloco esbranquiçado): precisa de DUAS linhas. A primeira só racha; a segunda tira e dá +1 gema e +20 pontos.',
+    'Curinga (anel colorido): vale por qualquer cor na linha de uma cor só.',
     'Só aparecem no Infinito: Desafio, Arena e fases continuam com as mesmas peças para todos.',
   ]);
 

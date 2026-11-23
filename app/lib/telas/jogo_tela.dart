@@ -106,6 +106,11 @@ class _JogoTelaState extends State<JogoTela> {
   int _gemasAmigo = 0;
   int _gemasRelampago = 0;
 
+  // Mascote durante a partida: comemora, avisa e dá dicas.
+  String? _fala;
+  Humor _humorMascote = Humor.feliz;
+  Timer? _falaTimer;
+
   // Relâmpago: tempo que falta, contado em passos de 250 ms (assim os testes controlam o relógio).
   static const _passo = Duration(milliseconds: 250);
   Timer? _relogio;
@@ -124,6 +129,7 @@ class _JogoTelaState extends State<JogoTela> {
   @override
   void dispose() {
     _relogio?.cancel();
+    _falaTimer?.cancel();
     super.dispose();
   }
 
@@ -134,6 +140,22 @@ class _JogoTelaState extends State<JogoTela> {
       if (!mounted || _fim != null) return _relogio?.cancel();
       setState(() => _restanteMs = math.max(0, _restanteMs - _passo.inMilliseconds));
       if (_restanteMs == 0) _tempoEsgotado();
+    });
+  }
+
+  void _mascoteDiz(String texto, Humor humor) {
+    _falaTimer?.cancel();
+    setState(() {
+      _fala = texto;
+      _humorMascote = humor;
+    });
+    _falaTimer = Timer(const Duration(milliseconds: 3200), () {
+      if (mounted) {
+        setState(() {
+          _fala = null;
+          _humorMascote = Humor.feliz;
+        });
+      }
     });
   }
 
@@ -152,6 +174,9 @@ class _JogoTelaState extends State<JogoTela> {
 
   @visibleForTesting
   void iniciarRelogioParaTeste() => _iniciarRelogio();
+
+  @visibleForTesting
+  void mascoteDizParaTeste(String texto, Humor humor) => _mascoteDiz(texto, humor);
 
   @override
   void initState() {
@@ -333,6 +358,16 @@ class _JogoTelaState extends State<JogoTela> {
       );
     }
     _iniciarRelogio();
+    if (_tutorial == null && widget.fase == null) {
+      final fala = falaAposJogada(
+        elogioNivel: elogio?.nivel ?? 0,
+        elogioTexto: elogio?.texto,
+        semLimpar: _partida.semLimpar,
+        ocupadas: _partida.tabuleiro.ocupadas,
+        jogadas: _partida.jogadas,
+      );
+      if (fala != null) _mascoteDiz(fala.texto, fala.humor);
+    }
     _s.progresso.registrarJogada(linhas: jogada.linhasLimpas, combo: jogada.combo);
     _s.progresso.ganharGemas(gemasDaJogada + gemasDasMetas);
     _s.progresso.contarMissoes(_dia, contagemDaJogada(jogada));
@@ -523,6 +558,8 @@ class _JogoTelaState extends State<JogoTela> {
         ? await _s.progresso.fimDoRelampago(pontos)
         : await _s.progresso.fimDePartida(pontos);
     await _s.progresso.ganharXpDaPartida(_dia);
+    // Ranking mundial: só o Infinito, o Desafio e a Arena (modos de pontuação cheia).
+    if (widget.fase == null && !widget.relampago && widget.amigo == null) _s.ranking.enviar(pontos);
     final gemasRelampago = widget.relampago ? gemasDoRelampago(pontos) : 0;
     if (gemasRelampago > 0) await _s.progresso.ganharGemas(gemasRelampago);
     await _s.progresso.contarMissoes(_dia, {TipoMissao.partidas: 1, TipoMissao.pontos: pontos});
@@ -605,8 +642,11 @@ class _JogoTelaState extends State<JogoTela> {
         child: LayoutBuilder(
           builder: (context, c) {
             // Reserva espaço para topo, placar, mão (2,5 casas) e reforços.
-            final lado = math.min(c.maxWidth - 24, (c.maxHeight - (_partida.rampa ? 282 : 250)) / 1.33);
+            final reserva = _partida.rampa ? 282 : 250;
+            final lado = math.min(c.maxWidth - 24, (c.maxHeight - reserva) / 1.33);
             _casa = lado / 8;
+            // O mascote só aparece se sobrar espaço sem encolher o tabuleiro (telas altas).
+            final cabeMascote = (c.maxHeight - reserva - 76) / 1.33 >= c.maxWidth - 24;
             return Stack(
               key: _chavePalco,
               children: [
@@ -616,6 +656,7 @@ class _JogoTelaState extends State<JogoTela> {
                     _placar(),
                     const Spacer(),
                     _tabuleiro(lado),
+                    if (cabeMascote && widget.fase == null && _fim == null && _tutorial == null) _faixaDoMascote(),
                     const Spacer(),
                     _mao(),
                     _reforcos(),
@@ -641,6 +682,44 @@ class _JogoTelaState extends State<JogoTela> {
             );
           },
         ),
+      ),
+    ),
+  );
+
+  /// Quadrinho ao lado do tabuleiro, com um balão quando tem algo a dizer.
+  Widget _faixaDoMascote() => SizedBox(
+    height: 60,
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+      child: Row(
+        children: [
+          Mascote(humor: _humorMascote, tamanho: 48),
+          const SizedBox(width: 8),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              layoutBuilder: (atual, anteriores) =>
+                  Stack(alignment: Alignment.centerLeft, children: [...anteriores, if (atual != null) atual]),
+              child: _fala == null
+                  ? const SizedBox.shrink(key: ValueKey('sem-fala'))
+                  : Container(
+                      key: ValueKey(_fala),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Cores.painel.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.white24),
+                      ),
+                      child: Text(
+                        _fala!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 14, height: 1.15),
+                      ),
+                    ),
+            ),
+          ),
+        ],
       ),
     ),
   );

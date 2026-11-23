@@ -3,6 +3,7 @@ import 'compras.dart';
 import 'copia_automatica.dart';
 import 'lembrete.dart';
 import 'progresso.dart';
+import 'ranking.dart';
 import 'sons.dart';
 
 /// O que as telas precisam do "mundo lá fora". Passado pelo construtor.
@@ -18,6 +19,7 @@ class Servicos {
     this.roletaAposPartida = true,
     this.copia,
     this.lembrete = const SemLembrete(),
+    this.ranking = const SemRanking(),
   });
 
   final Progresso progresso;
@@ -27,6 +29,9 @@ class Servicos {
 
   /// Cópia automática do progresso (recupera sozinho depois de reinstalar). `null` nos testes de tela.
   final SalvamentoAutomatico? copia;
+
+  /// Ranking mundial do Google Play Games (some do app enquanto o placar não estiver configurado).
+  final Ranking ranking;
 
   /// Lembrete diário do Desafio (notificação às 19h).
   final Lembrete lembrete;

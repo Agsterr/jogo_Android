@@ -155,9 +155,11 @@ o Encaixa+**, e o nível 20 libera o tema **Aurora** para sempre. A trilha recom
 `app/lib/jogo/passe.dart`.
 
 ## Blocos especiais (só no Infinito)
-Depois da primeira meta (nível 1), cerca de 12% das peças trazem **um** bloco especial:
-**bomba** (bola escura, 7%): quando a linha dela some, limpa também a área 3x3 em volta (pedras ficam) e dá +15 pontos;
-**joia** (losango brilhante, 5%): quando a linha dela some, dá **+1 gema** e +30 pontos. No nível 0, e em todos os
+Depois da primeira meta (nível 1), cerca de 16% das peças trazem **um** bloco especial:
+**bomba** (bola escura, 6%): quando a linha dela some, limpa também a área 3x3 em volta (pedras ficam) e dá +15 pontos;
+**joia** (losango brilhante, 4%): quando a linha dela some, dá **+1 gema** e +30 pontos;
+**gelo** (bloco esbranquiçado, 3%): precisa de **duas** linhas: a primeira só racha (ele fica, com rachaduras), a segunda tira
+e dá +1 gema e +20 pontos; **curinga** (anel colorido, 3%): vale por qualquer cor na linha de uma cor só. No nível 0, e em todos os
 outros modos (fases, Desafio, Arena, Relâmpago), o sorteio não gasta nenhum número a mais: as peças continuam exatamente
 as mesmas. Regras em `app/lib/jogo/partida.dart` e `peca.dart`; testes em `test/especiais_test.dart`.
 
@@ -169,3 +171,10 @@ festa no novo recorde, feliz na partida normal e tristinho se foi bem abaixo do 
 **Faixas** pela melhor pontuação do Desafio no dia: Bronze (1.500) +3 gemas, Prata (4.000) +8, Ouro (8.000) +15. Não
 soma entre faixas: ao subir de faixa no mesmo dia paga só a diferença. **Presente da noite**: depois das 19h aparece na
 tela inicial um segundo presente (+10 gemas e 20 XP do Passe) uma vez por dia; o lembrete das 19h cita ele.
+
+## Mascote na partida e ranking mundial
+**Quadrinho** fica ao lado do tabuleiro (só em telas altas, sem encolher o tabuleiro) e fala: comemora elogios (festa) e
+os fortes (Incrível, Fantástico: cara de "uau"), avisa quando o tabuleiro está quase cheio e dá uma **dica a cada 5
+jogadas sem limpar linha**. A arte (feliz, festa, uau, triste) está em `docs/artes/mascote-*.png`, gerada em código.
+**Ranking mundial:** o código já manda a pontuação do Infinito, Desafio e Arena ao placar do Google Play Games, mas o
+botão só aparece quando o ID do placar estiver em `game_services.xml` (passo a passo em `docs/PLAY_GAMES.md`, issue #17).
