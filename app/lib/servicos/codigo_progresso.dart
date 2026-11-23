@@ -34,8 +34,19 @@ abstract final class CodigoProgresso {
     'faseLiberada',
     'arenaSemana',
     'arenaMelhor',
+    'linhasTotal',
+    'jogadasTotal',
   };
-  static const _listas = {'temas', 'dicas', 'arenaPremios', 'figurinhas', 'conquistas', 'amigosFeitos', 'bauItens'};
+  static const _listas = {
+    'temas',
+    'dicas',
+    'arenaPremios',
+    'figurinhas',
+    'conquistas',
+    'amigosFeitos',
+    'bauItens',
+    'ultimas',
+  };
 
   /// Esta chave do `SharedPreferences` faz parte do progresso que vai no código?
   static bool vai(String chave) =>

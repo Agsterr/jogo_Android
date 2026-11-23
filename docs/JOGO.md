@@ -233,3 +233,16 @@ ouvindo a própria música): liga em *Como jogar > Música de fundo*, só toca c
 
 ## Ranking da semana
 - Botão ao lado do ranking mundial; usa o mesmo placar do Play Games na visão semanal (veja `docs/PLAY_GAMES.md`).
+
+## Estatísticas
+- Tela com as últimas 10 partidas em barras e os números do jogador (partidas, recorde, linhas, jogadas, combos, sequência,
+  fases, conquistas, baús, coleção). Atalho "Estatísticas" na tela inicial. Código: `app/lib/telas/estatisticas_tela.dart`.
+- Novos contadores: `linhasTotal`, `jogadasTotal` e `ultimas` (entram no código de progresso).
+
+## Imagem para compartilhar
+- "Desafiar amigos" manda o texto **e uma imagem** (1080x1350) com o tabuleiro final, a pontuação e o modo
+  (`app/lib/widgets/cartao_de_pontos.dart`). Se não der para gerar a imagem, vai só o texto. Captura 56.
+
+## Dois jogadores no mesmo celular
+- Cada um joga uma partida, um depois do outro, com as **mesmas peças** (mesma semente). Vence quem fizer mais pontos;
+  há "Revanche". Sem reforços, recorde, gemas, missões nem ranking. Código: `app/lib/jogo/duelo.dart`, `JogoTela(duelo:)`.

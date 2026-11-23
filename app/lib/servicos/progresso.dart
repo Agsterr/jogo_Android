@@ -105,6 +105,10 @@ class Progresso extends ChangeNotifier {
     await _prefs.setInt('partidas', partidas + 1);
     final novo = pontos > recorde;
     if (novo) await _prefs.setInt('recorde', pontos);
+    await _prefs.setStringList('ultimas', [
+      ...ultimasPartidas.skip(ultimasPartidas.length >= 10 ? 1 : 0).map((e) => '$e'),
+      '$pontos',
+    ]);
     notifyListeners();
     return novo;
   }
@@ -645,7 +649,16 @@ class Progresso extends ChangeNotifier {
   // ---------- conquistas ----------
 
   /// Registra o que a jogada fez (maior limpeza de linhas e maior combo).
+  /// Pontos das últimas 10 partidas (a mais velha primeiro), para o gráfico das Estatísticas.
+  List<int> get ultimasPartidas => [...?_prefs.getStringList('ultimas')?.map(int.tryParse).whereType<int>()];
+
+  /// Linhas limpas e jogadas feitas, somando todas as partidas (Estatísticas).
+  int get linhasTotal => _prefs.getInt('linhasTotal') ?? 0;
+  int get jogadasTotal => _prefs.getInt('jogadasTotal') ?? 0;
+
   Future<void> registrarJogada({required int linhas, required int combo}) async {
+    await _prefs.setInt('jogadasTotal', jogadasTotal + 1);
+    if (linhas > 0) await _prefs.setInt('linhasTotal', linhasTotal + linhas);
     if (linhas > (_prefs.getInt('linhasMax') ?? 0)) await _prefs.setInt('linhasMax', linhas);
     if (combo > (_prefs.getInt('comboMax') ?? 0)) await _prefs.setInt('comboMax', combo);
   }

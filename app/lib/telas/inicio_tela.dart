@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../app.dart';
+import '../jogo/duelo.dart';
 import '../jogo/puzzle.dart';
 import '../jogo/album.dart';
 import '../jogo/amigo.dart';
@@ -28,6 +29,7 @@ import 'baus_tela.dart';
 import 'conquistas_tela.dart';
 import 'passe_tela.dart';
 import 'arena_tela.dart';
+import 'estatisticas_tela.dart';
 import 'jogo_tela.dart';
 import 'loja_tela.dart';
 import 'mapa_tela.dart';
@@ -377,6 +379,17 @@ class _InicioTelaState extends State<InicioTela> {
                                   aoTocar: () => _abrir(JogoTela(servicos: servicos, zen: true)),
                                 ),
                               ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _Atalho(
+                                  icone: Icons.people_alt_rounded,
+                                  titulo: t('Dois jogadores'),
+                                  subtitulo: t('No mesmo celular, com as mesmas peças'),
+                                  cores: const [Color(0xFFFF6A00), Color(0xFFFF2E97)],
+                                  contorno: const Color(0xFF7A1033),
+                                  aoTocar: () => _abrir(JogoTela(servicos: servicos, duelo: Duelo.novo())),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -411,6 +424,11 @@ class _InicioTelaState extends State<InicioTela> {
                           onPressed: _codigoDeAmigo,
                           icon: const Icon(Icons.group_add_rounded, size: 20),
                           label: Text(t('Código de amigo')),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => _abrir(EstatisticasTela(servicos: servicos)),
+                          icon: const Icon(Icons.bar_chart_rounded, size: 20),
+                          label: Text(t('Estatísticas')),
                         ),
                         TextButton.icon(
                           onPressed: () => _abrir(ProgressoTela(servicos: servicos)),

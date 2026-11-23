@@ -130,6 +130,12 @@ abstract final class Dicas {
     'A partida fica guardada: pode sair e voltar quando quiser.',
   ]);
 
+  static const duelo = Dica('duelo', 'Dois jogadores', Icons.people_alt_rounded, Color(0xFFFF6A00), [
+    'Um celular, dois jogadores: cada um joga uma partida, um depois do outro.',
+    'As peças são as MESMAS para os dois, então ganha quem joga melhor.',
+    'Vence quem fizer mais pontos. Não vale recorde, gemas nem missões.',
+  ]);
+
   static const passe = Dica('passe', 'Passe de temporada', Icons.emoji_events_rounded, Color(0xFFFF8A00), [
     'Todo mês tem um Passe novo com 20 níveis. Jogar enche a barra.',
     'Desafio do dia dá 40, baú das missões 30, fases até 19 e partidas 5 (as 10 primeiras do dia).',
@@ -203,6 +209,7 @@ abstract final class Dicas {
     baus,
     puzzle,
     zen,
+    duelo,
     passe,
     especiais,
     relampago,

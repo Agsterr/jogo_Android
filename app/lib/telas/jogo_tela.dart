@@ -9,6 +9,7 @@ import '../app.dart';
 import '../jogo/album.dart';
 import '../jogo/amigo.dart';
 import '../jogo/arena.dart';
+import '../jogo/duelo.dart';
 import '../jogo/eventos.dart';
 import '../jogo/elogios.dart';
 import '../jogo/fases.dart';
@@ -24,6 +25,7 @@ import '../jogo/tabuleiro.dart';
 import '../servicos/servicos.dart';
 import '../servicos/sons.dart';
 import '../tema.dart';
+import '../widgets/cartao_de_pontos.dart';
 import '../widgets/dicas.dart';
 import '../widgets/doce.dart';
 import '../widgets/figura_widget.dart';
@@ -61,6 +63,7 @@ class JogoTela extends StatefulWidget {
     this.puzzle,
     this.relampago = false,
     this.zen = false,
+    this.duelo,
     this.duracao = const Duration(seconds: 60),
   });
 
@@ -86,6 +89,9 @@ class JogoTela extends StatefulWidget {
 
   /// Modo Zen: sem fim de jogo (abre espaço sozinho), sem recorde, gemas ou missões. Só para relaxar.
   final bool zen;
+
+  /// Dois jogadores no mesmo celular: mesmas peças para os dois, um de cada vez.
+  final Duelo? duelo;
 
   /// Duração do Relâmpago (os testes usam menos).
   final Duration duracao;
@@ -235,7 +241,9 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
                   ? Dicas.desafio
                   : (widget.relampago
                         ? Dicas.relampago
-                        : (widget.puzzle != null ? Dicas.puzzle : (widget.zen ? Dicas.zen : Dicas.infinito)))),
+                        : (widget.puzzle != null
+                              ? Dicas.puzzle
+                              : (widget.zen ? Dicas.zen : (widget.duelo != null ? Dicas.duelo : Dicas.infinito))))),
     };
     if (dica != null) await mostrarDicaUmaVez(context, _s, dica);
     // Quem já conhece o modo vê, uma vez só, os reforços novos.
@@ -281,7 +289,8 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
 
   Partida? _partidaSalva() {
     // Estes sempre começam do zero.
-    if (widget.fase != null || widget.amigo != null || widget.relampago || widget.puzzle != null) return null;
+    final semSalvar = widget.fase != null || widget.amigo != null || widget.relampago;
+    if (semSalvar || widget.puzzle != null || widget.duelo != null) return null;
     final json = _s.progresso.partidaSalva(_chave);
     if (json == null || (widget.diario && json['dia'] != _dia)) return null;
     if (widget.arena && json['semana'] != _semana) return null;
@@ -292,7 +301,8 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
     }
   }
 
-  void _salvar() => widget.fase != null || widget.amigo != null || widget.relampago || widget.puzzle != null
+  void _salvar() =>
+      widget.fase != null || widget.amigo != null || widget.relampago || widget.puzzle != null || widget.duelo != null
       ? null
       : _s.progresso.salvarPartida(_chave, {..._partida.paraJson(), 'dia': _dia, 'semana': _semana});
 
@@ -303,6 +313,7 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
       !widget.arena &&
       !widget.relampago &&
       !widget.zen &&
+      widget.duelo == null &&
       widget.puzzle == null &&
       (widget.amigo == null || widget.amigo!.infinito);
 
@@ -311,7 +322,9 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
             ? Partida.puzzle(widget.puzzle!.tabuleiro, widget.puzzle!.pecas)
             : (widget.fase?.novaPartida() ??
                   Partida(
-                    semente: widget.amigo != null
+                    semente: widget.duelo != null
+                        ? widget.duelo!.semente
+                        : widget.amigo != null
                         ? widget.amigo!.semente
                         : widget.arena
                         ? Arena.semente(_s.hoje())
@@ -412,7 +425,7 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
     if (((elogio?.nivel ?? 0) >= 3 || jogada.combo >= 4) && !MediaQuery.of(context).disableAnimations) {
       _tremor.forward(from: 0);
     }
-    if (_tutorial == null && widget.fase == null && widget.puzzle == null) {
+    if (_tutorial == null && widget.fase == null && widget.puzzle == null && widget.duelo == null) {
       final fala = falaAposJogada(
         elogioNivel: elogio?.nivel ?? 0,
         elogioTexto: elogio == null ? null : t(elogio.texto),
@@ -422,8 +435,10 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
       );
       if (fala != null) _mascoteDiz(fala.texto, fala.humor);
     }
-    if (!widget.zen) _s.progresso.registrarJogada(linhas: jogada.linhasLimpas, combo: jogada.combo);
-    if (widget.puzzle == null && !widget.zen) {
+    if (!widget.zen && widget.duelo == null) {
+      _s.progresso.registrarJogada(linhas: jogada.linhasLimpas, combo: jogada.combo);
+    }
+    if (widget.puzzle == null && !widget.zen && widget.duelo == null) {
       // No puzzle as gemas vêm só das estrelas do fim (senão dava para repetir à vontade).
       _s.progresso.ganharGemas(gemasDaJogada + gemasDasMetas);
       _s.progresso.contarMissoes(_dia, contagemDaJogada(jogada));
@@ -445,6 +460,8 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
       _s.sons.tocar(Som.fim);
       if (widget.zen) {
         _abrirEspaco();
+      } else if (widget.duelo != null) {
+        setState(() => _fim = _Fim.resultado);
       } else if (widget.puzzle != null) {
         _encerrarPuzzle();
       } else if (widget.relampago) {
@@ -705,7 +722,7 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
     if (mounted) Navigator.of(context).pop();
   }
 
-  void _compartilhar() {
+  Future<void> _compartilhar() async {
     final texto = widget.puzzle != null
         ? t('Encaixa 🧠 Puzzle #{0}\n{1} de 3 estrelas (linhas: {2})\nConsegue fazer melhor?\n{3}', [
             numeroDoDesafio(_s.hoje()),
@@ -740,7 +757,37 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
             texto,
             codigo,
           ]);
-    SharePlus.instance.share(ShareParams(text: completo));
+    // Imagem do tabuleiro com a pontuação; se não der para gerar, vai só o texto.
+    XFile? imagem;
+    try {
+      final puzzle = widget.puzzle != null;
+      final png = await CartaoDePontos(
+        tabuleiro: _partida.tabuleiro,
+        destaque: puzzle ? '${_partida.linhas}' : '${_partida.pontos}',
+        titulo: widget.puzzle != null
+            ? t('Puzzle #{0}', [numeroDoDesafio(_s.hoje())])
+            : widget.arena
+            ? t('Arena da semana')
+            : widget.diario
+            ? t('Desafio #{0}', [numeroDoDesafio(_s.hoje())])
+            : widget.relampago
+            ? t('Relâmpago')
+            : t('Infinito'),
+        detalhe: puzzle
+            ? t('{0} de 3 estrelas', [_estrelasPuzzle])
+            : t('{0} linhas · Combo x{1}', [_partida.linhas, _partida.maiorCombo]),
+      ).png();
+      imagem = XFile.fromData(png, mimeType: 'image/png', name: 'encaixa.png');
+    } on Object catch (e) {
+      debugPrint('Compartilhar (imagem): $e');
+    }
+    await SharePlus.instance.share(
+      ShareParams(
+        text: completo,
+        files: imagem == null ? null : [imagem],
+        fileNameOverrides: imagem == null ? null : ['encaixa.png'],
+      ),
+    );
   }
 
   // ---------- tela ----------
@@ -769,7 +816,7 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
                     if (cabeMascote && widget.fase == null && _fim == null && _tutorial == null) _faixaDoMascote(),
                     const Spacer(),
                     _mao(),
-                    if (widget.puzzle == null) _reforcos() else const SizedBox(height: 20),
+                    if (widget.puzzle == null && widget.duelo == null) _reforcos() else const SizedBox(height: 20),
                     const SizedBox(height: 8),
                   ],
                 ),
@@ -883,6 +930,11 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
               t('DESAFIO #{0}', [numeroDoDesafio(_s.hoje())]),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
             ),
+          if (widget.duelo case final duelo?)
+            Text(
+              t('JOGADOR {0}', [duelo.jogador]),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
+            ),
           if (widget.zen)
             Text(
               t('ZEN'),
@@ -900,11 +952,25 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
     ),
   );
 
-  Widget _placar() => widget.zen
+  Widget _placar() => widget.duelo != null
+      ? _placarDoDuelo(widget.duelo!)
+      : widget.zen
       ? _placarZen()
       : widget.puzzle != null
       ? _placarDoPuzzle(widget.puzzle!)
       : (widget.fase == null ? _placarDePontos() : _placarDaFase(widget.fase!));
+
+  Widget _placarDoDuelo(Duelo duelo) => Column(
+    children: [
+      TextoContornado('${_partida.pontos}', tamanho: 50),
+      Text(t('pontos'), style: const TextStyle(color: Cores.textoFraco, fontSize: 16)),
+      if (duelo.jogador == 2)
+        Text(
+          t('Jogador 1 fez {0}', [duelo.pontosJ1]),
+          style: const TextStyle(fontSize: 14, color: Cores.ouro, fontWeight: FontWeight.w700),
+        ),
+    ],
+  );
 
   Widget _placarZen() => Column(
     children: [
@@ -1409,7 +1475,62 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
     TextButton(onPressed: _sair, child: Text(t('Início'))),
   ];
 
-  List<Widget> _resultado() => widget.puzzle != null ? _resultadoDoPuzzle() : _resultadoNormal();
+  List<Widget> _resultado() => widget.duelo != null
+      ? _resultadoDoDuelo(widget.duelo!)
+      : widget.puzzle != null
+      ? _resultadoDoPuzzle()
+      : _resultadoNormal();
+
+  void _trocarDeTela(Duelo duelo) => Navigator.of(context).pushReplacement(
+    MaterialPageRoute<void>(
+      builder: (_) => JogoTela(servicos: _s, duelo: duelo),
+    ),
+  );
+
+  List<Widget> _resultadoDoDuelo(Duelo duelo) {
+    final pontos = _partida.pontos;
+    if (duelo.jogador == 1) {
+      return [
+        const Center(child: Mascote(humor: Humor.feliz, tamanho: 74)),
+        Text(
+          t('Jogador 1 fez {0} pontos', [pontos]),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          t('Passe o celular para o Jogador 2. Vocês jogam com as mesmas peças.'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Cores.textoFraco, fontSize: 16),
+        ),
+        const SizedBox(height: 20),
+        _botao(
+          t('Passar para o Jogador 2'),
+          Icons.arrow_forward_rounded,
+          () => _trocarDeTela(duelo.vezDoJogador2(pontos)),
+        ),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(t('Início'))),
+      ];
+    }
+    final quem = Duelo.vencedor(duelo.pontosJ1, pontos);
+    return [
+      const Center(child: Mascote(humor: Humor.feliz, tamanho: 74)),
+      Text(
+        quem == 0 ? t('Empate!') : t('O Jogador {0} venceu!', [quem]),
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        t('Jogador 1: {0} · Jogador 2: {1}', [duelo.pontosJ1, pontos]),
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 18),
+      ),
+      const SizedBox(height: 20),
+      _botao(t('Revanche'), Icons.replay_rounded, () => _trocarDeTela(Duelo.novo())),
+      TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(t('Início'))),
+    ];
+  }
 
   List<Widget> _resultadoNormal() => [
     Center(
