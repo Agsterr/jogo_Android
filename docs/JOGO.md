@@ -142,3 +142,14 @@ com quantas estão prontas. Regras em `app/lib/jogo/conquistas.dart`.
 ## Símbolos para daltônicos
 Em **Como jogar**, o interruptor "Símbolos nas peças" desenha um símbolo em cada cor (círculo, triângulo, losango, estrela,
 cruz e quadrado) nas peças da mão, no tabuleiro e na prévia. Desligado por padrão e vai no código de progresso.
+
+## Modo Relâmpago (60 segundos)
+Na tela inicial, **Relâmpago**: 60 segundos para fazer o máximo de pontos. O tempo só começa na primeira jogada; se o
+tabuleiro encher antes, a partida acaba (sem segunda chance). No fim: **1 gema a cada 150 pontos (até 15)**. O recorde do
+Relâmpago é separado do recorde geral. Peças sorteadas a cada partida, sem metas do Infinito.
+
+## Passe de temporada (mensal)
+20 níveis por mês, 100 XP cada. XP: Desafio +40, baú das missões +30, fase vencida +10 (+3 por estrela), vitória sobre
+amigo +15, partida +5 (só as 10 primeiras do dia). Cada nível dá gemas (10; nos níveis 5, 10, 15 e 20, 30), **o dobro com
+o Encaixa+**, e o nível 20 libera o tema **Aurora** para sempre. A trilha recomeça no mês seguinte. Regras em
+`app/lib/jogo/passe.dart`.

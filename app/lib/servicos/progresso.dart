@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../jogo/album.dart';
 import '../jogo/amigo.dart';
 import '../jogo/conquistas.dart';
+import '../jogo/passe.dart';
 import '../jogo/arena.dart';
 import '../jogo/fases.dart';
 import '../jogo/missoes.dart';
@@ -147,6 +148,7 @@ class Progresso extends ChangeNotifier {
       gemasGanhas = 5 + premioDaSequencia(dias);
       await contarMissao(dia, TipoMissao.desafio, 1);
       await ganharFigurinha(dia * 31 + 2);
+      await ganharXpDoPasse(dia, XpDoPasse.desafio);
       // Prêmio de 30 dias: tema exclusivo, guardado para sempre.
       for (final t in TemaDeBlocos.todos) {
         if (t.marcoDias != null && dias >= t.marcoDias!) await guardarTema(t);
@@ -254,7 +256,7 @@ class Progresso extends ChangeNotifier {
 
   /// Tem o tema? (grátis, comprado, assinante ou evento em andamento)
   bool temTema(TemaDeBlocos t, {String? eventoAtivo}) =>
-      (t.preco == 0 && !t.assinante && t.evento == null && t.marcoDias == null) ||
+      (t.preco == 0 && !t.assinante && t.evento == null && t.marcoDias == null && !t.passe) ||
       (_prefs.getStringList('temas') ?? []).contains(t.id) ||
       (t.assinante && assinante) ||
       (t.evento != null && t.evento == eventoAtivo);
@@ -343,6 +345,76 @@ class Progresso extends ChangeNotifier {
     return true;
   }
 
+  // ---------- passe de temporada ----------
+
+  int _mesDe(int dia) => dia ~/ 100;
+
+  bool _mesDoPasse(int dia) => _prefs.getInt('passeMes') == _mesDe(dia);
+
+  /// XP do passe no mês de [dia] (zera sozinho quando vira o mês).
+  int passeXp(int dia) => _mesDoPasse(dia) ? (_prefs.getInt('passeXp') ?? 0) : 0;
+
+  int passeNivel(int dia) => nivelDoPasse(passeXp(dia));
+
+  Set<int> passePegos(int dia) => _mesDoPasse(dia) ? {...?_prefs.getStringList('passePegos')?.map(int.parse)} : <int>{};
+
+  /// Níveis alcançados e ainda não resgatados.
+  int passeProntos(int dia) => passeNivel(dia) - passePegos(dia).length;
+
+  Future<void> _virarMesDoPasse(int dia) async {
+    if (_mesDoPasse(dia)) return;
+    await _prefs.setInt('passeMes', _mesDe(dia));
+    await _prefs.setInt('passeXp', 0);
+    await _prefs.setStringList('passePegos', []);
+    await _prefs.setInt('passePartidasDia', 0);
+    await _prefs.setInt('passePartidasQuando', 0);
+  }
+
+  Future<void> ganharXpDoPasse(int dia, int xp) async {
+    if (xp <= 0) return;
+    await _virarMesDoPasse(dia);
+    await _prefs.setInt('passeXp', (_prefs.getInt('passeXp') ?? 0) + xp);
+    notifyListeners();
+  }
+
+  /// XP de uma partida terminada: só vale nas primeiras [XpDoPasse.partidasPorDia] de cada dia.
+  Future<void> ganharXpDaPartida(int dia) async {
+    await _virarMesDoPasse(dia);
+    final hoje = _prefs.getInt('passePartidasQuando') == dia ? (_prefs.getInt('passePartidasDia') ?? 0) : 0;
+    if (hoje >= XpDoPasse.partidasPorDia) return;
+    await _prefs.setInt('passePartidasQuando', dia);
+    await _prefs.setInt('passePartidasDia', hoje + 1);
+    await ganharXpDoPasse(dia, XpDoPasse.partida);
+  }
+
+  /// Resgata o prêmio de um nível alcançado. Devolve as gemas (0 se não dá). O nível 20 libera o tema Aurora.
+  Future<int> pegarNivelDoPasse(int dia, int nivel) async {
+    if (nivel < 1 || nivel > passeNivel(dia) || passePegos(dia).contains(nivel)) return 0;
+    final gemas = gemasDoNivelDoPasse(nivel) * (assinante ? 2 : 1);
+    await _prefs.setStringList('passePegos', [...passePegos(dia).map((n) => '$n'), '$nivel']);
+    await ganharGemas(gemas);
+    if (nivel == niveisDoPasse) {
+      for (final t in TemaDeBlocos.todos) {
+        if (t.passe) await guardarTema(t);
+      }
+    }
+    notifyListeners();
+    return gemas;
+  }
+
+  // ---------- modo Relâmpago ----------
+
+  int get relampagoMelhor => _prefs.getInt('relampagoMelhor') ?? 0;
+
+  /// Fim de uma partida Relâmpago. Conta como partida, mas o recorde dele é separado do recorde geral.
+  Future<bool> fimDoRelampago(int pontos) async {
+    await _prefs.setInt('partidas', partidas + 1);
+    final novo = pontos > relampagoMelhor;
+    if (novo) await _prefs.setInt('relampagoMelhor', pontos);
+    notifyListeners();
+    return novo;
+  }
+
   // ---------- desafio de amigo ----------
 
   /// Terminou um desafio de amigo. Vencer paga gemas uma vez por desafio. Devolve as gemas ganhas.
@@ -377,6 +449,7 @@ class Progresso extends ChangeNotifier {
     desafios: _prefs.getInt('desafiosTotal') ?? 0,
     figurinhas: figurinhas.length,
     amigosVencidos: _prefs.getInt('amigosVencidos') ?? 0,
+    relampago: relampagoMelhor,
   );
 
   Set<String> get conquistasPegas => {...?_prefs.getStringList('conquistas')};
@@ -426,6 +499,7 @@ class Progresso extends ChangeNotifier {
     await _prefs.setBool('bauAberto', true);
     await ganharGemas(gemasDoBau);
     await ganharFigurinha(dia * 31 + 1);
+    await ganharXpDoPasse(dia, XpDoPasse.bau);
     return true;
   }
 

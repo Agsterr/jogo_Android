@@ -10,6 +10,7 @@ class TemaDeBlocos {
     this.assinante = false,
     this.evento,
     this.marcoDias,
+    this.passe = false,
   });
 
   final String id;
@@ -27,6 +28,9 @@ class TemaDeBlocos {
 
   /// Prêmio de sequência: libera depois de tantos dias seguidos no Desafio do dia (fica para sempre).
   final int? marcoDias;
+
+  /// Prêmio do nível 20 do Passe de temporada (fica para sempre).
+  final bool passe;
 
   static const classico = TemaDeBlocos('classico', 'Clássico', [
     Color(0xFFFF3D6E),
@@ -95,6 +99,14 @@ class TemaDeBlocos {
       Color(0xFFFF4D8D),
       Color(0xFFC81D6B),
     ], marcoDias: 30),
+    TemaDeBlocos('aurora', 'Aurora', [
+      Color(0xFF00F5A0),
+      Color(0xFF00D9F5),
+      Color(0xFF7B61FF),
+      Color(0xFFFF61D8),
+      Color(0xFFFFE259),
+      Color(0xFF5EFCE8),
+    ], passe: true),
   ];
 
   static TemaDeBlocos porId(String? id) => todos.firstWhere((t) => t.id == id, orElse: () => classico);

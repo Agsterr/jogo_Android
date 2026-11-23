@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ import '../jogo/fases.dart';
 import '../jogo/marcos.dart';
 import '../jogo/missoes.dart';
 import '../jogo/partida.dart';
+import '../jogo/passe.dart';
 import '../jogo/peca.dart';
 import '../jogo/sorteio.dart';
 import '../jogo/tabuleiro.dart';
@@ -51,6 +53,8 @@ class JogoTela extends StatefulWidget {
     this.fase,
     this.partida,
     this.amigo,
+    this.relampago = false,
+    this.duracao = const Duration(seconds: 60),
   });
 
   final Servicos servicos;
@@ -66,6 +70,12 @@ class JogoTela extends StatefulWidget {
 
   /// Desafio de amigo: as mesmas peças dele, com a pontuação dele para bater.
   final DesafioAmigo? amigo;
+
+  /// Modo Relâmpago: o tempo corre a partir da primeira jogada e a partida acaba quando ele zera.
+  final bool relampago;
+
+  /// Duração do Relâmpago (os testes usam menos).
+  final Duration duracao;
 
   /// Partida pronta (usada nos testes e nas capturas de tela).
   final Partida? partida;
@@ -93,6 +103,13 @@ class _JogoTelaState extends State<JogoTela> {
   bool _novoRecorde = false;
   int _gemasDesafio = 0;
   int _gemasAmigo = 0;
+  int _gemasRelampago = 0;
+
+  // Relâmpago: tempo que falta, contado em passos de 250 ms (assim os testes controlam o relógio).
+  static const _passo = Duration(milliseconds: 250);
+  Timer? _relogio;
+  late int _restanteMs = widget.duracao.inMilliseconds;
+  bool _comecou = false;
   ({Album album, Figurinha figurinha, bool completou})? _figurinhaNova;
 
   /// Fases: peças extras ganhas na ajuda (uma ajuda por tentativa).
@@ -102,8 +119,37 @@ class _JogoTelaState extends State<JogoTela> {
 
   Servicos get _s => widget.servicos;
 
+  @override
+  void dispose() {
+    _relogio?.cancel();
+    super.dispose();
+  }
+
+  void _iniciarRelogio() {
+    if (!widget.relampago || _comecou) return;
+    _comecou = true;
+    _relogio = Timer.periodic(_passo, (_) {
+      if (!mounted || _fim != null) return _relogio?.cancel();
+      setState(() => _restanteMs = math.max(0, _restanteMs - _passo.inMilliseconds));
+      if (_restanteMs == 0) _tempoEsgotado();
+    });
+  }
+
+  void _tempoEsgotado() {
+    _relogio?.cancel();
+    if (_fim != null) return;
+    _s.sons.tocar(Som.fim);
+    _arrastando = null;
+    _previa = null;
+    setState(() => _fim = _Fim.resultado);
+    _encerrar();
+  }
+
   @visibleForTesting
   Partida get partidaParaTeste => _partida;
+
+  @visibleForTesting
+  void iniciarRelogioParaTeste() => _iniciarRelogio();
 
   @override
   void initState() {
@@ -124,7 +170,10 @@ class _JogoTelaState extends State<JogoTela> {
       Objetivo.umaCor => Dicas.umaCor,
       Objetivo.combo => Dicas.combo,
       Objetivo.linhas => null,
-      null => widget.arena ? Dicas.arena : (widget.diario ? Dicas.desafio : Dicas.infinito),
+      null =>
+        widget.arena
+            ? Dicas.arena
+            : (widget.diario ? Dicas.desafio : (widget.relampago ? Dicas.relampago : Dicas.infinito)),
     };
     if (dica != null) await mostrarDicaUmaVez(context, _s, dica);
     // Quem já conhece o modo vê, uma vez só, os reforços novos.
@@ -155,13 +204,14 @@ class _JogoTelaState extends State<JogoTela> {
   }
 
   /// Clássico e Desafio têm partidas salvas separadas.
-  String get _chave =>
-      widget.arena ? 'arena' : (widget.diario ? 'desafio' : (widget.amigo != null ? 'amigo' : 'classico'));
+  String get _chave => widget.arena
+      ? 'arena'
+      : (widget.diario ? 'desafio' : (widget.amigo != null ? 'amigo' : (widget.relampago ? 'relampago' : 'classico')));
 
   int get _semana => Arena.semana(_s.hoje());
 
   Partida? _partidaSalva() {
-    if (widget.fase != null || widget.amigo != null) return null; // desafio de amigo sempre começa do zero
+    if (widget.fase != null || widget.amigo != null || widget.relampago) return null; // estes sempre começam do zero
     final json = _s.progresso.partidaSalva(_chave);
     if (json == null || (widget.diario && json['dia'] != _dia)) return null;
     if (widget.arena && json['semana'] != _semana) return null;
@@ -172,13 +222,17 @@ class _JogoTelaState extends State<JogoTela> {
     }
   }
 
-  void _salvar() => widget.fase != null || widget.amigo != null
+  void _salvar() => widget.fase != null || widget.amigo != null || widget.relampago
       ? null
       : _s.progresso.salvarPartida(_chave, {..._partida.paraJson(), 'dia': _dia, 'semana': _semana});
 
   /// Infinito: o único modo com metas de pontos e peças que ficam maiores (os outros têm peças iguais para todos).
   bool get _infinito =>
-      widget.fase == null && !widget.diario && !widget.arena && (widget.amigo == null || widget.amigo!.infinito);
+      widget.fase == null &&
+      !widget.diario &&
+      !widget.arena &&
+      !widget.relampago &&
+      (widget.amigo == null || widget.amigo!.infinito);
 
   Partida _novaPartida() =>
       (widget.fase?.novaPartida() ??
@@ -276,6 +330,7 @@ class _JogoTelaState extends State<JogoTela> {
         ],
       );
     }
+    _iniciarRelogio();
     _s.progresso.registrarJogada(linhas: jogada.linhasLimpas, combo: jogada.combo);
     _s.progresso.ganharGemas(gemasDaJogada + gemasDasMetas);
     _s.progresso.contarMissoes(_dia, contagemDaJogada(jogada));
@@ -288,12 +343,20 @@ class _JogoTelaState extends State<JogoTela> {
     }
     if (_partida.fimDeJogo) {
       _s.sons.tocar(Som.fim);
-      if (_partida.continuou) {
+      if (widget.relampago) {
+        _relogio?.cancel();
+        _encerrar(); // sem segunda chance: o tempo é o limite
+      } else if (_partida.continuou) {
         _encerrar();
       } else {
         setState(() => _fim = _Fim.segundaChance);
       }
     }
+  }
+
+  static String _formatarTempo(int ms) {
+    final s = (ms / 1000).ceil();
+    return '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
   }
 
   String _textoGemas(int n) => '+$n ${n == 1 ? 'gema' : 'gemas'}';
@@ -309,6 +372,7 @@ class _JogoTelaState extends State<JogoTela> {
       // Quem precisou de ajuda leva no máximo 1 estrela.
       final estrelas = _ajudou ? 1 : fase.estrelas(_partida);
       final gemas = await _s.progresso.concluirFase(fase.numero, estrelas);
+      if (gemas > 0) await _s.progresso.ganharXpDoPasse(_dia, XpDoPasse.fase(estrelas));
       await _s.progresso.contarMissoes(_dia, {
         TipoMissao.partidas: 1,
         TipoMissao.fases: 1,
@@ -447,10 +511,16 @@ class _JogoTelaState extends State<JogoTela> {
   Future<void> _encerrar() async {
     await _s.progresso.apagarPartida(_chave);
     final pontos = _partida.pontos;
-    final recorde = await _s.progresso.fimDePartida(pontos);
+    final recorde = widget.relampago
+        ? await _s.progresso.fimDoRelampago(pontos)
+        : await _s.progresso.fimDePartida(pontos);
+    await _s.progresso.ganharXpDaPartida(_dia);
+    final gemasRelampago = widget.relampago ? gemasDoRelampago(pontos) : 0;
+    if (gemasRelampago > 0) await _s.progresso.ganharGemas(gemasRelampago);
     await _s.progresso.contarMissoes(_dia, {TipoMissao.partidas: 1, TipoMissao.pontos: pontos});
     final gemasDesafio = widget.diario ? await _s.progresso.concluirDesafio(_dia, pontos) : 0;
     final gemasAmigo = widget.amigo == null ? 0 : await _s.progresso.concluirDesafioDeAmigo(widget.amigo!, pontos);
+    if (gemasAmigo > 0) await _s.progresso.ganharXpDoPasse(_dia, XpDoPasse.amigo);
     if (widget.diario) _figurinhaNova = _s.progresso.pegarFigurinhaRecente();
     if (widget.diario) _s.reagendarLembrete(); // hoje já jogou: o próximo lembrete passa para amanhã
     if (widget.arena) {
@@ -462,6 +532,7 @@ class _JogoTelaState extends State<JogoTela> {
       _novoRecorde = recorde;
       _gemasDesafio = gemasDesafio;
       _gemasAmigo = gemasAmigo;
+      _gemasRelampago = gemasRelampago;
       _fim = _Fim.resultado;
     });
     await mostrarRoletaDaPartida(context, _s);
@@ -476,6 +547,9 @@ class _JogoTelaState extends State<JogoTela> {
     await _intersticial();
     setState(() {
       _partida = _novaPartida();
+      _relogio?.cancel();
+      _comecou = false;
+      _restanteMs = widget.duracao.inMilliseconds;
       _fim = null;
       _novoRecorde = false;
       _removidos = const [];
@@ -501,6 +575,8 @@ class _JogoTelaState extends State<JogoTela> {
         : widget.diario
         ? 'Encaixa 🧩 Desafio #${numeroDoDesafio(_s.hoje())}\n⭐ ${_partida.pontos} pontos\n'
               'Mesmas peças para todo mundo. Consegue me passar?\n$linkDaLoja'
+        : widget.relampago
+        ? 'Fiz ${_partida.pontos} pontos em 60 segundos no Encaixa ⚡ Consegue me passar?\n$linkDaLoja'
         : 'Fiz ${_partida.pontos} pontos no Encaixa 🧩 Consegue me passar?\n$linkDaLoja';
     final codigo = widget.fase != null || _partida.semente <= 0
         ? null
@@ -580,6 +656,24 @@ class _JogoTelaState extends State<JogoTela> {
             const Text(
               'ARENA DA SEMANA',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
+            ),
+          if (widget.relampago)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: _restanteMs <= 10000 && _comecou ? Cores.destaque : Cores.painel.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.timer_rounded, size: 20),
+                  Text(
+                    ' ${_formatarTempo(_restanteMs)}',
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
             ),
           if (widget.amigo case final amigo?)
             Text(
@@ -1023,7 +1117,7 @@ class _JogoTelaState extends State<JogoTela> {
       style: const TextStyle(fontSize: 56, fontWeight: FontWeight.w700),
     ),
     Text(
-      'Recorde: ${_s.progresso.recorde}',
+      'Recorde: ${widget.relampago ? _s.progresso.relampagoMelhor : _s.progresso.recorde}',
       textAlign: TextAlign.center,
       style: const TextStyle(color: Cores.textoFraco),
     ),
@@ -1043,6 +1137,15 @@ class _JogoTelaState extends State<JogoTela> {
                   : 'Figurinha nova: ${f.figurinha.nome}',
             '🔥 ${_s.progresso.sequencia(_dia)} ${_s.progresso.sequencia(_dia) == 1 ? 'dia' : 'dias seguidos'}',
           ].join('\n'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
+        ),
+      ),
+    if (widget.relampago)
+      Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Text(
+          ['Tempo esgotado!', if (_gemasRelampago > 0) _textoGemas(_gemasRelampago)].join('\n'),
           textAlign: TextAlign.center,
           style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
         ),
@@ -1078,7 +1181,7 @@ class _JogoTelaState extends State<JogoTela> {
       ),
     const SizedBox(height: 20),
     _botao(
-      widget.diario || widget.arena || widget.amigo != null ? 'Tentar de novo' : 'Jogar de novo',
+      widget.diario || widget.arena || widget.amigo != null || widget.relampago ? 'Tentar de novo' : 'Jogar de novo',
       Icons.replay_rounded,
       _jogarDeNovo,
     ),

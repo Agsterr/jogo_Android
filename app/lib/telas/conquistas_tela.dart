@@ -18,6 +18,7 @@ const _icones = <Medida, IconData>{
   Medida.desafios: Icons.calendar_month_rounded,
   Medida.figurinhas: Icons.collections_bookmark_rounded,
   Medida.amigos: Icons.group_rounded,
+  Medida.relampago: Icons.timer_rounded,
 };
 
 class ConquistasTela extends StatelessWidget {

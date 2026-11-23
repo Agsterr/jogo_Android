@@ -19,6 +19,7 @@ abstract final class CodigoProgresso {
     'desafioPontos',
     'sequencia',
     'sequenciaMax',
+    'relampagoMelhor',
     'desafiosTotal',
     'linhasMax',
     'comboMax',

@@ -7,6 +7,7 @@ import '../app.dart';
 import '../jogo/album.dart';
 import '../jogo/amigo.dart';
 import '../jogo/conquistas.dart';
+import '../jogo/passe.dart';
 import '../jogo/arena.dart';
 import '../jogo/eventos.dart';
 import '../jogo/fases.dart';
@@ -23,6 +24,7 @@ import '../widgets/peca_widget.dart';
 import 'ajuda_tela.dart';
 import 'album_tela.dart';
 import 'conquistas_tela.dart';
+import 'passe_tela.dart';
 import 'arena_tela.dart';
 import 'jogo_tela.dart';
 import 'loja_tela.dart';
@@ -224,6 +226,40 @@ class _InicioTelaState extends State<InicioTela> {
                           _RecuperarSequencia(servicos: servicos, dia: dia),
                           const SizedBox(height: 14),
                         ],
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: _Atalho(
+                                  icone: Icons.bolt_rounded,
+                                  titulo: 'Relâmpago',
+                                  subtitulo: p.relampagoMelhor > 0
+                                      ? '60 segundos · melhor ${p.relampagoMelhor}'
+                                      : '60 segundos para pontuar!',
+                                  cores: const [Color(0xFFFFD000), Color(0xFFFF6A00)],
+                                  contorno: const Color(0xFF7A3000),
+                                  aoTocar: () => _abrir(JogoTela(servicos: servicos, relampago: true)),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _Atalho(
+                                  icone: Icons.workspace_premium_rounded,
+                                  titulo: 'Passe',
+                                  subtitulo: p.passeProntos(dia) > 0
+                                      ? '${p.passeProntos(dia)} prêmio${p.passeProntos(dia) == 1 ? '' : 's'} para pegar!'
+                                      : 'Nível ${p.passeNivel(dia)} de $niveisDoPasse',
+                                  cores: const [Color(0xFF7B61FF), Color(0xFFFF61D8)],
+                                  contorno: const Color(0xFF3A1B8A),
+                                  selo: p.passeProntos(dia),
+                                  aoTocar: () => _abrir(PasseTela(servicos: servicos)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
                         IntrinsicHeight(
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,

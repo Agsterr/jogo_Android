@@ -96,6 +96,9 @@ int? proximoMarco(int dias) {
   return null;
 }
 
+/// Gemas pelo Relâmpago: 1 a cada 150 pontos, no máximo 15.
+int gemasDoRelampago(int pontos) => (pontos ~/ 150).clamp(0, 15);
+
 /// Dia anterior no formato aaaammdd.
 int diaAnterior(int dia) {
   final d = DateTime.utc(dia ~/ 10000, dia ~/ 100 % 100, dia % 100).subtract(const Duration(days: 1));

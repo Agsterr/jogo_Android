@@ -11,13 +11,14 @@ class Estatisticas {
     this.desafios = 0,
     this.figurinhas = 0,
     this.amigosVencidos = 0,
+    this.relampago = 0,
   });
 
   final int partidas, recorde, linhasMax, comboMax, fasesConcluidas, estrelas, sequenciaMax, desafios, figurinhas;
-  final int amigosVencidos;
+  final int amigosVencidos, relampago;
 }
 
-enum Medida { partidas, recorde, linhas, combo, fases, estrelas, sequencia, desafios, figurinhas, amigos }
+enum Medida { partidas, recorde, linhas, combo, fases, estrelas, sequencia, desafios, figurinhas, amigos, relampago }
 
 class Conquista {
   const Conquista(this.id, this.nome, this.descricao, this.medida, this.meta, this.gemas);
@@ -40,6 +41,7 @@ class Conquista {
     Medida.desafios => e.desafios,
     Medida.figurinhas => e.figurinhas,
     Medida.amigos => e.amigosVencidos,
+    Medida.relampago => e.relampago,
   };
 
   bool feita(Estatisticas e) => valor(e) >= meta;
@@ -69,6 +71,8 @@ class Conquista {
     Conquista('seq-30', 'Um mês', '30 dias seguidos no Desafio', Medida.sequencia, 30, 100),
     Conquista('fig-12', 'Colecionador', 'Complete um álbum de figurinhas', Medida.figurinhas, 12, 30),
     Conquista('fig-24', 'Álbuns cheios', 'Complete os dois álbuns', Medida.figurinhas, 24, 80),
+    Conquista('relampago-1000', 'Relâmpago', 'Faça 1.000 pontos em 60 segundos', Medida.relampago, 1000, 20),
+    Conquista('relampago-2500', 'Raio', 'Faça 2.500 pontos em 60 segundos', Medida.relampago, 2500, 60),
     Conquista('amigo-1', 'Rival', 'Vença o desafio de um amigo', Medida.amigos, 1, 15),
     Conquista('amigo-5', 'Imbatível', 'Vença 5 desafios de amigos', Medida.amigos, 5, 50),
   ];

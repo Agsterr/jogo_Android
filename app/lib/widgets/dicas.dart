@@ -107,6 +107,21 @@ abstract final class Dicas {
     'Todo fim de semana (sexta 18h a domingo) também tem gemas em dobro.',
   ]);
 
+  static const relampago = Dica('relampago', 'Relâmpago', Icons.timer_rounded, Color(0xFFFFB800), [
+    'Você tem 60 segundos. O tempo só começa a correr na sua primeira jogada.',
+    'Faça o máximo de pontos: linhas e combos valem muito.',
+    'Se o tabuleiro encher antes, a partida acaba (não tem segunda chance).',
+    'No fim, ganha 1 gema a cada 150 pontos (até 15).',
+  ]);
+
+  static const passe = Dica('passe', 'Passe de temporada', Icons.emoji_events_rounded, Color(0xFFFF8A00), [
+    'Todo mês tem um Passe novo com 20 níveis. Jogar enche a barra.',
+    'Desafio do dia dá 40, baú das missões 30, fases até 19 e partidas 5 (as 10 primeiras do dia).',
+    'Cada 100 de XP é um nível, e cada nível dá gemas. O nível 20 dá o tema Aurora.',
+    'Com o Encaixa+ as gemas do Passe vêm em dobro.',
+    'No mês seguinte a trilha recomeça do zero: resgate os prêmios antes!',
+  ]);
+
   static const album = Dica('album', 'Álbum de figurinhas', Icons.collections_bookmark_rounded, Color(0xFF00D084), [
     'Concluir o Desafio do dia dá uma figurinha nova.',
     'Abrir o baú das missões do dia também dá uma.',
@@ -150,6 +165,8 @@ abstract final class Dicas {
     presente,
     reforcos,
     album,
+    passe,
+    relampago,
     roda,
     progresso,
     eventos,
