@@ -164,3 +164,8 @@ as mesmas. Regras em `app/lib/jogo/partida.dart` e `peca.dart`; testes em `test/
 ## Quadrinho, o mascote
 Um bloco simpático desenhado em código (`app/lib/widgets/mascote.dart`, sem imagens) aparece no fim da partida e reage:
 festa no novo recorde, feliz na partida normal e tristinho se foi bem abaixo do recorde, com uma frase de incentivo.
+
+## Faixas do Desafio e presente da noite
+**Faixas** pela melhor pontuação do Desafio no dia: Bronze (1.500) +3 gemas, Prata (4.000) +8, Ouro (8.000) +15. Não
+soma entre faixas: ao subir de faixa no mesmo dia paga só a diferença. **Presente da noite**: depois das 19h aparece na
+tela inicial um segundo presente (+10 gemas e 20 XP do Passe) uma vez por dia; o lembrete das 19h cita ele.

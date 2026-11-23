@@ -144,6 +144,19 @@ class _InicioTelaState extends State<InicioTela> {
                         const SizedBox(height: 4),
                         const Logo(tamanho: 50),
                         const SizedBox(height: 14),
+                        if (p.presenteDaNoiteDisponivel(dia, hoje)) ...[
+                          _PresenteDaNoite(
+                            aoTocar: () async {
+                              final gemas = await p.pegarPresenteDaNoite(dia, servicos.hoje());
+                              if (gemas > 0 && context.mounted) {
+                                ScaffoldMessenger.of(context)
+                                  ..clearSnackBars()
+                                  ..showSnackBar(SnackBar(content: Text('Boa noite! +$gemas gemas')));
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 14),
+                        ],
                         if (_BannerEvento.temAlgo(hoje)) ...[
                           GestureDetector(
                             onTap: () => mostrarDica(context, Dicas.eventos),
@@ -1145,6 +1158,50 @@ class _DialogoCodigoAmigoState extends State<_DialogoCodigoAmigo> {
       FilledButton(onPressed: _campo.text.trim().isEmpty ? null : _comecar, child: const Text('Jogar')),
     ],
   );
+}
+
+/// Segundo presente do dia, depois das 19h.
+class _PresenteDaNoite extends StatelessWidget {
+  const _PresenteDaNoite({required this.aoTocar});
+
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) {
+    const cores = [Color(0xFF2B2FA8), Color(0xFF8B3DFF)];
+    return Semantics(
+      button: true,
+      label: 'Presente da noite',
+      child: GestureDetector(
+        onTap: aoTocar,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            gradient: const LinearGradient(colors: cores),
+            border: Border.all(color: Cores.ouro, width: 2),
+            boxShadow: [BoxShadow(color: cores.last.withValues(alpha: 0.5), blurRadius: 18)],
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.nightlight_round, size: 34, color: Cores.ouro),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Presente da noite!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                    Text('Toque e leve +$gemasDaNoite gemas', style: TextStyle(fontSize: 14, height: 1.2)),
+                  ],
+                ),
+              ),
+              const IconeGema(tamanho: 26),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Atalho pequeno (metade da largura): Álbum e Conquistas. O selo avisa quando há prêmio para pegar.

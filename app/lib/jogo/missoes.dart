@@ -96,6 +96,26 @@ int? proximoMarco(int dias) {
   return null;
 }
 
+/// Faixas de pontuação do Desafio do dia: bônus de gemas pela melhor pontuação do dia (não se soma entre faixas).
+enum Faixa {
+  nenhuma('', 0, 0),
+  bronze('Bronze', 1500, 3),
+  prata('Prata', 4000, 8),
+  ouro('Ouro', 8000, 15);
+
+  const Faixa(this.nome, this.pontos, this.gemas);
+
+  final String nome;
+  final int pontos;
+  final int gemas;
+
+  /// A maior faixa alcançada com [pontos].
+  static Faixa de(int pontos) => values.lastWhere((f) => pontos >= f.pontos);
+}
+
+/// Gemas do presente da noite.
+const gemasDaNoite = 10;
+
 /// Gemas pelo Relâmpago: 1 a cada 150 pontos, no máximo 15.
 int gemasDoRelampago(int pontos) => (pontos ~/ 150).clamp(0, 15);
 

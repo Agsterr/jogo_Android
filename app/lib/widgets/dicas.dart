@@ -70,6 +70,8 @@ abstract final class Dicas {
     'Todo dia um desafio novo, com as MESMAS peças para todo mundo.',
     'Jogue para ganhar +5 gemas e manter a sua sequência de dias 🔥.',
     'Prêmios extras com 3, 7, 14 e 30 dias seguidos.',
+    'Faixas de pontuação no dia: Bronze (1.500) +3 gemas, Prata (4.000) +8 e Ouro (8.000) +15.',
+    'Depois das 19h tem ainda um presente da noite na tela inicial.',
     'Compartilhe a pontuação e desafie os amigos.',
   ]);
 

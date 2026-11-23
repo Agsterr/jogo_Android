@@ -139,6 +139,12 @@ class Progresso extends ChangeNotifier {
   Future<int> concluirDesafio(int dia, int pontos) async {
     if (desafioFeito == dia && pontos <= desafioPontos) return 0;
     final primeiraVez = desafioFeito != dia;
+    // Faixa: paga só a diferença para a melhor faixa que o jogador já tinha hoje.
+    final antes = primeiraVez ? Faixa.nenhuma : Faixa.de(desafioPontos);
+    final agora = Faixa.de(pontos);
+    final bonusFaixa = agora.gemas - antes.gemas;
+    _faixaRecente = bonusFaixa > 0 ? (faixa: agora, gemas: bonusFaixa) : null;
+    if (bonusFaixa > 0) await ganharGemas(bonusFaixa);
     var gemasGanhas = 0;
     if (primeiraVez) {
       final dias = sequencia(dia) + 1;
@@ -159,6 +165,29 @@ class Progresso extends ChangeNotifier {
     await ganharGemas(gemasGanhas);
     notifyListeners();
     return gemasGanhas;
+  }
+
+  /// Faixa conquistada agora no Desafio (só em memória; a tela mostra e limpa).
+  ({Faixa faixa, int gemas})? _faixaRecente;
+
+  ({Faixa faixa, int gemas})? pegarFaixaRecente() {
+    final f = _faixaRecente;
+    _faixaRecente = null;
+    return f;
+  }
+
+  // ---------- presente da noite ----------
+
+  /// Depois das 19h há um segundo presente por dia (o mesmo horário do lembrete do Desafio).
+  bool presenteDaNoiteDisponivel(int dia, DateTime agora) =>
+      agora.hour >= 19 && (_prefs.getInt('noiteDia') ?? 0) != dia;
+
+  Future<int> pegarPresenteDaNoite(int dia, DateTime agora) async {
+    if (!presenteDaNoiteDisponivel(dia, agora)) return 0;
+    await _prefs.setInt('noiteDia', dia);
+    await ganharGemas(gemasDaNoite);
+    await ganharXpDoPasse(dia, 20);
+    return gemasDaNoite;
   }
 
   /// O progresso acabou de voltar sozinho da cópia automática (a tela inicial avisa o jogador uma vez).

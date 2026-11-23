@@ -74,7 +74,7 @@ class LembreteLocal implements Lembrete {
       await _android!.zonedSchedule(
         id: _id,
         title: 'Desafio do dia no Encaixa',
-        body: 'O desafio de hoje está esperando. Mantenha a sua sequência!',
+        body: 'O desafio de hoje e o presente da noite estão esperando. Mantenha a sua sequência!',
         scheduledDate: instante,
         notificationDetails: const AndroidNotificationDetails(
           'desafio',

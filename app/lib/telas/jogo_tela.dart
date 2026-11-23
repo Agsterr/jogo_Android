@@ -112,6 +112,7 @@ class _JogoTelaState extends State<JogoTela> {
   late int _restanteMs = widget.duracao.inMilliseconds;
   bool _comecou = false;
   ({Album album, Figurinha figurinha, bool completou})? _figurinhaNova;
+  ({Faixa faixa, int gemas})? _faixaNova;
 
   /// Fases: peças extras ganhas na ajuda (uma ajuda por tentativa).
   int _extras = 0;
@@ -529,6 +530,7 @@ class _JogoTelaState extends State<JogoTela> {
     final gemasAmigo = widget.amigo == null ? 0 : await _s.progresso.concluirDesafioDeAmigo(widget.amigo!, pontos);
     if (gemasAmigo > 0) await _s.progresso.ganharXpDoPasse(_dia, XpDoPasse.amigo);
     if (widget.diario) _figurinhaNova = _s.progresso.pegarFigurinhaRecente();
+    if (widget.diario) _faixaNova = _s.progresso.pegarFaixaRecente();
     if (widget.diario) _s.reagendarLembrete(); // hoje já jogou: o próximo lembrete passa para amanhã
     if (widget.arena) {
       await _s.progresso.registrarArena(_semana, pontos);
@@ -1152,6 +1154,7 @@ class _JogoTelaState extends State<JogoTela> {
           [
             'Desafio do dia concluído!',
             if (_gemasDesafio > 0) '+$_gemasDesafio gemas',
+            if (_faixaNova case final f?) 'Faixa ${f.faixa.nome}! +${f.gemas} gemas',
             if (premioDaSequencia(_s.progresso.sequencia(_dia)) > 0 && _gemasDesafio > 0)
               'Marco de ${_s.progresso.sequencia(_dia)} dias! 🎉',
             if (_s.progresso.sequencia(_dia) == 30 && _gemasDesafio > 0) 'Tema Chama liberado na Loja!',
