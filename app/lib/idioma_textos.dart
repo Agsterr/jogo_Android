@@ -5,6 +5,9 @@ abstract final class Textos {
 }
 
 const _en = <String, String>{
+  'Sem fim, sem pressa': 'Endless and calm',
+  'Duelo no mesmo celular': 'Duel on one phone',
+  'Temas, molduras e fundos': 'Themes, frames and backgrounds',
   'Linhas limpas': 'Lines cleared',
   'JOGADOR {0}': 'PLAYER {0}',
   'pontos': 'points',
@@ -18,7 +21,6 @@ const _en = <String, String>{
   'Jogador 1: {0} · Jogador 2: {1}': 'Player 1: {0} · Player 2: {1}',
   'Revanche': 'Rematch',
   'Dois jogadores': 'Two players',
-  'No mesmo celular, com as mesmas peças': 'On the same phone, same pieces',
   'Um celular, dois jogadores: cada um joga uma partida, um depois do outro.':
       'One phone, two players: each plays one game, one after the other.',
   'As peças são as MESMAS para os dois, então ganha quem joga melhor.':
@@ -63,7 +65,6 @@ const _en = <String, String>{
   'Ouro e noite': 'Gold and night',
   'ZEN': 'ZEN',
   'Zen': 'Zen',
-  'Sem fim e sem pressa, só para relaxar': 'Endless and calm, just to relax',
   'Abrimos espaço!': 'Made some room!',
   'No Zen a partida não acaba': 'In Zen the game never ends',
   'Modo Zen': 'Zen mode',
@@ -124,7 +125,6 @@ const _en = <String, String>{
   'Garantia de raridade': 'Rarity guarantee',
   'Baú novo na coleção!': 'New chest in your collection!',
   '{0} baú{1} para abrir!': '{0} chest{1} to open!',
-  'Itens de aparência: temas, molduras e cores': 'Cosmetic items: themes, frames and colors',
   'Você ganhou um baú! Veja em Baús e coleção.': 'You got a chest! See it in Chests and collection.',
   'Você ganha baús jogando: Desafio do dia, níveis 5, 10, 15 e 20 do Passe, álbum completo e 14 e 30 dias de sequência.': 'You earn chests by playing: daily Challenge, Pass levels 5, 10, 15 and 20, a complete album, and 14 and 30-day streaks.',
   'Cada baú traz um item de APARÊNCIA: tema de blocos, moldura, cor do Quadrinho ou fundo do jogo. Nada muda a pontuação.': 'Each chest holds a COSMETIC item: a block theme, a board frame, a Quadrinho color or a game background. Nothing changes your score.',
@@ -763,6 +763,9 @@ const _en = <String, String>{
 };
 
 const _es = <String, String>{
+  'Sem fim, sem pressa': 'Sin fin ni prisa',
+  'Duelo no mesmo celular': 'Duelo en un móvil',
+  'Temas, molduras e fundos': 'Temas, marcos y fondos',
   'Linhas limpas': 'Líneas limpias',
   'JOGADOR {0}': 'JUGADOR {0}',
   'pontos': 'puntos',
@@ -776,7 +779,6 @@ const _es = <String, String>{
   'Jogador 1: {0} · Jogador 2: {1}': 'Jugador 1: {0} · Jugador 2: {1}',
   'Revanche': 'Revancha',
   'Dois jogadores': 'Dos jugadores',
-  'No mesmo celular, com as mesmas peças': 'En el mismo móvil, con las mismas piezas',
   'Um celular, dois jogadores: cada um joga uma partida, um depois do outro.':
       'Un móvil, dos jugadores: cada uno juega una partida, uno tras otro.',
   'As peças são as MESMAS para os dois, então ganha quem joga melhor.':
@@ -821,7 +823,6 @@ const _es = <String, String>{
   'Ouro e noite': 'Oro y noche',
   'ZEN': 'ZEN',
   'Zen': 'Zen',
-  'Sem fim e sem pressa, só para relaxar': 'Sin fin y sin prisa, solo para relajarte',
   'Abrimos espaço!': '¡Hicimos espacio!',
   'No Zen a partida não acaba': 'En Zen la partida nunca termina',
   'Modo Zen': 'Modo Zen',
@@ -882,7 +883,6 @@ const _es = <String, String>{
   'Garantia de raridade': 'Garantía de rareza',
   'Baú novo na coleção!': '¡Cofre nuevo en tu colección!',
   '{0} baú{1} para abrir!': '¡{0} cofre{1} para abrir!',
-  'Itens de aparência: temas, molduras e cores': 'Artículos de aspecto: temas, marcos y colores',
   'Você ganhou um baú! Veja em Baús e coleção.': '¡Ganaste un cofre! Míralo en Cofres y colección.',
   'Você ganha baús jogando: Desafio do dia, níveis 5, 10, 15 e 20 do Passe, álbum completo e 14 e 30 dias de sequência.': 'Ganas cofres jugando: Desafío del día, niveles 5, 10, 15 y 20 del Pase, álbum completo y rachas de 14 y 30 días.',
   'Cada baú traz um item de APARÊNCIA: tema de blocos, moldura, cor do Quadrinho ou fundo do jogo. Nada muda a pontuação.': 'Cada cofre trae un artículo de ASPECTO: tema de bloques, marco del tablero, color de Quadrinho o fondo del juego. Nada cambia la puntuación.',

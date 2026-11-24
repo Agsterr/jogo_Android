@@ -11,7 +11,13 @@ import 'suporte/capturas.dart';
 void main() {
   setUpAll(carregarFontes);
 
-  Future<void> desenhar(WidgetTester tester, Size tamanho, Widget arte, String nome) async {
+  Future<void> desenhar(
+    WidgetTester tester,
+    Size tamanho,
+    Widget arte,
+    String nome, {
+    String pasta = '../docs/artes',
+  }) async {
     tester.view
       ..devicePixelRatio = 1
       ..physicalSize = tamanho;
@@ -23,7 +29,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await capturar(tester, nome, pasta: '../docs/artes');
+    await capturar(tester, nome, pasta: pasta);
   }
 
   // Arte do mascote Quadrinho, desenhada em código: uma folha com todos os humores e um PNG de cada.
@@ -89,35 +95,43 @@ void main() {
     );
   });
 
-  testWidgets('imagem de destaque 1024x500', (tester) async {
-    await desenhar(
-      tester,
-      const Size(1024, 500),
-      const DecoratedBox(
-        decoration: BoxDecoration(gradient: Cores.fundo),
-        child: Stack(
-          children: [
-            Positioned.fill(child: CustomPaint(painter: _Pilha())),
-            Align(
-              alignment: Alignment(-0.75, 0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Logo(tamanho: 96),
-                  SizedBox(height: 12),
-                  Text(
-                    'Encaixe. Limpe. Combine as cores.',
-                    style: TextStyle(fontSize: 30, color: Cores.texto, fontWeight: FontWeight.w500),
-                  ),
-                ],
+  // Imagem de destaque da loja, uma por idioma (o texto é o único que muda).
+  for (final (slogan, nome, pasta) in [
+    ('Encaixe. Limpe. Combine as cores.', 'destaque-1024x500', '../docs/artes'),
+    ('Fit. Clear. Match the colors.', 'destaque-en-1024x500', '../docs/play-store/en'),
+    ('Encaja. Limpia. Combina los colores.', 'destaque-es-1024x500', '../docs/play-store/es'),
+  ]) {
+    testWidgets('imagem de destaque 1024x500 ($nome)', (tester) async {
+      await desenhar(
+        tester,
+        const Size(1024, 500),
+        DecoratedBox(
+          decoration: const BoxDecoration(gradient: Cores.fundo),
+          child: Stack(
+            children: [
+              const Positioned.fill(child: CustomPaint(painter: _Pilha())),
+              Align(
+                alignment: const Alignment(-0.75, 0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Logo(tamanho: 96),
+                    const SizedBox(height: 12),
+                    Text(
+                      slogan,
+                      style: const TextStyle(fontSize: 30, color: Cores.texto, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      'destaque-1024x500',
-    );
-  });
+        nome,
+        pasta: pasta,
+      );
+    });
+  }
 }
 
 /// Peça em "T" centralizada, com margem para o recorte redondo do Android.

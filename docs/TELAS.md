@@ -28,3 +28,12 @@ O ícone adaptativo (Android 8+) usa essa frente sobre o degradê de `res/drawab
 Efeitos sintetizados por `ferramentas/gerar_sons.py` (sem licença de terceiros): `python3 ferramentas/gerar_sons.py`.
 Arquivos: `encaixe`, `linha`, `combo`, `incrivel`, `fantastico` e `fim`. Todo valor de `Som` precisa de um `.wav` com o mesmo
 nome (um teste confere).
+
+## Capturas novas (issue #25)
+- `docs/telas/60-play-games-conectado.png` e `61-play-games-conectar.png`: tela *Salvar progresso* com e sem a conta do Play Games
+  (`62-*-pequena.png`: 320x600 com fonte 1,3x). Gerar: `flutter test test/play_games_tela_test.dart --dart-define=CAPTURAS=true`.
+- `63-inicio-fim.png`: a tela inicial inteira (360x1900). `1-inicio.png`, `29-aviso-salvar.png` e `idioma-*-inicio-2.png` foram
+  geradas com o branch `feat/esconder-salvar-progresso` (sem o botão *Salvar progresso*); se esse branch ainda não estiver na
+  `main`, regere depois do merge.
+- Imagem de destaque por idioma: `docs/artes/destaque-1024x500.png` (pt), `docs/play-store/en/destaque-en-1024x500.png` e
+  `docs/play-store/es/destaque-es-1024x500.png` (`test/artes_test.dart`).

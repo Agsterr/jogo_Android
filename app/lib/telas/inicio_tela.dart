@@ -337,7 +337,7 @@ class _InicioTelaState extends State<InicioTela> {
                                   titulo: t('Baús e coleção'),
                                   subtitulo: p.baus > 0
                                       ? t('{0} baú{1} para abrir!', [p.baus, p.baus == 1 ? '' : 's'])
-                                      : t('Itens de aparência: temas, molduras e cores'),
+                                      : t('Temas, molduras e fundos'),
                                   cores: const [Color(0xFFFFB800), Color(0xFF8B3DFF)],
                                   contorno: const Color(0xFF3A1B8A),
                                   selo: p.baus,
@@ -373,7 +373,7 @@ class _InicioTelaState extends State<InicioTela> {
                                 child: _Atalho(
                                   icone: Icons.spa_rounded,
                                   titulo: t('Zen'),
-                                  subtitulo: t('Sem fim e sem pressa, só para relaxar'),
+                                  subtitulo: t('Sem fim, sem pressa'),
                                   cores: const [Color(0xFF00C2A8), Color(0xFF3D8BFF)],
                                   contorno: const Color(0xFF004A52),
                                   aoTocar: () => _abrir(JogoTela(servicos: servicos, zen: true)),
@@ -384,7 +384,7 @@ class _InicioTelaState extends State<InicioTela> {
                                 child: _Atalho(
                                   icone: Icons.people_alt_rounded,
                                   titulo: t('Dois jogadores'),
-                                  subtitulo: t('No mesmo celular, com as mesmas peças'),
+                                  subtitulo: t('Duelo no mesmo celular'),
                                   cores: const [Color(0xFFFF6A00), Color(0xFFFF2E97)],
                                   contorno: const Color(0xFF7A1033),
                                   aoTocar: () => _abrir(JogoTela(servicos: servicos, duelo: Duelo.novo())),
