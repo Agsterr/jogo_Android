@@ -98,7 +98,7 @@ abstract final class Dicas {
   static const progresso = Dica('progresso', 'Salvar o progresso', Icons.save_rounded, Color(0xFF3FE0D0), [
     'O jogo salva o seu progresso sozinho. Se você reinstalar, ele tenta recuperar na primeira abertura.',
     'Funciona melhor com o Backup do Google ligado (Configurações > Google > Backup).',
-    'Para garantir, ou para trocar de celular, toque em "Salvar progresso" (no fim da tela inicial, ou na Loja) e copie o código.',
+    'Para garantir, ou para trocar de celular, toque em "Salvar ou recuperar progresso" (na Loja) e copie o código.',
     'No celular novo, abra o mesmo botão, cole o código e toque em Recuperar.',
     'As compras (Sem anúncios e Encaixa+) voltam em Loja > Restaurar compras.',
   ]);

@@ -585,7 +585,8 @@ const _en = <String, String>{
   'Oceano': 'Ocean',
   'Ouro': 'Gold',
   'Para começar': 'Getting started',
-  'Para garantir, ou para trocar de celular, toque em "Salvar progresso" (no fim da tela inicial, ou na Loja) e copie o código.': 'To be safe, or to switch phones, tap "Save progress" (at the bottom of the home screen, or in the Shop) and copy the code.',
+  'Para garantir, ou para trocar de celular, toque em "Salvar ou recuperar progresso" (na Loja) e copie o código.':
+      'To be safe, or to switch phones, tap "Save or restore progress" (in the Shop) and copy the code.',
   'Para sempre, entre partidas.': 'Forever, between games.',
   'Passe': 'Pass',
   'Passe completo!': 'Pass complete!',
@@ -1349,7 +1350,7 @@ const _es = <String, String>{
   'Oceano': 'Océano',
   'Ouro': 'Oro',
   'Para começar': 'Para empezar',
-  'Para garantir, ou para trocar de celular, toque em "Salvar progresso" (no fim da tela inicial, ou na Loja) e copie o código.': 'Para estar seguro, o para cambiar de teléfono, toca "Guardar progreso" (al final de la pantalla de inicio, o en la Tienda) y copia el código.',
+  'Para garantir, ou para trocar de celular, toque em "Salvar ou recuperar progresso" (na Loja) e copie o código.': 'Para estar seguro, o para cambiar de teléfono, toca "Guardar o recuperar progreso" (en la Tienda) y copia el código.',
   'Para sempre, entre partidas.': 'Para siempre, entre partidas.',
   'Passe': 'Pase',
   'Passe completo!': '¡Pase completado!',
