@@ -16,11 +16,11 @@ IDs reais entram por segredo no CI; sem eles o app usa os **IDs de teste do Goog
 ## Compras no app (Google Play Billing) — `app/lib/servicos/compras.dart`
 | ID no Play Console | Tipo | Preço sugerido | O que dá |
 |---|---|---|---|
-| `sem_anuncios` | Produto não consumível | R$ 14,90 | Remove intersticiais para sempre |
-| `gemas_100` | Consumível | R$ 4,90 | 100 gemas |
-| `gemas_300` | Consumível | R$ 12,90 | 300 gemas ("Mais popular") |
-| `gemas_1000` | Consumível | R$ 34,90 | 1000 gemas ("Melhor valor") |
-| `encaixa_mais` | **Assinatura** mensal | R$ 9,90/mês (teste grátis de 3 dias sugerido) | Sem intersticiais + segunda chance grátis + 10 gemas/dia |
+| `sem_anuncios` | Produto único | R$ 14,99 | Remove intersticiais para sempre |
+| `gemas_100` | Produto único (consumível) | R$ 4,89 | 100 gemas |
+| `gemas_300` | Produto único (consumível) | R$ 12,99 | 300 gemas ("Mais popular") |
+| `gemas_1000` | Produto único (consumível) | R$ 34,99 | 1000 gemas ("Melhor valor") |
+| `encaixa_mais` (plano `mensal`) | **Assinatura** mensal | R$ 9,99/mês (sem teste grátis por enquanto) | Sem intersticiais + segunda chance grátis + 10 gemas/dia |
 
 Os preços são ponto de partida; o Play converte para outras moedas. Teste A/B depois de ter tráfego.
 
@@ -51,3 +51,10 @@ Firebase Remote Config (#6, #15).
 ## Métricas para acompanhar
 Retenção D1/D7/D30, partidas por dia, % que vê premiado, ARPDAU, conversão para Encaixa+. Precisa de
 Firebase Analytics (issue aberta).
+
+### Estado no Play Console (24\/11\/2026)
+Os 4 produtos únicos e a assinatura foram **criados e ativados** no Play Console, com preço em reais e conversão automática
+para os outros países. O Play só aceita certos pontos de preço, então R$ 4,90 / 12,90 / 34,90 / 14,90 / 9,90 viraram os
+valores da tabela acima (R$ 4,89 / 12,99 / 34,99 / 14,99 / 9,99). O app mostra o preço que o Play devolve.
+Falta: oferta de teste grátis da assinatura e o produto `gemas_evento` (#21).
+**Baús vendidos por dinheiro continuam fora**: risco legal (ECA Digital) e dependem da verificação no servidor (#5, #23).
