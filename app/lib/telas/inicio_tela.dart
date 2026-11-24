@@ -33,7 +33,6 @@ import 'estatisticas_tela.dart';
 import 'jogo_tela.dart';
 import 'loja_tela.dart';
 import 'mapa_tela.dart';
-import 'progresso_tela.dart';
 import 'roda_tela.dart';
 import '../idioma.dart';
 
@@ -76,7 +75,7 @@ class _InicioTelaState extends State<InicioTela> {
       if (servicos.mostrarPresenteAoAbrir && servicos.progresso.presenteDeHoje(dia) > 0) {
         _abrirPresente(dia);
       } else if (servicos.progresso.faseLiberada >= 5) {
-        // Quem já tem progresso a perder: lembra uma vez onde fica o "Salvar progresso".
+        // Quem já tem progresso a perder: lembra uma vez como o progresso é salvo.
         mostrarDicaUmaVez(context, servicos, Dicas.progresso);
       }
     });
@@ -429,11 +428,6 @@ class _InicioTelaState extends State<InicioTela> {
                           onPressed: () => _abrir(EstatisticasTela(servicos: servicos)),
                           icon: const Icon(Icons.bar_chart_rounded, size: 20),
                           label: Text(t('Estatísticas')),
-                        ),
-                        TextButton.icon(
-                          onPressed: () => _abrir(ProgressoTela(servicos: servicos)),
-                          icon: const Icon(Icons.save_rounded, size: 20),
-                          label: Text(t('Salvar progresso')),
                         ),
                       ],
                     ),

@@ -356,7 +356,7 @@ void main() {
     await tester.pumpWidget(appDeTeste(s));
     await tester.pumpAndSettle();
     expect(find.text('Salvar o progresso'), findsWidgets);
-    expect(find.textContaining('fim da tela inicial'), findsOneWidget);
+    expect(find.textContaining('(na Loja)'), findsOneWidget);
     await capturar(tester, '29-aviso-salvar');
     await tester.tap(find.text('ENTENDI').first);
     await tester.pumpAndSettle();
