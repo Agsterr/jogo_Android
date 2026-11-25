@@ -220,7 +220,10 @@ void main() {
   });
 
   testWidgets('loja: gemas por anúncio param depois de 5 no dia', (tester) async {
-    telaDeCelular(tester);
+    telaDeCelular(
+      tester,
+      tamanho: const Size(360, 1400),
+    ); // os produtos agora têm o botão embaixo: tela alta para ver tudo
     final s = await servicosDeTeste(valores: {'gemas': 0, 'premiadosDia': 20261112, 'premiadosQtd': 4});
     await tester.pumpWidget(appDeTeste(s, tela: LojaTela(servicos: s)));
     await tester.pump();

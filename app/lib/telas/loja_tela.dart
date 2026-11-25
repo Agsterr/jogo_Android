@@ -204,7 +204,10 @@ class _CartaoAssinatura extends StatelessWidget {
           child: FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Cores.fundoTopo),
             onPressed: ativo ? null : aoAssinar,
-            child: Text(ativo ? t('Assinatura ativa') : t('Assinar por {0}/mês', [preco])),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(ativo ? t('Assinatura ativa') : t('Assinar por {0}/mês', [preco])),
+            ),
           ),
         ),
         const SizedBox(height: 6),
@@ -226,22 +229,29 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
     decoration: BoxDecoration(color: Cores.painel.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(18)),
-    child: Row(
+    // Texto em cima (usa a largura toda, sem espremer) e o botão embaixo: não quebra palavras em celular estreito
+    // nem com fonte grande.
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        icone,
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(titulo, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-              Text(descricao, style: const TextStyle(color: Cores.textoFraco)),
-            ],
-          ),
+        Row(
+          children: [
+            icone,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(titulo, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                  Text(descricao, style: const TextStyle(color: Cores.textoFraco)),
+                ],
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
+        const SizedBox(height: 10),
         FilledButton(
           style: FilledButton.styleFrom(minimumSize: const Size(96, 44)),
           onPressed: aoTocar,
@@ -279,8 +289,8 @@ class _ItemTema extends StatelessWidget {
       decoration: BoxDecoration(color: Cores.painel.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(18)),
       child: Row(
         children: [
-          SizedBox(width: 96, height: 32, child: CustomPaint(painter: _Amostra(tema))),
-          const SizedBox(width: 12),
+          SizedBox(width: 72, height: 26, child: CustomPaint(painter: _Amostra(tema))),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,7 +309,10 @@ class _ItemTema extends StatelessWidget {
             ),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(minimumSize: const Size(88, 40)),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(80, 40),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
             onPressed: emUso || bloqueado ? null : aoTocar,
             child: emUso
                 ? Text(t('Em uso'))
