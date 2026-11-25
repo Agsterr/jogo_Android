@@ -13,7 +13,15 @@ abstract final class Produtos {
   static const assinatura = 'encaixa_mais';
   static const gemas = {'gemas_100': 100, 'gemas_300': 300, 'gemas_1000': 1000};
 
-  static const todos = {semAnuncios, assinatura, 'gemas_100', 'gemas_300', 'gemas_1000'};
+  /// Oferta por tempo limitado, só na Loja e só durante um evento (`eventoAtivo`). Não entra em `gemas` para não
+  /// aparecer na lista fixa de pacotes.
+  static const gemasEvento = 'gemas_evento';
+  static const qtdGemasEvento = 400;
+
+  /// Compras que gastam o item (consumíveis): dá para comprar de novo.
+  static bool consumivel(String id) => gemas.containsKey(id) || id == gemasEvento;
+
+  static const todos = {semAnuncios, assinatura, 'gemas_100', 'gemas_300', 'gemas_1000', gemasEvento};
 }
 
 class ProdutoLoja {
@@ -50,6 +58,7 @@ class ComprasFicticias extends Compras {
     'gemas_100': ProdutoLoja('gemas_100', r'R$ 4,90'),
     'gemas_300': ProdutoLoja('gemas_300', r'R$ 12,90'),
     'gemas_1000': ProdutoLoja('gemas_1000', r'R$ 34,90'),
+    Produtos.gemasEvento: ProdutoLoja(Produtos.gemasEvento, r'R$ 9,90'),
   };
 
   @override
@@ -64,7 +73,7 @@ class ComprasFicticias extends Compras {
 Future<void> entregar(Progresso progresso, String id) async {
   if (id == Produtos.semAnuncios) return progresso.definirSemAnuncios(true);
   if (id == Produtos.assinatura) return progresso.definirAssinante(true);
-  final gemas = Produtos.gemas[id];
+  final gemas = id == Produtos.gemasEvento ? Produtos.qtdGemasEvento : Produtos.gemas[id];
   if (gemas != null) await progresso.ganharGemas(gemas);
 }
 
@@ -127,7 +136,7 @@ class ComprasPlay extends Compras {
     if (detalhe == null) return;
     erro = null;
     final param = PurchaseParam(productDetails: detalhe);
-    if (Produtos.gemas.containsKey(id)) {
+    if (Produtos.consumivel(id)) {
       await _iap.buyConsumable(purchaseParam: param);
     } else {
       await _iap.buyNonConsumable(purchaseParam: param);
