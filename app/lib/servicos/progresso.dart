@@ -38,6 +38,15 @@ class Progresso extends ChangeNotifier {
   int get recorde => _prefs.getInt('recorde') ?? 0;
   int get gemas => _prefs.getInt('gemas') ?? gemasIniciais;
   int get partidas => _prefs.getInt('partidas') ?? 0;
+
+  /// Rodadas terminadas em qualquer modo (partida, fase, puzzle, Relâmpago, duelo). Serve para a política dos anúncios
+  /// entre partidas: quem só joga Fases também passa a ver (antes só `partidas` contava e ele nunca via anúncio).
+  int get rodadas => _prefs.getInt('rodadas') ?? 0;
+
+  Future<void> contarRodada() => _prefs.setInt('rodadas', rodadas + 1);
+
+  /// Quem já tinha partidas antes desta contagem não volta ao período sem anúncios.
+  int get rodadasParaAnuncios => rodadas > partidas ? rodadas : partidas;
   bool get semAnuncios => _prefs.getBool('semAnuncios') ?? false;
   bool get assinante => _prefs.getBool('assinante') ?? false;
 

@@ -79,6 +79,8 @@ void main() {
     await tester.pumpAndSettle();
     await jogarPelaTela(tester);
     expect(find.text('Fase 1 concluída!'), findsOneWidget);
+    expect(s.progresso.rodadas, 1, reason: 'fase vencida conta como rodada para a política de anúncios');
+    expect(s.progresso.partidas, 0);
     await capturar(tester, '54-fase-figura');
     expect(tester.takeException(), isNull);
   });

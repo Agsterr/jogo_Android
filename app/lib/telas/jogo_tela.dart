@@ -461,6 +461,7 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
       if (widget.zen) {
         _abrirEspaco();
       } else if (widget.duelo != null) {
+        _s.progresso.contarRodada();
         setState(() => _fim = _Fim.resultado);
       } else if (widget.puzzle != null) {
         _encerrarPuzzle();
@@ -492,6 +493,7 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
       _s.sons.tocar(Som.combo);
       // Quem precisou de ajuda leva no máximo 1 estrela.
       final estrelas = _ajudou ? 1 : fase.estrelas(_partida);
+      await _s.progresso.contarRodada();
       final primeiraVez = _s.progresso.estrelasDaFase(fase.numero) == 0;
       final gemas = await _s.progresso.concluirFase(fase.numero, estrelas);
       _figuraCompleta = primeiraVez && fase.chefe;
@@ -510,6 +512,7 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
       }
     } else if (_restantes(fase) <= 0 || _partida.fimDeJogo) {
       _s.sons.tocar(Som.fim);
+      _s.progresso.contarRodada();
       setState(() => _fim = _Fim.faseFalhou);
     }
   }
@@ -648,6 +651,7 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
 
   Future<void> _encerrarPuzzle() async {
     final puzzle = widget.puzzle!;
+    await _s.progresso.contarRodada();
     final estrelas = estrelasDoPuzzle(_partida.linhas, puzzle.meta);
     final gemas = await _s.progresso.registrarPuzzle(_dia, estrelas);
     if (!mounted) return;
@@ -660,6 +664,7 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
 
   Future<void> _encerrar() async {
     await _s.progresso.apagarPartida(_chave);
+    await _s.progresso.contarRodada();
     final pontos = _partida.pontos;
     final recorde = widget.relampago
         ? await _s.progresso.fimDoRelampago(pontos)
@@ -695,7 +700,7 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
 
   Future<void> _intersticial() async {
     if (_s.progresso.livreDeAnuncios) return;
-    await _s.anuncios.talvezIntersticial(partidasJogadas: _s.progresso.partidas);
+    await _s.anuncios.talvezIntersticial(partidasJogadas: _s.progresso.rodadasParaAnuncios);
   }
 
   Future<void> _jogarDeNovo() async {

@@ -1,4 +1,6 @@
 import 'package:encaixa/servicos/anuncios.dart';
+import 'package:encaixa/servicos/progresso.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -22,5 +24,22 @@ void main() {
       expect(p.deveMostrar(partidasJogadas: i, agora: cedo), isFalse);
     }
     expect(p.deveMostrar(partidasJogadas: 16, agora: t0.add(const Duration(minutes: 4))), isTrue);
+  });
+
+  test('rodadas de qualquer modo contam para os anúncios (quem só joga Fases também vê)', () async {
+    SharedPreferences.setMockInitialValues({});
+    final p = await Progresso.carregar();
+    expect(p.rodadasParaAnuncios, 0);
+    for (var i = 0; i < 4; i++) {
+      await p.contarRodada();
+    }
+    expect(p.rodadas, 4);
+    expect(p.partidas, 0);
+    expect(p.rodadasParaAnuncios, 4, reason: 'passou das 3 primeiras: o anúncio já pode aparecer');
+    final antigo = await (() async {
+      SharedPreferences.setMockInitialValues({'partidas': 40});
+      return Progresso.carregar();
+    })();
+    expect(antigo.rodadasParaAnuncios, 40, reason: 'quem já jogava não volta ao período sem anúncios');
   });
 }

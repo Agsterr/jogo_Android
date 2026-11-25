@@ -7,7 +7,7 @@ Regra de ouro: **o anúncio nunca interrompe uma partida** e o premiado é sempr
 | Formato | Onde | Regra |
 |---|---|---|
 | Premiado | Segunda chance; "+5 gemas grátis" na loja; Roda da sorte (giros 2 e 3); roleta do fim de partida (giros extras) | Só quando o jogador toca. Continua disponível para quem pagou |
-| Intersticial | Ao sair do resultado ("Jogar de novo"/"Início") | Nunca nas 3 primeiras partidas; no máximo 1 a cada 3 partidas **e** 3 minutos (`PoliticaIntersticial`, testada) |
+| Intersticial | Ao sair do resultado ("Jogar de novo"/"Início"/"Próxima fase"/"Mapa") | Nunca nas 3 primeiras rodadas; no máximo 1 a cada 3 rodadas **e** 3 minutos (`PoliticaIntersticial`, testada). **Rodada** = partida, fase (vencida ou perdida), puzzle ou duelo (`Progresso.rodadas`); antes só contava `partidas`, então quem jogava só Fases nunca via anúncio |
 | Banner | — | Não usamos: paga pouco e deixa a tela feia |
 
 O consentimento (GDPR/UMP) é pedido pelo SDK do Google só onde a lei exige.
@@ -58,3 +58,9 @@ para os outros países. O Play só aceita certos pontos de preço, então R$ 4,9
 valores da tabela acima (R$ 4,89 / 12,99 / 34,99 / 14,99 / 9,99). O app mostra o preço que o Play devolve.
 Falta: oferta de teste grátis da assinatura e o produto `gemas_evento` (#21).
 **Baús vendidos por dinheiro continuam fora**: risco legal (ECA Digital) e dependem da verificação no servidor (#5, #23).
+
+### Duração e tamanho dos anúncios
+O app não controla a duração: quem decide é o AdMob/anunciante. Intersticial costuma ser vídeo que pode ser pulado
+depois de alguns segundos; o premiado é mais longo de propósito (o jogador escolhe ver e ganha a recompensa).
+Com os **IDs de teste do Google** (quando os segredos `ADMOB_PREMIADO`/`ADMOB_INTERSTICIAL` não estão no CI) os anúncios
+de teste são grandes e longos. Para anúncios mais rápidos entre partidas, só nos blocos reais do AdMob (issue de AdMob).
