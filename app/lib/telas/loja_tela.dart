@@ -88,6 +88,20 @@ class LojaTela extends StatelessWidget {
                   botao: p.semAnuncios ? t('Ativo') : preco(Produtos.semAnuncios),
                   aoTocar: pode && !p.semAnuncios ? () => compras.comprar(Produtos.semAnuncios) : null,
                 ),
+                // Oferta por tempo limitado: só aparece durante um evento (Festival, Natal, Carnaval...).
+                if (eventoAtivo(servicos.hoje()) case final evento?) ...[
+                  const SizedBox(height: 12),
+                  _Item(
+                    icone: const IconeGema(tamanho: 32),
+                    titulo: t('{0} gemas', [Produtos.qtdGemasEvento]),
+                    descricao: t('Oferta: {0} · acaba em {1}', [
+                      t(evento.nome),
+                      tempoRestante(servicos.hoje(), evento.fim),
+                    ]),
+                    botao: preco(Produtos.gemasEvento),
+                    aoTocar: pode ? () => compras.comprar(Produtos.gemasEvento) : null,
+                  ),
+                ],
                 const SizedBox(height: 20),
                 Text(t('Gemas'), style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
                 Text(t('Use em Desfazer, Trocar e Continuar.'), style: TextStyle(color: Cores.textoFraco)),

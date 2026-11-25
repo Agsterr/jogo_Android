@@ -377,4 +377,25 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Salvar o progresso'), findsNothing);
   });
+
+  testWidgets('loja: oferta de 400 gemas aparece durante o evento e credita na compra', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(valores: {'gemas': 10}, hoje: DateTime(2026, 11, 12, 9)); // Festival de Lançamento
+    await tester.pumpWidget(appDeTeste(s, tela: LojaTela(servicos: s)));
+    await tester.pump();
+    expect(find.text('400 gemas'), findsOneWidget);
+    expect(find.textContaining('Oferta: Festival de Lançamento'), findsOneWidget);
+    await tester.tap(find.text(r'R$ 9,90').last);
+    await tester.pump();
+    expect(s.progresso.gemas, 410);
+  });
+
+  testWidgets('loja: sem evento ativo, não mostra a oferta de 400 gemas', (tester) async {
+    telaDeCelular(tester);
+    final s = await servicosDeTeste(hoje: DateTime(2026, 12, 5, 9)); // entre o Festival e o Natal
+    await tester.pumpWidget(appDeTeste(s, tela: LojaTela(servicos: s)));
+    await tester.pump();
+    expect(find.text('400 gemas'), findsNothing);
+    expect(find.textContaining('Oferta:'), findsNothing);
+  });
 }
