@@ -97,8 +97,9 @@ class Fase {
     Objetivo.pontos => p.pontos,
     Objetivo.pedras => pedras - p.tabuleiro.pedras,
     Objetivo.umaCor => p.linhasDeUmaCor,
-    // Sequência atual (não o recorde da partida): quebrou, volta a 0.
-    Objetivo.combo => p.combo,
+    // Sequência atual (não o recorde da partida): quebrou, volta a 0. Uma limpada sozinha ainda não é combo: a barra
+    // começa na 2ª seguida (x2), igual ao aviso "Combo x2" da tela.
+    Objetivo.combo => p.combo >= 2 ? p.combo : 0,
   };
 
   bool concluida(Partida p) => progresso(p) >= alvo;

@@ -59,7 +59,7 @@ abstract final class Dicas {
   ], exemplo: ExemploDaDica.umaCor);
 
   static const combo = Dica('combo', 'Combo', Icons.bolt_rounded, Color(0xFFFF2E7E), [
-    'Combo é limpar linhas em jogadas SEGUIDAS: a 1ª jogada que limpa vale x1, a próxima x2, depois x3, x4...',
+    'Combo é limpar linhas em jogadas SEGUIDAS. Uma limpada sozinha ainda não é combo: a 2ª seguida vale x2, depois x3, x4...',
     'Nas fases de combo, jogada que NÃO limpa linha zera a contagem: tem que limpar em todas, uma atrás da outra.',
     'Fase "combo x4": limpe uma linha em 4 jogadas seguidas. A barra mostra a sequência de agora.',
     'No Infinito, Desafio e Arena o combo é mais folgado: aguenta até 2 jogadas sem limpar e zera na 3ª.',

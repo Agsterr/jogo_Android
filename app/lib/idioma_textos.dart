@@ -5,6 +5,10 @@ abstract final class Textos {
 }
 
 const _en = <String, String>{
+  'Combo é limpar linhas em jogadas SEGUIDAS. Uma limpada sozinha ainda não é combo: a 2ª seguida vale x2, depois x3, x4...': 'Combo means clearing lines on CONSECUTIVE moves. A single clear is not a combo yet: the 2nd in a row is x2, then x3, x4...',
+  '1ª jogada: limpa': '1st move: clears',
+  '2ª jogada: Combo x2': '2nd move: Combo x2',
+  '3ª jogada: Combo x3': '3rd move: Combo x3',
   'Nas fases de combo, jogada que NÃO limpa linha zera a contagem: tem que limpar em todas, uma atrás da outra.': 'In combo levels, a move that does NOT clear a line resets the count: you must clear on every move, one after another.',
   'Fase "combo x4": limpe uma linha em 4 jogadas seguidas. A barra mostra a sequência de agora.':
       '"Combo x4" level: clear a line on 4 moves in a row. The bar shows your current streak.',
@@ -792,6 +796,10 @@ const _en = <String, String>{
 };
 
 const _es = <String, String>{
+  'Combo é limpar linhas em jogadas SEGUIDAS. Uma limpada sozinha ainda não é combo: a 2ª seguida vale x2, depois x3, x4...': 'Combo es limpiar líneas en jugadas SEGUIDAS. Una limpieza sola aún no es combo: la 2.ª seguida vale x2, luego x3, x4...',
+  '1ª jogada: limpa': '1.ª jugada: limpia',
+  '2ª jogada: Combo x2': '2.ª jugada: Combo x2',
+  '3ª jogada: Combo x3': '3.ª jugada: Combo x3',
   'Nas fases de combo, jogada que NÃO limpa linha zera a contagem: tem que limpar em todas, uma atrás da outra.': 'En los niveles de combo, una jugada que NO limpia línea reinicia la cuenta: hay que limpiar en todas, una tras otra.',
   'Fase "combo x4": limpe uma linha em 4 jogadas seguidas. A barra mostra a sequência de agora.':
       'Nivel "combo x4": limpia una línea en 4 jugadas seguidas. La barra muestra tu racha actual.',

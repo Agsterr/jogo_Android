@@ -198,11 +198,13 @@ void main() {
     p.combo = 3;
     p.maiorCombo = 3;
     expect(fase.progresso(p), 3);
+    p.combo = 1; // uma limpada sozinha ainda não é combo
+    expect(fase.progresso(p), 0);
     p.combo = 0; // quebrou
     expect(fase.progresso(p), 0, reason: 'a barra volta a zero quando a sequência quebra, mesmo com maiorCombo antigo');
   });
 
-  test('fase de combo x4: 4 jogadas seguidas que limpam completam o objetivo (cada limpada conta 1, 2, 3, 4)', () {
+  test('fase de combo x4: 4 jogadas seguidas que limpam completam o objetivo (a barra marca 0, 2, 3, 4)', () {
     final fase = Fase.numero(8);
     final p = fase.novaPartida();
     // tabuleiro livre, com 5 linhas quase cheias (falta a última casa)
@@ -220,7 +222,7 @@ void main() {
       expect(p.colocar(0, i, 7), isNotNull);
       vistos.add(fase.progresso(p));
     }
-    expect(vistos, [1, 2, 3, 4]);
+    expect(vistos, [0, 2, 3, 4], reason: 'a 1ª limpada sozinha não é combo: a barra só anda a partir da 2ª seguida');
     expect(fase.concluida(p), isTrue);
   });
 }

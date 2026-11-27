@@ -41,9 +41,9 @@ List<List<_Quadro>> _passos(ExemploDaDica e) => switch (e) {
   ],
   ExemploDaDica.combo => [
     [
-      const _Quadro(['.....', '.....', '04?12'], '1ª jogada: x1'),
-      const _Quadro(['.....', '.....', '3?514'], '2ª jogada: x2'),
-      const _Quadro(['.....', '.....', '2?025'], '3ª jogada: x3'),
+      const _Quadro(['.....', '.....', '04?12'], '1ª jogada: limpa'),
+      const _Quadro(['.....', '.....', '3?514'], '2ª jogada: Combo x2'),
+      const _Quadro(['.....', '.....', '2?025'], '3ª jogada: Combo x3'),
     ],
   ],
 };
