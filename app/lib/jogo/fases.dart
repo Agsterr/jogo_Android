@@ -87,7 +87,9 @@ class Fase {
     for (final (l, k, cor) in inicial) {
       t.definir(l, k, cor);
     }
-    return Partida(semente: semente, inicial: t, cores: cores);
+    // Fase de combo: a sequência é de jogadas seguidas, sem folga (uma jogada sem limpar zera).
+    return Partida(semente: semente, inicial: t, cores: cores)
+      ..folga = objetivo == Objetivo.combo ? 1 : Partida.folgaCombo;
   }
 
   int progresso(Partida p) => switch (objetivo) {
@@ -95,7 +97,8 @@ class Fase {
     Objetivo.pontos => p.pontos,
     Objetivo.pedras => pedras - p.tabuleiro.pedras,
     Objetivo.umaCor => p.linhasDeUmaCor,
-    Objetivo.combo => p.maiorCombo,
+    // Sequência atual (não o recorde da partida): quebrou, volta a 0.
+    Objetivo.combo => p.combo,
   };
 
   bool concluida(Partida p) => progresso(p) >= alvo;

@@ -1,3 +1,4 @@
+import 'package:encaixa/jogo/fases.dart';
 import 'package:encaixa/jogo/partida.dart';
 import 'package:encaixa/jogo/peca.dart';
 import 'package:encaixa/jogo/sorteio.dart';
@@ -156,5 +157,48 @@ void main() {
     expect(p.tabuleiro.cor(7, 6), Tabuleiro.pedra);
     expect(p.tabuleiro.cor(3, 3), isNull, reason: 'bloco comum some');
     expect(p.tabuleiro.pedras, 2);
+  });
+
+  test('combo de fase é seguido: uma jogada sem limpar zera; no Infinito aguenta 2 jogadas sem limpar', () {
+    Partida montar(int folga) {
+      final p = Partida(semente: 3)..folga = folga;
+      for (var l = 0; l < 3; l++) {
+        _quaseCheia(p.tabuleiro, l);
+      }
+      p.mao = [Peca(_bloco, 1), Peca(_bloco, 1), Peca(_bloco, 1)];
+      return p;
+    }
+
+    // folga 1 (fases de combo): limpa, limpa, não limpa -> zera
+    final fase = montar(1);
+    expect(fase.colocar(0, 0, 7)!.combo, 1);
+    expect(fase.colocar(1, 1, 7)!.combo, 2);
+    expect(fase.combo, 2);
+    fase.mao = [Peca(_bloco, 1), Peca(_bloco, 1), Peca(_bloco, 1)];
+    fase.colocar(0, 5, 5); // não limpa
+    expect(fase.combo, 0, reason: 'uma jogada sem limpar já zera na fase de combo');
+
+    // folga 3 (resto do jogo): duas jogadas sem limpar ainda mantêm o combo
+    final livre = montar(Partida.folgaCombo);
+    expect(livre.colocar(0, 0, 7)!.combo, 1);
+    livre.mao = [Peca(_bloco, 1), Peca(_bloco, 1), Peca(_bloco, 1)];
+    livre.colocar(0, 5, 5);
+    livre.colocar(1, 6, 6);
+    expect(livre.combo, 1, reason: '2 jogadas sem limpar: combo ainda vivo');
+    livre.colocar(2, 7, 0);
+    expect(livre.combo, 0, reason: 'na 3ª sem limpar, zera');
+  });
+
+  test('progresso da fase de combo é a sequência de agora e a partida da fase não tem folga', () {
+    final fase = Fase.numero(8);
+    expect(fase.objetivo, Objetivo.combo);
+    final p = fase.novaPartida();
+    expect(p.folga, 1);
+    expect(fase.progresso(p), 0);
+    p.combo = 3;
+    p.maiorCombo = 3;
+    expect(fase.progresso(p), 3);
+    p.combo = 0; // quebrou
+    expect(fase.progresso(p), 0, reason: 'a barra volta a zero quando a sequência quebra, mesmo com maiorCombo antigo');
   });
 }

@@ -5,6 +5,10 @@ abstract final class Textos {
 }
 
 const _en = <String, String>{
+  'Nas fases de combo, jogada que NÃO limpa linha zera a contagem: tem que limpar em todas, uma atrás da outra.': 'In combo levels, a move that does NOT clear a line resets the count: you must clear on every move, one after another.',
+  'Fase "combo x4": limpe uma linha em 4 jogadas seguidas. A barra mostra a sequência de agora.':
+      '"Combo x4" level: clear a line on 4 moves in a row. The bar shows your current streak.',
+  'No Infinito, Desafio e Arena o combo é mais folgado: aguenta até 2 jogadas sem limpar e zera na 3ª.': 'In Endless, Challenge and Arena the combo is more forgiving: it survives up to 2 moves without clearing and resets on the 3rd.',
   'Combo é limpar linhas em jogadas SEGUIDAS: a 1ª jogada que limpa vale x1, a próxima x2, depois x3, x4...':
       'Combo means clearing lines on CONSECUTIVE moves: the 1st clearing move is x1, the next x2, then x3, x4...',
   'Pode ter até 2 jogadas sem limpar no meio. Na 3ª seguida sem limpar, o combo volta a zero.':
@@ -788,6 +792,10 @@ const _en = <String, String>{
 };
 
 const _es = <String, String>{
+  'Nas fases de combo, jogada que NÃO limpa linha zera a contagem: tem que limpar em todas, uma atrás da outra.': 'En los niveles de combo, una jugada que NO limpia línea reinicia la cuenta: hay que limpiar en todas, una tras otra.',
+  'Fase "combo x4": limpe uma linha em 4 jogadas seguidas. A barra mostra a sequência de agora.':
+      'Nivel "combo x4": limpia una línea en 4 jugadas seguidas. La barra muestra tu racha actual.',
+  'No Infinito, Desafio e Arena o combo é mais folgado: aguenta até 2 jogadas sem limpar e zera na 3ª.': 'En Infinito, Desafío y Arena el combo es más flexible: aguanta hasta 2 jugadas sin limpiar y se reinicia en la 3.ª.',
   'Combo é limpar linhas em jogadas SEGUIDAS: a 1ª jogada que limpa vale x1, a próxima x2, depois x3, x4...':
       'Combo es limpiar líneas en jugadas SEGUIDAS: la 1.ª jugada que limpia vale x1, la siguiente x2, luego x3, x4...',
   'Pode ter até 2 jogadas sem limpar no meio. Na 3ª seguida sem limpar, o combo volta a zero.':

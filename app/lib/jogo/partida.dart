@@ -151,8 +151,11 @@ class Partida {
 
   static const int tamanhoMao = 3;
 
-  /// Jogadas seguidas sem limpar linha que ainda mantêm o combo.
+  /// Jogadas seguidas sem limpar linha para o combo voltar a zero (a 3ª seguida zera; até 2 mantêm).
   static const int folgaCombo = 3;
+
+  /// Igual a [folgaCombo], menos nas fases de "combo xN": lá basta 1 jogada sem limpar para zerar (combo é seguido mesmo).
+  int folga = folgaCombo;
 
   final Sorteio _sorteio;
   Tabuleiro tabuleiro;
@@ -268,7 +271,7 @@ class Partida {
           15 * bombas +
           15 * raios +
           20 * rachados;
-    } else if (++_semLimpar >= folgaCombo) {
+    } else if (++_semLimpar >= folga) {
       combo = 0;
     }
     pontos += ganho;
