@@ -13,6 +13,7 @@ void main() {
     ('64-loja-fonte-1-3', 1.3, const Size(360, 800)),
     ('65-loja-fonte-1-6', 1.6, const Size(360, 800)),
     ('66-loja-pequena', 1.3, const Size(320, 640)),
+    ('68-loja-tela-ampliada', 1.3, const Size(280, 600)), // 'Tamanho da tela' ampliado no Samsung
   ]) {
     testWidgets('loja legível ($nome)', (tester) async {
       telaDeCelular(tester, tamanho: tamanho, fonte: fonte);

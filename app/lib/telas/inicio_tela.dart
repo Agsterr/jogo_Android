@@ -130,23 +130,37 @@ class _InicioTelaState extends State<InicioTela> {
                                 ),
                               ),
                             ],
-                            const Spacer(),
-                            IconButton(
-                              tooltip: t('Como jogar'),
-                              visualDensity: VisualDensity.compact,
-                              onPressed: () => _abrir(AjudaTela(servicos: servicos)),
-                              icon: const Icon(Icons.help_rounded),
-                            ),
-                            _BotaoPresente(disponivel: p.presenteDeHoje(dia) > 0, aoTocar: () => _abrirPresente(dia)),
-                            IconButton(
-                              tooltip: p.somLigado ? t('Desligar som') : t('Ligar som'),
-                              visualDensity: VisualDensity.compact,
-                              onPressed: p.alternarSom,
-                              icon: Icon(p.somLigado ? Icons.volume_up_rounded : Icons.volume_off_rounded),
-                            ),
-                            GemasChip(
-                              gemas: p.gemas,
-                              aoTocar: () => _abrir(LojaTela(servicos: servicos)),
+                            // Os botões da direita encolhem juntos se a tela for estreita (tela ampliada, fonte grande).
+                            Expanded(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerRight,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      tooltip: t('Como jogar'),
+                                      visualDensity: VisualDensity.compact,
+                                      onPressed: () => _abrir(AjudaTela(servicos: servicos)),
+                                      icon: const Icon(Icons.help_rounded),
+                                    ),
+                                    _BotaoPresente(
+                                      disponivel: p.presenteDeHoje(dia) > 0,
+                                      aoTocar: () => _abrirPresente(dia),
+                                    ),
+                                    IconButton(
+                                      tooltip: p.somLigado ? t('Desligar som') : t('Ligar som'),
+                                      visualDensity: VisualDensity.compact,
+                                      onPressed: p.alternarSom,
+                                      icon: Icon(p.somLigado ? Icons.volume_up_rounded : Icons.volume_off_rounded),
+                                    ),
+                                    GemasChip(
+                                      gemas: p.gemas,
+                                      aoTocar: () => _abrir(LojaTela(servicos: servicos)),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -880,9 +894,13 @@ class _BannerEvento extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  t('EVENTO · termina em {0}', [evento == null ? t('domingo') : tempoRestante(agora, evento.fim)]),
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    t('EVENTO · termina em {0}', [evento == null ? t('domingo') : tempoRestante(agora, evento.fim)]),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                  ),
                 ),
                 FittedBox(
                   fit: BoxFit.scaleDown,

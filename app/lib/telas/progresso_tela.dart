@@ -155,9 +155,15 @@ class _ProgressoTelaState extends State<ProgressoTela> {
                       Row(
                         children: [
                           const Icon(Icons.map_rounded, color: Cores.brilhoCiano),
-                          Text(
-                            t('  Fase {0} de {1}', [p.faseLiberada.clamp(1, Fase.total), Fase.total]),
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                t('  Fase {0} de {1}', [p.faseLiberada.clamp(1, Fase.total), Fase.total]),
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                              ),
+                            ),
                           ),
                           const Spacer(),
                           const Icon(Icons.star_rounded, color: Cores.ouro),

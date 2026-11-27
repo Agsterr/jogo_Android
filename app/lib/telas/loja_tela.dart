@@ -285,51 +285,73 @@ class _ItemTema extends StatelessWidget {
   Widget build(BuildContext context) {
     final bloqueado =
         !temTema && (tema.assinante || tema.evento != null || tema.marcoDias != null || tema.passe || tema.bau);
+    final amostra = SizedBox(width: 72, height: 26, child: CustomPaint(painter: _Amostra(tema)));
+    final textos = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(t(tema.nome), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        if (tema.assinante || tema.evento != null || tema.marcoDias != null || tema.passe || (tema.bau && !temTema))
+          Text(
+            tema.bau
+                ? t('Só nos baús')
+                : tema.assinante
+                ? t('Exclusivo Encaixa+')
+                : (tema.marcoDias != null
+                      ? t('{0} dias seguidos no Desafio', [tema.marcoDias])
+                      : (tema.passe ? t('Nível 20 do Passe de temporada') : t('Grátis no evento'))),
+            style: const TextStyle(color: Cores.textoFraco, fontSize: 13),
+          ),
+      ],
+    );
+    final botao = FilledButton(
+      style: FilledButton.styleFrom(
+        minimumSize: const Size(80, 40),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+      ),
+      onPressed: emUso || bloqueado ? null : aoTocar,
+      child: emUso
+          ? Text(t('Em uso'))
+          : temTema
+          ? Text(t('Usar'))
+          : bloqueado
+          ? const Icon(Icons.lock_rounded, size: 20)
+          : Row(mainAxisSize: MainAxisSize.min, children: [const IconeGema(tamanho: 16), Text(' ${tema.preco}')]),
+    );
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 10, 12, 10),
       decoration: BoxDecoration(color: Cores.painel.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(18)),
-      child: Row(
-        children: [
-          SizedBox(width: 72, height: 26, child: CustomPaint(painter: _Amostra(tema))),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: LayoutBuilder(
+        builder: (context, caixa) {
+          // Sobra pouco para o nome (tela ampliada, fonte grande ou celular estreito)? Botão vai para baixo, em vez
+          // de espremer o nome até quebrar no meio da palavra.
+          final escala = MediaQuery.textScalerOf(context).scale(18) / 18;
+          final sobra = caixa.maxWidth - 72 - 10 - 80 - 8;
+          if (sobra >= 130 * escala) {
+            return Row(
               children: [
-                Text(t(tema.nome), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                if (tema.assinante ||
-                    tema.evento != null ||
-                    tema.marcoDias != null ||
-                    tema.passe ||
-                    (tema.bau && !temTema))
-                  Text(
-                    tema.bau
-                        ? t('Só nos baús')
-                        : tema.assinante
-                        ? t('Exclusivo Encaixa+')
-                        : (tema.marcoDias != null
-                              ? t('{0} dias seguidos no Desafio', [tema.marcoDias])
-                              : (tema.passe ? t('Nível 20 do Passe de temporada') : t('Grátis no evento'))),
-                    style: const TextStyle(color: Cores.textoFraco, fontSize: 13),
-                  ),
+                amostra,
+                const SizedBox(width: 10),
+                Expanded(child: textos),
+                const SizedBox(width: 8),
+                botao,
               ],
-            ),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(80, 40),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-            ),
-            onPressed: emUso || bloqueado ? null : aoTocar,
-            child: emUso
-                ? Text(t('Em uso'))
-                : temTema
-                ? Text(t('Usar'))
-                : bloqueado
-                ? const Icon(Icons.lock_rounded, size: 20)
-                : Row(mainAxisSize: MainAxisSize.min, children: [const IconeGema(tamanho: 16), Text(' ${tema.preco}')]),
-          ),
-        ],
+            );
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  amostra,
+                  const SizedBox(width: 10),
+                  Expanded(child: textos),
+                ],
+              ),
+              const SizedBox(height: 8),
+              botao,
+            ],
+          );
+        },
       ),
     );
   }

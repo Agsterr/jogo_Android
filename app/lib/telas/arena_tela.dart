@@ -44,9 +44,12 @@ class ArenaTela extends StatelessWidget {
                         onPressed: () => Navigator.of(context).maybePop(),
                         icon: const Icon(Icons.arrow_back_rounded),
                       ),
-                      TextoContornado(t('Arena'), tamanho: 26),
+                      Flexible(
+                        child: FittedBox(fit: BoxFit.scaleDown, child: TextoContornado(t('Arena'), tamanho: 26)),
+                      ),
                       IconButton(
                         tooltip: t('Como funciona a Arena'),
+                        visualDensity: VisualDensity.compact,
                         onPressed: () => mostrarDica(context, Dicas.arena),
                         icon: const Icon(Icons.info_outline_rounded),
                       ),

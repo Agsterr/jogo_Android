@@ -55,29 +55,36 @@ class GemasChip extends StatelessWidget {
   final VoidCallback? aoTocar;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: Cores.painel.withValues(alpha: 0.7),
-    shape: const StadiumBorder(),
-    child: InkWell(
-      customBorder: const StadiumBorder(),
-      onTap: aoTocar,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 6, 12, 6),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const IconeGema(tamanho: 20),
-            const SizedBox(width: 6),
-            Text('$gemas', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            if (aoTocar != null) ...[
-              const SizedBox(width: 4),
-              const Icon(Icons.add_circle, size: 18, color: Cores.gema),
+  Widget build(BuildContext context) {
+    // Tela ampliada ou celular estreito: o contador encolhe (sem o "+") para não empurrar o resto do topo.
+    final apertado = MediaQuery.sizeOf(context).width < 330;
+    return Material(
+      color: Cores.painel.withValues(alpha: 0.7),
+      shape: const StadiumBorder(),
+      child: InkWell(
+        customBorder: const StadiumBorder(),
+        onTap: aoTocar,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(apertado ? 8 : 10, 6, apertado ? 8 : 12, 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconeGema(tamanho: apertado ? 18 : 20),
+              SizedBox(width: apertado ? 4 : 6),
+              Text(
+                '$gemas',
+                style: TextStyle(fontSize: apertado ? 16 : 18, fontWeight: FontWeight.w700),
+              ),
+              if (aoTocar != null && !apertado) ...[
+                const SizedBox(width: 4),
+                const Icon(Icons.add_circle, size: 18, color: Cores.gema),
+              ],
             ],
-          ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// Gema desenhada em código (losango facetado).
