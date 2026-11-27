@@ -283,7 +283,8 @@ class _ItemTema extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bloqueado = !temTema && (tema.assinante || tema.evento != null || tema.marcoDias != null || tema.passe);
+    final bloqueado =
+        !temTema && (tema.assinante || tema.evento != null || tema.marcoDias != null || tema.passe || tema.bau);
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 10, 12, 10),
       decoration: BoxDecoration(color: Cores.painel.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(18)),
@@ -296,9 +297,15 @@ class _ItemTema extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(t(tema.nome), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                if (tema.assinante || tema.evento != null || tema.marcoDias != null || tema.passe)
+                if (tema.assinante ||
+                    tema.evento != null ||
+                    tema.marcoDias != null ||
+                    tema.passe ||
+                    (tema.bau && !temTema))
                   Text(
-                    tema.assinante
+                    tema.bau
+                        ? t('Só nos baús')
+                        : tema.assinante
                         ? t('Exclusivo Encaixa+')
                         : (tema.marcoDias != null
                               ? t('{0} dias seguidos no Desafio', [tema.marcoDias])

@@ -5,6 +5,7 @@ abstract final class Textos {
 }
 
 const _en = <String, String>{
+  'Só nos baús': 'Chests only',
   'Sem fim, sem pressa': 'Endless and calm',
   'Duelo no mesmo celular': 'Duel on one phone',
   'Temas, molduras e fundos': 'Themes, frames and backgrounds',
@@ -765,6 +766,7 @@ const _en = <String, String>{
 };
 
 const _es = <String, String>{
+  'Só nos baús': 'Solo en cofres',
   'Sem fim, sem pressa': 'Sin fin ni prisa',
   'Duelo no mesmo celular': 'Duelo en un móvil',
   'Temas, molduras e fundos': 'Temas, marcos y fondos',

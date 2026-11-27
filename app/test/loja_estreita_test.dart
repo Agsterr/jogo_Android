@@ -1,3 +1,4 @@
+import 'package:encaixa/jogo/temas.dart';
 import 'package:encaixa/telas/loja_tela.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -29,4 +30,29 @@ void main() {
       await capturar(tester, '$nome-temas');
     });
   }
+
+  test('todo tema da Loja tem um jeito de conseguir: preço, assinatura, evento, marco, passe, baú ou é o clássico', () {
+    for (final t in TemaDeBlocos.todos) {
+      final jeito = t.preco > 0 || t.assinante || t.evento != null || t.marcoDias != null || t.passe || t.bau;
+      expect(jeito || t.id == TemaDeBlocos.classico.id, isTrue, reason: '${t.nome} ficaria com preço 0');
+    }
+  });
+
+  testWidgets('temas dos baús não mostram preço 0: ficam travados com "Só nos baús" e liberam o Usar quando saem', (
+    tester,
+  ) async {
+    telaDeCelular(tester, tamanho: const Size(360, 2600));
+    final s = await servicosDeTeste(
+      valores: {
+        'gemas': 243,
+        'temas': ['tema-menta'],
+      },
+    );
+    await tester.pumpWidget(appDeTeste(s, tela: LojaTela(servicos: s)));
+    await tester.pumpAndSettle();
+    expect(find.text('Só nos baús'), findsNWidgets(5), reason: '6 temas de baú, 1 já saiu');
+    expect(find.text(' 0'), findsNothing, reason: 'nenhum botão com preço 0');
+    await capturar(tester, '67-loja-temas-bau');
+    expect(tester.takeException(), isNull);
+  });
 }
