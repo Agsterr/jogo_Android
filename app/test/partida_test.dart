@@ -201,4 +201,26 @@ void main() {
     p.combo = 0; // quebrou
     expect(fase.progresso(p), 0, reason: 'a barra volta a zero quando a sequência quebra, mesmo com maiorCombo antigo');
   });
+
+  test('fase de combo x4: 4 jogadas seguidas que limpam completam o objetivo (cada limpada conta 1, 2, 3, 4)', () {
+    final fase = Fase.numero(8);
+    final p = fase.novaPartida();
+    // tabuleiro livre, com 5 linhas quase cheias (falta a última casa)
+    for (var l = 0; l < Tabuleiro.tamanho; l++) {
+      for (var k = 0; k < Tabuleiro.tamanho; k++) {
+        p.tabuleiro.definir(l, k, null);
+      }
+    }
+    for (var l = 0; l < 5; l++) {
+      _quaseCheia(p.tabuleiro, l);
+    }
+    final vistos = <int>[];
+    for (var i = 0; i < 4; i++) {
+      p.mao = [Peca(_bloco, 1), Peca(_bloco, 1), Peca(_bloco, 1)];
+      expect(p.colocar(0, i, 7), isNotNull);
+      vistos.add(fase.progresso(p));
+    }
+    expect(vistos, [1, 2, 3, 4]);
+    expect(fase.concluida(p), isTrue);
+  });
 }
