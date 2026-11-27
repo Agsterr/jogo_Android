@@ -75,9 +75,11 @@ class _RoletaDaPartidaState extends State<RoletaDaPartida> {
   Widget build(BuildContext context) {
     final extrasRestantes = Roleta.girosExtras + 1 - _giros;
     final ultimo = _ultimo;
+    // Respeita as barras do sistema; em tela baixa a roda encolhe em vez de empurrar os botões para fora.
+    final barras = MediaQuery.viewPaddingOf(context);
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(20),
+      insetPadding: EdgeInsets.fromLTRB(20, 20 + barras.top, 20, 20 + barras.bottom),
       child: CartaoVidro(
         padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
         child: Column(
@@ -97,7 +99,7 @@ class _RoletaDaPartidaState extends State<RoletaDaPartida> {
                     : ultimo == 0
                     ? TextoContornado(t('Ah, não foi dessa vez!'), tamanho: 24, cor: Color(0xFFCFC8F0))
                     : TextoContornado(
-                        t('+{0} gemas!', [ultimo]),
+                        t(ultimo == 1 ? '+{0} gema!' : '+{0} gemas!', [ultimo]),
                         tamanho: 32,
                         cor: const Color(0xFFFFF27A),
                         contorno: const Color(0xFFB0186A),
@@ -105,17 +107,21 @@ class _RoletaDaPartidaState extends State<RoletaDaPartida> {
               ),
             ),
             const SizedBox(height: 6),
-            SizedBox(
-              height: 250,
-              child: Center(
-                child: RodaGiratoria(
-                  key: _roda,
-                  rotulos: [for (var i = 0; i < Roleta.premios.length; i++) Roleta.rotulo(i)],
-                  // "Nada" em cinza: dá para ver que tem prêmio ruim.
-                  cores: [
-                    for (var i = 0; i < Roleta.premios.length; i++)
-                      Roleta.premios[i] == 0 ? const Color(0xFF6B6390) : Cores.blocos[i % Cores.blocos.length],
-                  ],
+            Flexible(
+              child: LayoutBuilder(
+                builder: (context, caixa) => SizedBox(
+                  height: caixa.maxHeight < 250 ? caixa.maxHeight : 250,
+                  child: Center(
+                    child: RodaGiratoria(
+                      key: _roda,
+                      rotulos: [for (var i = 0; i < Roleta.premios.length; i++) Roleta.rotulo(i)],
+                      // "Nada" em cinza: dá para ver que tem prêmio ruim.
+                      cores: [
+                        for (var i = 0; i < Roleta.premios.length; i++)
+                          Roleta.premios[i] == 0 ? const Color(0xFF6B6390) : Cores.blocos[i % Cores.blocos.length],
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -123,7 +129,7 @@ class _RoletaDaPartidaState extends State<RoletaDaPartida> {
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
-                  t('Total ganho: {0} gemas', [_total]),
+                  t(_total == 1 ? 'Total ganho: {0} gema' : 'Total ganho: {0} gemas', [_total]),
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Cores.gema, fontWeight: FontWeight.w700),
                 ),

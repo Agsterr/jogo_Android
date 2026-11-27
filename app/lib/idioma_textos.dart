@@ -5,6 +5,8 @@ abstract final class Textos {
 }
 
 const _en = <String, String>{
+  '+{0} gema!': '+{0} gem!',
+  'Total ganho: {0} gema': 'Total earned: {0} gem',
   'Só nos baús': 'Chests only',
   'Sem fim, sem pressa': 'Endless and calm',
   'Duelo no mesmo celular': 'Duel on one phone',
@@ -766,6 +768,8 @@ const _en = <String, String>{
 };
 
 const _es = <String, String>{
+  '+{0} gema!': '¡+{0} gema!',
+  'Total ganho: {0} gema': 'Total ganado: {0} gema',
   'Só nos baús': 'Solo en cofres',
   'Sem fim, sem pressa': 'Sin fin ni prisa',
   'Duelo no mesmo celular': 'Duelo en un móvil',
