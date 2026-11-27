@@ -246,3 +246,10 @@ ouvindo a própria música): liga em *Como jogar > Música de fundo*, só toca c
 ## Dois jogadores no mesmo celular
 - Cada um joga uma partida, um depois do outro, com as **mesmas peças** (mesma semente). Vence quem fizer mais pontos;
   há "Revanche". Sem reforços, recorde, gemas, missões nem ranking. Código: `app/lib/jogo/duelo.dart`, `JogoTela(duelo:)`.
+
+## Dicas com exemplo e botão "?"
+- Toda tela de jogo tem um botão **?** no topo: abre a dica do objetivo da fase (ou do modo) com **mini tabuleiros de exemplo** ("antes e depois"):
+  linhas, pedras, uma cor, pontos e combo (`app/lib/widgets/exemplo_dica.dart`).
+- Perdeu a **mesma fase 2 vezes seguidas** (e a cada 2 depois): a dica abre sozinha e a tela de derrota mostra o cartão "Está difícil?
+  Veja uma dica com exemplo" (`Progresso.falhasNaFase`, zera ao vencer). Testes: `app/test/dicas_fases_test.dart`, capturas 70 a 72.
+- A dica do **Combo** foi reescrita: combo = limpar linha em jogadas seguidas (x1, x2, x3, x4...); até 2 jogadas sem limpar no meio.

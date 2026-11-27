@@ -148,6 +148,9 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
   bool _ajudou = false;
   int _gemasFase = 0;
 
+  /// Derrotas seguidas na fase atual (a partir de 2 aparece a dica com exemplo).
+  int _falhasSeguidas = 0;
+
   /// A fase vencida agora completou a figura do mundo (e deu um baú).
   bool _figuraCompleta = false;
 
@@ -248,6 +251,27 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
     if (dica != null) await mostrarDicaUmaVez(context, _s, dica);
     // Quem já conhece o modo vê, uma vez só, os reforços novos.
     if (mounted && _tutorial == null) await mostrarDicaUmaVez(context, _s, Dicas.reforcos);
+  }
+
+  /// A dica do objetivo da fase (fases de "limpar linhas" usam a dica geral das Fases).
+  Dica _dicaDaFase(Fase fase) => switch (fase.objetivo) {
+    Objetivo.pedras => Dicas.pedras,
+    Objetivo.pontos => Dicas.pontos,
+    Objetivo.umaCor => Dicas.umaCor,
+    Objetivo.combo => Dicas.combo,
+    Objetivo.linhas => Dicas.fases,
+  };
+
+  /// Dica do botão "?": a do objetivo da fase ou a do modo em que o jogador está.
+  Dica _dicaDoModo() {
+    if (widget.fase case final fase?) return _dicaDaFase(fase);
+    if (widget.arena) return Dicas.arena;
+    if (widget.diario) return Dicas.desafio;
+    if (widget.relampago) return Dicas.relampago;
+    if (widget.puzzle != null) return Dicas.puzzle;
+    if (widget.zen) return Dicas.zen;
+    if (widget.duelo != null) return Dicas.duelo;
+    return Dicas.infinito;
   }
 
   // ---------- tutorial da fase 1 ----------
@@ -512,8 +536,19 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
       }
     } else if (_restantes(fase) <= 0 || _partida.fimDeJogo) {
       _s.sons.tocar(Som.fim);
-      _s.progresso.contarRodada();
-      setState(() => _fim = _Fim.faseFalhou);
+      await _s.progresso.contarRodada();
+      final falhas = await _s.progresso.registrarFalhaNaFase(fase.numero);
+      if (!mounted) return;
+      setState(() {
+        _falhasSeguidas = falhas;
+        _fim = _Fim.faseFalhou;
+      });
+      // Perdeu 2, 4, 6... vezes seguidas: abre a dica da fase com o exemplo, sem o jogador precisar procurar.
+      if (falhas >= 2 && falhas.isEven) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) mostrarDica(context, _dicaDaFase(fase));
+        });
+      }
     }
   }
 
@@ -950,6 +985,12 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
               t('PUZZLE #{0}', [numeroDoDesafio(_s.hoje())]),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Cores.ouro),
             ),
+          IconButton(
+            tooltip: t('Dica'),
+            visualDensity: VisualDensity.compact,
+            onPressed: () => mostrarDica(context, _dicaDoModo()),
+            icon: const Icon(Icons.help_outline_rounded),
+          ),
           const Spacer(),
           GemasChip(gemas: _s.progresso.gemas, aoTocar: _abrirLoja),
         ],
@@ -1375,6 +1416,26 @@ class _JogoTelaState extends State<JogoTela> with SingleTickerProviderStateMixin
         textAlign: TextAlign.center,
         style: const TextStyle(fontSize: 18, color: Cores.textoFraco),
       ),
+      if (_falhasSeguidas >= 2)
+        Container(
+          margin: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Cores.ouro.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Cores.ouro.withValues(alpha: 0.6)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.lightbulb_rounded, color: Cores.ouro),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(t('Está difícil? Veja uma dica com exemplo.'), style: const TextStyle(fontSize: 15)),
+              ),
+              TextButton(onPressed: () => mostrarDica(context, _dicaDaFase(fase)), child: Text(t('Ver dica'))),
+            ],
+          ),
+        ),
       const SizedBox(height: 20),
       if (!_ajudou) ...[
         _botao(

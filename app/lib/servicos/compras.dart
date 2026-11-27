@@ -16,7 +16,10 @@ abstract final class Produtos {
   /// Oferta por tempo limitado, só na Loja e só durante um evento (`eventoAtivo`). Não entra em `gemas` para não
   /// aparecer na lista fixa de pacotes.
   static const gemasEvento = 'gemas_evento';
-  static const qtdGemasEvento = 400;
+
+  /// Preço no Play: R$ 9,99. A conta fecha: 250 gemas por R$ 9,99 (25 por real) fica entre o pacote de 300 (23 por real)
+  /// e o de 1000 (28 por real). Com 400 a oferta pagava mais gemas por real que o melhor pacote (teste `precos_test`).
+  static const qtdGemasEvento = 250;
 
   /// Compras que gastam o item (consumíveis): dá para comprar de novo.
   static bool consumivel(String id) => gemas.containsKey(id) || id == gemasEvento;

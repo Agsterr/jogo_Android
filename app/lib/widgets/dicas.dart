@@ -3,11 +3,12 @@ import 'package:material_ui/material_ui.dart';
 import '../servicos/servicos.dart';
 import '../tema.dart';
 import 'doce.dart';
+import 'exemplo_dica.dart';
 import '../idioma.dart';
 
 /// Um texto de ajuda: aparece uma vez como janela e fica na tela "Como jogar".
 class Dica {
-  const Dica(this.id, this.titulo, this.icone, this.cor, this.linhas, {this.botao = 'ENTENDI'});
+  const Dica(this.id, this.titulo, this.icone, this.cor, this.linhas, {this.botao = 'ENTENDI', this.exemplo});
 
   final String id;
   final String titulo;
@@ -17,6 +18,9 @@ class Dica {
 
   /// Texto do botão que fecha a janela.
   final String botao;
+
+  /// Desenho de exemplo (mini tabuleiros) mostrado em cima do texto.
+  final ExemploDaDica? exemplo;
 }
 
 abstract final class Dicas {
@@ -34,31 +38,32 @@ abstract final class Dicas {
     'Sobrou bastante peça? Ganha até 3 estrelas.',
     'Ficou sem peça ou sem espaço? Dá para pedir ajuda com anúncio ou gemas.',
     'A cada 20 fases, um mundo novo e +15 gemas.',
-  ]);
+  ], exemplo: ExemploDaDica.linhas);
 
   static const pedras = Dica('pedras', 'Pedras', Icons.landscape_rounded, Color(0xFF8E8AA6), [
     'Blocos cinza rachados são pedras.',
     'Elas não saem sozinhas: complete a linha ou a coluna onde a pedra está para quebrá-la.',
     'Quebre todas para passar de fase.',
-  ]);
+  ], exemplo: ExemploDaDica.pedras);
 
   static const pontos = Dica('pontos', 'Fase de pontos', Icons.star_rounded, Color(0xFFFFCC33), [
     'Faça a pontuação pedida antes de acabar as peças.',
     'Cada bloco vale 1 ponto; cada linha limpa vale 10.',
     'Combos e várias linhas de uma vez multiplicam os pontos!',
-  ]);
+  ], exemplo: ExemploDaDica.pontos);
 
   static const umaCor = Dica('uma-cor', 'Linhas de uma cor', Icons.palette_rounded, Color(0xFFA64DFF), [
     'Nesta fase as peças vêm em só 3 cores.',
     'Encha uma linha ou coluna inteira com blocos da MESMA cor.',
     'Dica: guarde uma linha para cada cor e não misture.',
-  ]);
+  ], exemplo: ExemploDaDica.umaCor);
 
   static const combo = Dica('combo', 'Combo', Icons.bolt_rounded, Color(0xFFFF2E7E), [
-    'Cada jogada que limpa linha aumenta o combo: x2, x3, x4...',
-    'O combo só zera depois de 3 jogadas seguidas sem limpar nada.',
-    'Dica: deixe várias linhas quase cheias e vá fechando uma por jogada.',
-  ]);
+    'Combo é limpar linhas em jogadas SEGUIDAS: a 1ª jogada que limpa vale x1, a próxima x2, depois x3, x4...',
+    'Pode ter até 2 jogadas sem limpar no meio. Na 3ª seguida sem limpar, o combo volta a zero.',
+    'Fase "combo x4": limpe uma linha em 4 jogadas seguidas, sem parar.',
+    'Dica: deixe várias linhas quase cheias (faltando 1 ou 2 blocos) e feche uma por jogada.',
+  ], exemplo: ExemploDaDica.combo);
 
   static const infinito = Dica('infinito', 'Modo Infinito', Icons.all_inclusive_rounded, Color(0xFFFF8A00), [
     'Jogue até não caber mais nenhuma peça: não tem limite de pontos.',
@@ -261,6 +266,7 @@ class DialogoDica extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (dica.exemplo case final exemplo?) ExemploDaDicaWidget(exemplo: exemplo, cor: dica.cor),
                     for (final l in dica.linhas)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),

@@ -20,6 +20,7 @@ IDs reais entram por segredo no CI; sem eles o app usa os **IDs de teste do Goog
 | `gemas_100` | Produto único (consumível) | R$ 4,89 | 100 gemas |
 | `gemas_300` | Produto único (consumível) | R$ 12,99 | 300 gemas ("Mais popular") |
 | `gemas_1000` | Produto único (consumível) | R$ 34,99 | 1000 gemas ("Melhor valor") |
+| `gemas_evento` | Produto único (consumível), só na Loja durante um evento | R$ 9,99 | 250 gemas (25 por real: melhor que o pacote de 300, pior que o de 1000; teste `precos_test`) |
 | `encaixa_mais` (plano `mensal`) | **Assinatura** mensal | R$ 9,99/mês (sem teste grátis por enquanto) | Sem intersticiais + segunda chance grátis + 10 gemas/dia |
 
 Os preços são ponto de partida; o Play converte para outras moedas. Teste A/B depois de ter tráfego.

@@ -5,6 +5,26 @@ abstract final class Textos {
 }
 
 const _en = <String, String>{
+  'Combo é limpar linhas em jogadas SEGUIDAS: a 1ª jogada que limpa vale x1, a próxima x2, depois x3, x4...':
+      'Combo means clearing lines on CONSECUTIVE moves: the 1st clearing move is x1, the next x2, then x3, x4...',
+  'Pode ter até 2 jogadas sem limpar no meio. Na 3ª seguida sem limpar, o combo volta a zero.':
+      'You can have up to 2 moves without clearing in between. On the 3rd in a row without clearing, the combo resets.',
+  'Fase "combo x4": limpe uma linha em 4 jogadas seguidas, sem parar.':
+      '"Combo x4" level: clear a line on 4 moves in a row, without stopping.',
+  'Dica: deixe várias linhas quase cheias (faltando 1 ou 2 blocos) e feche uma por jogada.':
+      'Tip: leave several lines almost full (1 or 2 blocks missing) and close one per move.',
+  'Dica': 'Tip',
+  'Está difícil? Veja uma dica com exemplo.': 'Tough one? See a tip with an example.',
+  'Ver dica': 'See tip',
+  'Falta 1 bloco': '1 block missing',
+  'A linha some!': 'The line clears!',
+  'Pedra na linha': 'Stone in the line',
+  'A pedra quebra!': 'The stone breaks!',
+  'Mesma cor': 'Same color',
+  'Bônus +1 gema': 'Bonus +1 gem',
+  '1ª jogada: x1': '1st move: x1',
+  '2ª jogada: x2': '2nd move: x2',
+  '3ª jogada: x3': '3rd move: x3',
   '+{0} gema!': '+{0} gem!',
   'Total ganho: {0} gema': 'Total earned: {0} gem',
   'Só nos baús': 'Chests only',
@@ -768,6 +788,26 @@ const _en = <String, String>{
 };
 
 const _es = <String, String>{
+  'Combo é limpar linhas em jogadas SEGUIDAS: a 1ª jogada que limpa vale x1, a próxima x2, depois x3, x4...':
+      'Combo es limpiar líneas en jugadas SEGUIDAS: la 1.ª jugada que limpia vale x1, la siguiente x2, luego x3, x4...',
+  'Pode ter até 2 jogadas sem limpar no meio. Na 3ª seguida sem limpar, o combo volta a zero.':
+      'Puedes tener hasta 2 jugadas sin limpiar en medio. A la 3.ª seguida sin limpiar, el combo vuelve a cero.',
+  'Fase "combo x4": limpe uma linha em 4 jogadas seguidas, sem parar.':
+      'Nivel "combo x4": limpia una línea en 4 jugadas seguidas, sin parar.',
+  'Dica: deixe várias linhas quase cheias (faltando 1 ou 2 blocos) e feche uma por jogada.':
+      'Consejo: deja varias líneas casi llenas (faltando 1 o 2 bloques) y cierra una por jugada.',
+  'Dica': 'Consejo',
+  'Está difícil? Veja uma dica com exemplo.': '¿Difícil? Mira un consejo con ejemplo.',
+  'Ver dica': 'Ver consejo',
+  'Falta 1 bloco': 'Falta 1 bloque',
+  'A linha some!': '¡La línea desaparece!',
+  'Pedra na linha': 'Piedra en la línea',
+  'A pedra quebra!': '¡La piedra se rompe!',
+  'Mesma cor': 'Mismo color',
+  'Bônus +1 gema': 'Bono +1 gema',
+  '1ª jogada: x1': '1.ª jugada: x1',
+  '2ª jogada: x2': '2.ª jugada: x2',
+  '3ª jogada: x3': '3.ª jugada: x3',
   '+{0} gema!': '¡+{0} gema!',
   'Total ganho: {0} gema': 'Total ganado: {0} gema',
   'Só nos baús': 'Solo en cofres',

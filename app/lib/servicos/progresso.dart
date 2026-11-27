@@ -357,7 +357,19 @@ class Progresso extends ChangeNotifier {
 
   /// Guarda a melhor nota e libera a próxima. Devolve as gemas ganhas
   /// (+2 na primeira vez; +15 ao terminar um mundo).
+  /// Quantas vezes seguidas o jogador perdeu esta fase (zera ao vencer ou ao tentar outra fase).
+  int falhasNaFase(int numero) => _prefs.getInt('falhasFase') == numero ? (_prefs.getInt('falhasQtd') ?? 0) : 0;
+
+  /// Conta mais uma derrota na fase. Devolve o total de derrotas seguidas nela.
+  Future<int> registrarFalhaNaFase(int numero) async {
+    final n = falhasNaFase(numero) + 1;
+    await _prefs.setInt('falhasFase', numero);
+    await _prefs.setInt('falhasQtd', n);
+    return n;
+  }
+
   Future<int> concluirFase(int numero, int estrelas) async {
+    if (_prefs.getInt('falhasFase') == numero) await _prefs.remove('falhasQtd');
     final primeiraVez = estrelasDaFase(numero) == 0;
     if (estrelas > estrelasDaFase(numero)) await _prefs.setInt('estrelas_$numero', estrelas);
     if (numero >= faseLiberada) await _prefs.setInt('faseLiberada', numero + 1);
